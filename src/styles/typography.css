@@ -1,0 +1,169 @@
+/* ── Font Faces ── */
+/* 
+ * Self-hosted fonts from /fonts/ directory.
+ * Uncomment @font-face blocks below after placing .woff2 files.
+ * Until then, Georgia serif is used as fallback.
+ */
+
+/*
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Lora-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Lora-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Lora-Italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PlayfairDisplay-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PlayfairDisplay-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/PlayfairDisplay-Bold.woff2') format('woff2');
+}
+*/
+
+/* ── Base Typography ── */
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Headings ── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-xl); }
+h4 { font-size: var(--text-lg); }
+
+/* ── Article Body — Justified Text ── */
+
+.article-body p {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+  max-width: var(--measure);
+}
+
+.article-body {
+  hanging-punctuation: first;
+}
+
+/* ── Justification Fallback (Mobile) ── */
+
+@media (max-width: 600px) {
+  .article-body p {
+    text-align: left;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+  }
+}
+
+/* ── Justification Exclusions ── */
+
+.article-body h1,
+.article-body h2,
+.article-body h3,
+.article-body h4,
+.article-body h5,
+.article-body h6,
+.article-body ul,
+.article-body ol,
+.article-body li,
+.article-body pre,
+.article-body code,
+.article-body blockquote,
+.article-body table,
+.article-body .pattern-block,
+.article-body .artifact-preview {
+  text-align: left;
+  hyphens: manual;
+}
+
+/* ── Links ── */
+
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+a:hover {
+  color: var(--text-muted);
+  border-color: var(--text-muted);
+}
+
+/* ── Eyebrows (UI Labels) ── */
+
+.eyebrow {
+  font-family: 'Lora', Georgia, serif;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+/* ── Pull Quotes ── */
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+blockquote {
+  border-left: 2px solid var(--border);
+  padding-left: var(--space-lg);
+  margin: var(--space-xl) 0;
+  font-style: italic;
+  color: var(--text-muted);
+}

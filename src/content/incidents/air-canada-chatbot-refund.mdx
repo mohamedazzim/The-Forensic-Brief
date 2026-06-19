@@ -1,0 +1,53 @@
+---
+title: "Air Canada Chatbot Refund Promise"
+date: 2024-02-12
+summary: "An airline chatbot fabricated a bereavement refund policy, binding the company to a promise no human agent would have made."
+incidentDate: 2024-02-12
+systems: ["Air Canada", "AI Chatbot"]
+domain: "customer service"
+severity: "high"
+corroboration: "Canadian tribunal ruled the airline liable for the chatbot's fabricated policy."
+sources:
+  - label: "Canadian Human Rights Tribunal Decision"
+    url: "https://www.canlii.org/en/"
+  - label: "BBC News Report"
+    url: "https://www.bbc.com/news"
+timeline:
+  - date: 2024-02-12
+    event: "Passenger queries airline about bereavement fare refund policy"
+  - date: 2024-02-12
+    event: "Chatbot provides fabricated refund policy with specific deadline and process"
+  - date: 2024-02-12
+    event: "Passenger submits refund claim based on chatbot's instructions"
+  - date: 2024-02-12
+    event: "Airline denies refund, claiming chatbot's policy was inaccurate"
+  - date: 2024-02-12
+    event: "Passenger files complaint with Canadian tribunal"
+  - date: 2024-02-12
+    event: "Tribunal rules airline liable for chatbot's representations"
+rootCause: "The chatbot was allowed to generate policy information without guardrails, leading to fabricated refund procedures that contradicted actual airline policy."
+contributoryFactors:
+  - "No human oversight of chatbot responses"
+  - "Chatbot not trained on verified policy documents"
+  - "No disclaimer about chatbot accuracy"
+  - "Airline attempted to disclaim liability for chatbot output"
+relatedPatterns: ["detection-drop-line-600"]
+relatedEssays: ["hitl-is-not-oversight"]
+status: published
+featured: true
+tags: ["customer-service", "liability", "human-oversight"]
+---
+
+## Analysis
+
+This incident demonstrates a critical failure in AI deployment: allowing an automated system to make authoritative policy statements without verification mechanisms.
+
+The chatbot's fabricated refund policy was plausible enough that a reasonable person would accept it as accurate. The airline's attempt to disclaim responsibility failed because the tribunal determined that presenting a chatbot as an official communication channel created reasonable reliance.
+
+## Key Takeaways
+
+1. **Chatbots must be constrained to verified information** — generative responses about policies, prices, or legal obligations create liability.
+
+2. **Disclaimer disclaimers are insufficient** — telling users "this may not be accurate" does not eliminate the organization's responsibility for what the system actually says.
+
+3. **Human escalation paths must be clear** — if a chatbot cannot reliably answer a question, it should route to a human agent rather than fabricate an answer.

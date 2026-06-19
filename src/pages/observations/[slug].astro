@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const observations = await getCollection('observations');
+  return observations.map((observation) => ({
+    params: { slug: observation.id.replace(/\.(md|mdx)$/, '') },
+    props: { observation },
+  }));
+}
+
+const { observation } = Astro.props;
+const { Content } = await observation.render();
+
+const statusColors: Record<string, string> = {
+  preliminary: 'var(--text-light)',
+  ongoing: 'var(--accent)',
+  resolved: '#2ecc71',
+};
+---
+
+<BaseLayout title={observation.data.title} description={observation.data.summary}>
+  <article class="article-body">
+    <header class="article-header">
+      <span class="eyebrow">Observation</span>
+      <h1 class="article-title">{observation.data.title}</h1>
+      <p class="article-dek">{observation.data.summary}</p>
+      <div class="article-meta">
+        <time datetime={observation.data.date.toISOString()}>
+          {observation.data.date.toISOString().split('T')[0]}
+        </time>
+        <span class="meta-separator">·</span>
+        <span class="observation-status" style={`color: ${statusColors[observation.data.observationStatus]}`}>
+          {observation.data.observationStatus}
+        </span>
+      </div>
+    </header>
+
+    <div class="article-content">
+      <Content />
+    </div>
+
+    {observation.data.tags.length > 0 && (
+      <section class="related-content">
+        <h2>Related Topics</h2>
+        <div class="tag-list">
+          {observation.data.tags.map((tag) => (
+            <a href={`/topics/${tag}/`} class="tag-chip">{tag}</a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .article-header {
+    margin-bottom: 48px;
+    max-width: var(--measure);
+  }
+
+  .article-title {
+    font-size: var(--text-3xl);
+    margin: 12px 0 16px;
+  }
+
+  .article-dek {
+    font-size: var(--text-md);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-sm);
+    color: var(--text-light);
+  }
+
+  .meta-separator {
+    color: var(--border);
+  }
+
+  .observation-status {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--text-xs);
+  }
+
+  .article-content {
+    max-width: var(--measure);
+  }
+
+  .related-content {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .related-content h2 {
+    font-size: var(--text-lg);
+    margin-bottom: 12px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag-chip {
+    font-size: var(--text-xs);
+    padding: 4px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .tag-chip:hover {
+    background: var(--text-primary);
+    color: var(--bg);
+    border-color: var(--text-primary);
+  }
+</style>

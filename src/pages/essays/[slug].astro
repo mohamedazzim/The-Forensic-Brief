@@ -1,0 +1,202 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SeriesNav from '../../components/SeriesNav.astro';
+import RelatedContent from '../../components/RelatedContent.astro';
+import StructuredData from '../../components/StructuredData.astro';
+import NewsletterCTA from '../../components/NewsletterCTA.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const essays = await getCollection('essays');
+  return essays.map((essay) => ({
+    params: { slug: essay.id.replace(/\.(md|mdx)$/, '') },
+    props: { essay },
+  }));
+}
+
+const { essay } = Astro.props;
+const { Content } = await essay.render();
+
+const isPattern = essay.data.category === 'pattern';
+const essayUrl = `/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`;
+---
+
+<BaseLayout title={essay.data.title} description={essay.data.summary}>
+  <StructuredData 
+    type="article" 
+    data={{
+      title: essay.data.title,
+      summary: essay.data.summary,
+      date: essay.data.date,
+      updated: essay.data.updated,
+      author: essay.data.author,
+      url: essayUrl,
+      image: essay.data.ogImage,
+    }} 
+  />
+
+  <article class="article-body">
+    <header class="article-header">
+      <span class="eyebrow">{isPattern ? 'Pattern' : essay.data.series || 'Essay'}</span>
+      <h1 class="article-title">{essay.data.title}</h1>
+      <p class="article-dek">{essay.data.summary}</p>
+      <div class="article-meta">
+        <time datetime={essay.data.date.toISOString()}>
+          {essay.data.date.toISOString().split('T')[0]}
+        </time>
+        {essay.data.readingTime && (
+          <>
+            <span class="meta-separator">·</span>
+            <span>{essay.data.readingTime} min read</span>
+          </>
+        )}
+      </div>
+    </header>
+
+    {isPattern && essay.data.patternId && (
+      <div class="pattern-header">
+        <div class="pattern-field">
+          <span class="pattern-label">Pattern ID</span>
+          <span class="pattern-value">{essay.data.patternId}</span>
+        </div>
+        {essay.data.signature && (
+          <div class="pattern-field">
+            <span class="pattern-label">Signature</span>
+            <span class="pattern-value">{essay.data.signature}</span>
+          </div>
+        )}
+        {essay.data.metric && (
+          <div class="pattern-field">
+            <span class="pattern-label">Metric</span>
+            <span class="pattern-value">{essay.data.metric}</span>
+          </div>
+        )}
+      </div>
+    )}
+
+    <div class="article-content">
+      <Content />
+    </div>
+
+    <SeriesNav 
+      prev={essay.data.prev}
+      next={essay.data.next}
+      book={essay.data.book}
+      artifact={essay.data.artifact}
+      series={essay.data.series}
+    />
+
+    {essay.data.tags.length > 0 && (
+      <section class="related-content">
+        <h2>Related Topics</h2>
+        <div class="tag-list">
+          {essay.data.tags.map((tag) => (
+            <a href={`/topics/${tag}/`} class="tag-chip">{tag}</a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <NewsletterCTA />
+  </article>
+</BaseLayout>
+
+<style>
+  .article-header {
+    margin-bottom: 48px;
+    max-width: var(--measure);
+  }
+
+  .article-title {
+    font-size: var(--text-3xl);
+    margin: 12px 0 16px;
+  }
+
+  .article-dek {
+    font-size: var(--text-md);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-sm);
+    color: var(--text-light);
+  }
+
+  .meta-separator {
+    color: var(--border);
+  }
+
+  .pattern-header {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 24px;
+    margin-bottom: 48px;
+    max-width: var(--measure);
+  }
+
+  .pattern-field {
+    margin-bottom: 12px;
+  }
+
+  .pattern-field:last-child {
+    margin-bottom: 0;
+  }
+
+  .pattern-label {
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    margin-bottom: 4px;
+  }
+
+  .pattern-value {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+  }
+
+  .article-content {
+    max-width: var(--measure);
+  }
+
+  .related-content {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .related-content h2 {
+    font-size: var(--text-lg);
+    margin-bottom: 12px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag-chip {
+    font-size: var(--text-xs);
+    padding: 4px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .tag-chip:hover {
+    background: var(--text-primary);
+    color: var(--bg);
+    border-color: var(--text-primary);
+  }
+</style>

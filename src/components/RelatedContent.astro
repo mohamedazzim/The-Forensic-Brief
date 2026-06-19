@@ -1,0 +1,73 @@
+---
+interface Props {
+  title?: string;
+  items: Array<{
+    title: string;
+    href: string;
+    type: string;
+  }>;
+}
+
+const { title = 'Related Content', items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <section class="related-content">
+    <h2>{title}</h2>
+    <ul class="related-list">
+      {items.map((item) => (
+        <li class="related-item">
+          <span class="related-type">{item.type}</span>
+          <a href={item.href} class="related-link">{item.title}</a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .related-content {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .related-content h2 {
+    font-size: var(--text-lg);
+    margin-bottom: 16px;
+  }
+
+  .related-list {
+    list-style: none;
+  }
+
+  .related-item {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .related-type {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    min-width: 80px;
+  }
+
+  .related-link {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .related-link:hover {
+    color: var(--text-muted);
+    border-color: var(--text-muted);
+  }
+</style>

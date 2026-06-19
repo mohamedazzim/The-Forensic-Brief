@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About" description="About The Forensic Brief — Post-Incident Analysis of AI Failure.">
+  <article class="article-body prose-section">
+    <header class="article-header">
+      <span class="eyebrow">About</span>
+      <h1 class="article-title">About The Forensic Brief</h1>
+    </header>
+
+    <div class="prose-body">
+      <p>
+        The Forensic Brief is an independent publication dedicated to the systematic, evidence-based analysis of AI failures. It publishes post-incident analyses, long-form essays on AI governance and accountability, and reusable templates for practitioners working with high-stakes AI systems.
+      </p>
+
+      <p>
+        The publication is founded on the principle that understanding failure is essential to building reliable AI. Each incident is documented with structured timelines, root cause analysis, and contributory factor mapping — the same rigor applied to aviation safety investigations and medical device recalls.
+      </p>
+
+      <p>
+        The Forensic Brief is not a news site. It does not cover AI product launches, funding rounds, or benchmark leaderboards. It covers what happens when AI systems fail in production — and what organizations can learn from those failures.
+      </p>
+
+      <h2>Author</h2>
+
+      <p>
+        Dr. Anandkumar Prakasam is the author and editor of The Forensic Brief. The publication represents independent research and analysis; it is not affiliated with any AI vendor, consulting firm, or advocacy organization.
+      </p>
+
+      <h2>Contact</h2>
+
+      <p>
+        For inquiries, corrections, or to report an AI incident for analysis, contact the author through the publication's official channels.
+      </p>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-header {
+    margin-bottom: 48px;
+  }
+
+  .article-title {
+    font-size: var(--text-3xl);
+    margin: 12px 0 16px;
+  }
+
+  .prose-body {
+    max-width: 620px;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .prose-body p + p {
+    margin-top: 16px;
+  }
+
+  .prose-body h2 {
+    margin-top: 32px;
+    margin-bottom: 12px;
+  }
+</style>

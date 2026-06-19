@@ -1,0 +1,70 @@
+---
+interface Props {
+  type: 'article' | 'book' | 'breadcrumb';
+  data: Record<string, any>;
+}
+
+const { type, data } = Astro.props;
+
+let structuredData: Record<string, any> = {};
+
+if (type === 'article') {
+  structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: data.title,
+    description: data.summary,
+    datePublished: data.date?.toISOString(),
+    dateModified: data.updated?.toISOString() || data.date?.toISOString(),
+    author: {
+      '@type': 'Person',
+      name: data.author || 'Dr. Anandkumar Prakasam',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'The Forensic Brief',
+      url: 'https://theforensicbrief.com',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://theforensicbrief.com${data.url}`,
+    },
+  };
+  
+  if (data.image) {
+    structuredData.image = data.image;
+  }
+} else if (type === 'book') {
+  structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Book',
+    name: data.title,
+    description: data.summary,
+    author: {
+      '@type': 'Person',
+      name: data.author || 'Dr. Anandkumar Prakasam',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'The Forensic Brief',
+    },
+    url: `https://theforensicbrief.com${data.url}`,
+    image: data.cover,
+    isbn: data.isbn,
+    numberOfPages: data.pages,
+  };
+} else if (type === 'breadcrumb') {
+  structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: data.items.map((item: any, index: number) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: `https://theforensicbrief.com${item.url}`,
+    })),
+  };
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />

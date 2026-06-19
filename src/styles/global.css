@@ -1,0 +1,70 @@
+/* TODO: Self-host woff2 fonts (Playfair Display, Lora) in public/fonts/ */
+/* Fonts will be served locally once woff2 files are added */
+
+@import './tokens.css';
+@import './typography.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(160, 145, 125, 0.12) 0px,
+    rgba(160, 145, 125, 0.12) 1px,
+    transparent 1px,
+    transparent var(--line-gap)
+  );
+  min-height: 100vh;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Skip to Content ── */
+
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--text-primary);
+  color: var(--bg);
+  z-index: 1000;
+}
+
+.skip-to-content:focus {
+  top: var(--space-md);
+}
+
+/* ── Focus States ── */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Reduced Motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

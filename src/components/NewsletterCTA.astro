@@ -1,0 +1,113 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { 
+  title = 'Stay Informed', 
+  description = 'Get notified when new incidents, essays, and artifacts are published.' 
+} = Astro.props;
+---
+
+<section class="newsletter-cta">
+  <h2 class="newsletter-title">{title}</h2>
+  <p class="newsletter-description">{description}</p>
+  
+  <!-- 
+    Provider-agnostic newsletter form.
+    Replace the action URL with your Buttondown/ConvertKit form endpoint.
+    Example for Buttondown: action="https://buttondown.com/api/emails/embed-subscribe/YOUR_USERNAME"
+    Example for ConvertKit: action="https://app.convertkit.com/forms/YOUR_FORM_ID/subscribe"
+  -->
+  <form class="newsletter-form" action="#" method="POST">
+    <input 
+      type="email" 
+      name="email"
+      placeholder="your@email.com" 
+      required 
+      aria-label="Email address"
+    />
+    <button type="submit">Subscribe</button>
+  </form>
+  
+  <p class="newsletter-privacy">
+    No spam. Unsubscribe anytime. View our <a href="/disclaimer/">privacy policy</a>.
+  </p>
+</section>
+
+<style>
+  .newsletter-cta {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 48px 32px;
+    text-align: center;
+    margin-top: 64px;
+  }
+
+  .newsletter-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  .newsletter-description {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    font-size: var(--text-sm);
+  }
+
+  .newsletter-form {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .newsletter-form input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.9rem;
+  }
+
+  .newsletter-form input:focus {
+    outline: none;
+    border-color: var(--text-primary);
+  }
+
+  .newsletter-form button {
+    padding: 12px 24px;
+    background: var(--text-primary);
+    color: var(--bg);
+    border: none;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .newsletter-form button:hover {
+    opacity: 0.9;
+  }
+
+  .newsletter-privacy {
+    margin-top: 16px;
+    font-size: var(--text-xs);
+    color: var(--text-light);
+  }
+
+  .newsletter-privacy a {
+    color: var(--text-light);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    .newsletter-form {
+      flex-direction: column;
+    }
+  }
+</style>

@@ -1,0 +1,148 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Card from '../components/Card.astro';
+import SearchBox from '../components/SearchBox.astro';
+import NewsletterCTA from '../components/NewsletterCTA.astro';
+import { getCollection } from 'astro:content';
+
+const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
+const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay');
+
+const featuredIncidents = incidents
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const featuredEssays = essays
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+---
+
+<BaseLayout title="Home">
+  <section class="search-section">
+    <SearchBox />
+  </section>
+
+  <section class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">Incidents</h2>
+      <p class="section-description">Documented AI failure events with evidence-based post-mortems and structured timelines.</p>
+    </div>
+    <hr class="section-rule">
+    <div class="card-grid">
+      {featuredIncidents.map((incident) => (
+        <Card
+          title={incident.data.title}
+          excerpt={incident.data.summary}
+          date={incident.data.incidentDate.toISOString().split('T')[0]}
+          category="Incident Report"
+          href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
+          linkText="Read report"
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">Essays</h2>
+      <p class="section-description">Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.</p>
+    </div>
+    <hr class="section-rule">
+    <div class="card-grid">
+      {featuredEssays.map((essay) => (
+        <Card
+          title={essay.data.title}
+          excerpt={essay.data.summary}
+          date={essay.data.date.toISOString().split('T')[0]}
+          category={essay.data.series || 'Essay'}
+          href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
+          linkText="Read essay"
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">Books</h2>
+      <p class="section-description">Free PDF downloads and hardcopy editions.</p>
+    </div>
+    <hr class="section-rule">
+    <div class="books-strip">
+      <p class="coming-soon">Books available in the <a href="/books/">Books section</a>.</p>
+    </div>
+  </section>
+
+  <NewsletterCTA />
+</BaseLayout>
+
+<style>
+  .search-section {
+    margin-bottom: 48px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .content-section {
+    margin-bottom: 72px;
+    scroll-margin-top: 56px;
+  }
+
+  .content-section:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .books-strip {
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  .coming-soon {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .coming-soon a {
+    color: var(--text-primary);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

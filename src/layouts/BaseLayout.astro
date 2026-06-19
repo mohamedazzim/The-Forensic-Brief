@@ -1,0 +1,188 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title, description = 'Post-Incident Analysis of AI Failure', ogImage } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content={description}>
+    <title>{title} | The Forensic Brief</title>
+    <link rel="canonical" href={canonicalURL}>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content={title}>
+    <meta property="og:description" content={description}>
+    <meta property="og:url" content={canonicalURL}>
+    <meta property="og:site_name" content="The Forensic Brief">
+    {ogImage && <meta property="og:image" content={ogImage}>}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content={title}>
+    <meta name="twitter:description" content={description}>
+    {ogImage && <meta name="twitter:image" content={ogImage}>}
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="The Forensic Brief" href="/rss.xml">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  </head>
+  <body>
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+
+    <header class="site-header">
+      <h1 class="site-title">The Forensic Brief</h1>
+      <hr class="site-divider">
+      <p class="site-tagline">Post-Incident Analysis of AI Failure</p>
+    </header>
+
+    <nav class="site-nav" aria-label="Primary navigation">
+      <ul>
+        <li><a href="/incidents/">Incidents</a></li>
+        <li><a href="/essays/">Essays</a></li>
+        <li><a href="/books/">Books</a></li>
+        <li><a href="/observations/">Observations</a></li>
+        <li><a href="/artifacts/">Artifacts</a></li>
+        <li><a href="/about/">About</a></li>
+      </ul>
+    </nav>
+
+    <main id="main-content" class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; {new Date().getFullYear()} The Forensic Brief. All rights reserved.</p>
+      <p><a href="/disclaimer/">Disclaimer</a> · <a href="/methodology/">Methodology</a></p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    text-align: center;
+    padding: 60px 24px 32px;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .site-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+
+  .site-divider {
+    width: 320px;
+    max-width: 80%;
+    height: 1px;
+    background: var(--border);
+    border: none;
+    margin: 20px auto 18px;
+  }
+
+  .site-tagline {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: rgba(240, 235, 226, 0.96);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 24px;
+  }
+
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    list-style: none;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .site-nav li a {
+    display: block;
+    padding: 14px 20px;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    color: var(--text-primary);
+    text-decoration: none;
+    border: none;
+    transition: color 0.2s ease;
+  }
+
+  .site-nav li a:hover {
+    color: var(--text-muted);
+    border: none;
+  }
+
+  .site-main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--border-light);
+    padding: 32px 24px;
+    text-align: center;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .site-footer p {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    letter-spacing: 0.03em;
+    margin-top: 8px;
+  }
+
+  .site-footer a {
+    border: none;
+    color: var(--text-light);
+  }
+
+  .site-footer a:hover {
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 600px) {
+    .site-nav li a {
+      padding: 12px 12px;
+      font-size: 0.82rem;
+    }
+
+    .site-title {
+      letter-spacing: 0.06em;
+    }
+  }
+</style>

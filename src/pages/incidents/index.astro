@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/Card.astro';
+import { getCollection } from 'astro:content';
+
+const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
+const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Incidents" description="Documented AI failure events with evidence-based post-mortems and structured timelines.">
+  <section class="content-section">
+    <div class="section-header">
+      <h1 class="section-title">Incidents</h1>
+      <p class="section-description">Documented AI failure events with evidence-based post-mortems and structured timelines.</p>
+    </div>
+    <hr class="section-rule">
+
+    {sortedIncidents.length > 0 ? (
+      <div class="card-grid">
+        {sortedIncidents.map((incident) => (
+          <Card
+            title={incident.data.title}
+            excerpt={incident.data.summary}
+            date={incident.data.date.toISOString().split('T')[0]}
+            category={`${incident.data.severity.toUpperCase()} · ${incident.data.domain}`}
+            href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
+            linkText="Read report"
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">No incidents published yet.</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .content-section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .empty-state {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 40px 0;
+  }
+</style>

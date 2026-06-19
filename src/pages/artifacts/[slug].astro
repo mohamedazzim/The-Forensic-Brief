@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const artifacts = await getCollection('artifacts');
+  return artifacts.map((artifact) => ({
+    params: { slug: artifact.id.replace(/\.(md|mdx)$/, '') },
+    props: { artifact },
+  }));
+}
+
+const { artifact } = Astro.props;
+const { Content } = await artifact.render();
+---
+
+<BaseLayout title={artifact.data.title} description={artifact.data.summary}>
+  <article class="artifact-page">
+    <header class="artifact-header">
+      <div class="artifact-meta-top">
+        <span class="eyebrow">{artifact.data.artifactType}</span>
+        <span class="artifact-version">Version {artifact.data.version}</span>
+      </div>
+      <h1 class="artifact-title">{artifact.data.title}</h1>
+      <p class="artifact-summary">{artifact.data.summary}</p>
+
+      <div class="artifact-downloads">
+        <span class="downloads-label">Download:</span>
+        {artifact.data.downloads.map((download) => (
+          <a 
+            href={download.url} 
+            class="download-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {download.format} ({download.sizeKB} KB)
+          </a>
+        ))}
+      </div>
+
+      <div class="artifact-license">
+        <span class="license-badge">{artifact.data.license}</span>
+      </div>
+    </header>
+
+    <div class="artifact-content article-body">
+      <Content />
+    </div>
+
+    {artifact.data.relatedEssays.length > 0 && (
+      <section class="related-section">
+        <h2>Related Essays</h2>
+        <ul>
+          {artifact.data.relatedEssays.map((slug) => (
+            <li><a href={`/essays/${slug}/`}>{slug}</a></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {artifact.data.relatedBook && (
+      <section class="related-section">
+        <h2>Related Book</h2>
+        <p><a href={`/books/${artifact.data.relatedBook}/`}>{artifact.data.relatedBook}</a></p>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .artifact-page {
+    max-width: var(--measure);
+  }
+
+  .artifact-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .artifact-meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .artifact-version {
+    font-size: var(--text-sm);
+    color: var(--text-light);
+  }
+
+  .artifact-title {
+    font-size: var(--text-3xl);
+    margin-bottom: 16px;
+  }
+
+  .artifact-summary {
+    font-size: var(--text-md);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .artifact-downloads {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .downloads-label {
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .download-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--text-primary);
+    color: var(--bg);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    border: none;
+    transition: opacity 0.2s;
+  }
+
+  .download-btn:hover {
+    opacity: 0.9;
+  }
+
+  .artifact-license {
+    margin-top: 16px;
+  }
+
+  .license-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    color: var(--text-light);
+  }
+
+  .artifact-content {
+    margin-top: 48px;
+  }
+
+  .related-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .related-section h2 {
+    font-size: var(--text-lg);
+    margin-bottom: 12px;
+  }
+
+  .related-section ul {
+    list-style: none;
+  }
+
+  .related-section li {
+    margin-bottom: 8px;
+  }
+</style>

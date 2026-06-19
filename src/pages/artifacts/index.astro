@@ -1,0 +1,219 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
+const sortedArtifacts = artifacts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const artifactTypes = [
+  { id: 'template', name: 'Templates' },
+  { id: 'checklist', name: 'Checklists' },
+  { id: 'table', name: 'Tables' },
+  { id: 'framework', name: 'Frameworks' },
+  { id: 'worksheet', name: 'Worksheets' },
+  { id: 'audit', name: 'Audits' },
+];
+---
+
+<BaseLayout title="Artifacts" description="Reusable templates and tools for AI governance — free to download and adapt.">
+  <section class="content-section">
+    <div class="section-header">
+      <h1 class="section-title">Artifacts</h1>
+      <p class="section-description">Reusable templates and tools for AI governance — free to download and adapt.</p>
+    </div>
+    <hr class="section-rule">
+
+    <!-- Type Filter -->
+    <div class="filter-bar">
+      <span class="filter-label">Type:</span>
+      <a href="/artifacts/" class="filter-link filter-link--active">All</a>
+      {artifactTypes.map((type) => (
+        <a href={`/artifacts/?type=${type.id}`} class="filter-link">{type.name}</a>
+      ))}
+    </div>
+
+    {sortedArtifacts.length > 0 ? (
+      <div class="artifact-grid">
+        {sortedArtifacts.map((artifact) => (
+          <article class="artifact-card">
+            <div class="artifact-header">
+              <span class="artifact-type">{artifact.data.artifactType}</span>
+              <span class="artifact-version">v{artifact.data.version}</span>
+            </div>
+            <h2 class="artifact-title">
+              <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`}>{artifact.data.title}</a>
+            </h2>
+            <p class="artifact-summary">{artifact.data.summary}</p>
+            <div class="artifact-downloads">
+              {artifact.data.downloads.map((download) => (
+                <span class="download-badge">{download.format}</span>
+              ))}
+            </div>
+            <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`} class="artifact-link">
+              View artifact →
+            </a>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">No artifacts published yet.</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .content-section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    font-size: var(--text-sm);
+  }
+
+  .filter-label {
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .filter-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    border: none;
+    padding: 4px 8px;
+    transition: color 0.2s;
+  }
+
+  .filter-link:hover {
+    color: var(--text-primary);
+  }
+
+  .filter-link--active {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .artifact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .artifact-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .artifact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .artifact-type {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+  }
+
+  .artifact-version {
+    font-size: var(--text-xs);
+    color: var(--text-light);
+  }
+
+  .artifact-title {
+    font-size: var(--text-lg);
+    margin-bottom: 8px;
+  }
+
+  .artifact-title a {
+    color: inherit;
+    text-decoration: none;
+    border: none;
+  }
+
+  .artifact-title a:hover {
+    color: var(--text-muted);
+  }
+
+  .artifact-summary {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    flex: 1;
+  }
+
+  .artifact-downloads {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .download-badge {
+    font-size: var(--text-xs);
+    padding: 4px 8px;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    color: var(--text-light);
+  }
+
+  .artifact-link {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1px;
+    align-self: flex-start;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .artifact-link:hover {
+    color: var(--text-muted);
+    border-color: var(--text-muted);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+</style>

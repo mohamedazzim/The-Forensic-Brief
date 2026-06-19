@@ -1,0 +1,116 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/Card.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const allContent = [
+    ...(await getCollection('incidents')),
+    ...(await getCollection('essays')),
+    ...(await getCollection('observations')),
+    ...(await getCollection('artifacts')),
+  ];
+
+  const tagMap: Record<string, typeof allContent> = {};
+  allContent.forEach((item) => {
+    if (item.data.tags) {
+      item.data.tags.forEach((tag) => {
+        if (!tagMap[tag]) tagMap[tag] = [];
+        tagMap[tag].push(item);
+      });
+    }
+  });
+
+  return Object.entries(tagMap).map(([tag, items]) => ({
+    params: { tag },
+    props: { tag, items },
+  }));
+}
+
+const { tag, items } = Astro.props;
+const sortedItems = items.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function getCollectionType(item: any) {
+  if (item.collection === 'incidents') return 'Incident';
+  if (item.collection === 'essays') {
+    if (item.data.category === 'pattern') return 'Pattern';
+    return 'Essay';
+  }
+  if (item.collection === 'observations') return 'Observation';
+  if (item.collection === 'artifacts') return 'Artifact';
+  return 'Content';
+}
+
+function getHref(item: any) {
+  const cleanId = item.id.replace(/\.(md|mdx)$/, '');
+  if (item.collection === 'incidents') return `/incidents/${cleanId}/`;
+  if (item.collection === 'essays') return `/essays/${cleanId}/`;
+  if (item.collection === 'observations') return `/observations/${cleanId}/`;
+  if (item.collection === 'artifacts') return `/artifacts/${cleanId}/`;
+  return '#';
+}
+---
+
+<BaseLayout title={`Topic: ${tag}`} description={`All content tagged with "${tag}".`}>
+  <section class="content-section">
+    <div class="section-header">
+      <span class="eyebrow">Topic</span>
+      <h1 class="section-title">{tag}</h1>
+      <p class="section-description">{sortedItems.length} {sortedItems.length === 1 ? 'item' : 'items'} tagged with "{tag}".</p>
+    </div>
+    <hr class="section-rule">
+
+    <div class="card-grid">
+      {sortedItems.map((item) => (
+        <Card
+          title={item.data.title}
+          excerpt={item.data.summary}
+          date={item.data.date.toISOString().split('T')[0]}
+          category={getCollectionType(item)}
+          href={getHref(item)}
+          linkText="Read more"
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .content-section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin-top: 8px;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+</style>

@@ -1,0 +1,227 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StructuredData from '../../components/StructuredData.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const books = await getCollection('books');
+  return books.map((book) => ({
+    params: { slug: book.id.replace(/\.(md|mdx)$/, '') },
+    props: { book },
+  }));
+}
+
+const { book } = Astro.props;
+const { Content } = await book.render();
+const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
+---
+
+<BaseLayout title={book.data.title} description={book.data.summary}>
+  <StructuredData 
+    type="book" 
+    data={{
+      title: book.data.title,
+      summary: book.data.summary,
+      author: book.data.author,
+      url: bookUrl,
+      cover: book.data.cover,
+      isbn: book.data.isbn,
+      pages: book.data.pages,
+    }} 
+  />
+
+  <article class="book-page">
+    <div class="book-header">
+      <div class="book-cover-large">
+        <img 
+          src={book.data.cover} 
+          alt={`Cover of ${book.data.title}`}
+          width="400"
+          height="600"
+        />
+      </div>
+      <div class="book-details">
+        <span class="eyebrow">Book</span>
+        <h1 class="book-title">{book.data.title}</h1>
+        <p class="book-series">Part of the <a href={`/essays/${book.data.series}/`}>{book.data.series}</a> series</p>
+        <p class="book-blurb">{book.data.blurb}</p>
+
+        <div class="book-actions">
+          <a 
+            href={book.data.pdfUrl} 
+            class="btn btn-primary btn-large"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Download PDF ({book.data.pdfSizeMB} MB)
+          </a>
+          <a 
+            href={book.data.amazonUrl} 
+            class="btn btn-secondary btn-large"
+            target="_blank"
+            rel="sponsored noopener noreferrer"
+          >
+            Buy on Amazon
+          </a>
+        </div>
+
+        <div class="book-meta">
+          {book.data.isbn && <p>ISBN: {book.data.isbn}</p>}
+          {book.data.pages && <p>{book.data.pages} pages</p>}
+        </div>
+      </div>
+    </div>
+
+    <section class="book-toc">
+      <h2>Table of Contents</h2>
+      <ol class="toc-list">
+        {book.data.toc.map((chapter) => (
+          <li>{chapter}</li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="book-content article-body">
+      <Content />
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .book-page {
+    max-width: var(--measure);
+  }
+
+  .book-header {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 40px;
+    margin-bottom: 48px;
+  }
+
+  .book-cover-large img {
+    width: 100%;
+    height: auto;
+    display: block;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .book-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .book-title {
+    font-size: var(--text-3xl);
+    margin: 12px 0 16px;
+  }
+
+  .book-series {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .book-series a {
+    border: none;
+    text-decoration: underline;
+  }
+
+  .book-blurb {
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+    flex: 1;
+  }
+
+  .book-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 24px;
+    font-size: var(--text-sm);
+    font-family: 'Lora', Georgia, serif;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    border: none;
+  }
+
+  .btn-large {
+    padding: 16px 28px;
+    font-size: var(--text-base);
+  }
+
+  .btn-primary {
+    background: var(--text-primary);
+    color: var(--bg);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn:hover {
+    opacity: 0.9;
+  }
+
+  .book-meta {
+    font-size: var(--text-sm);
+    color: var(--text-light);
+  }
+
+  .book-meta p {
+    margin-bottom: 4px;
+  }
+
+  .book-toc {
+    margin-bottom: 48px;
+    padding: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+  }
+
+  .book-toc h2 {
+    font-size: var(--text-lg);
+    margin-bottom: 16px;
+  }
+
+  .toc-list {
+    padding-left: 24px;
+  }
+
+  .toc-list li {
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .book-content {
+    margin-top: 48px;
+  }
+
+  @media (max-width: 600px) {
+    .book-header {
+      grid-template-columns: 1fr;
+    }
+
+    .book-cover-large {
+      max-width: 200px;
+    }
+
+    .book-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      text-align: center;
+    }
+  }
+</style>

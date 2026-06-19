@@ -1,0 +1,217 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RelatedContent from '../../components/RelatedContent.astro';
+import StructuredData from '../../components/StructuredData.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const incidents = await getCollection('incidents');
+  return incidents.map((incident) => ({
+    params: { slug: incident.id.replace(/\.(md|mdx)$/, '') },
+    props: { incident },
+  }));
+}
+
+const { incident } = Astro.props;
+const { Content } = await incident.render();
+const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
+---
+
+<BaseLayout title={incident.data.title} description={incident.data.summary}>
+  <StructuredData 
+    type="article" 
+    data={{
+      title: incident.data.title,
+      summary: incident.data.summary,
+      date: incident.data.incidentDate,
+      updated: incident.data.updated,
+      author: incident.data.author,
+      url: incidentUrl,
+      image: incident.data.ogImage,
+    }} 
+  />
+
+  <article class="article-body">
+    <header class="article-header">
+      <span class="eyebrow">Incident Report</span>
+      <h1 class="article-title">{incident.data.title}</h1>
+      <p class="article-dek">{incident.data.summary}</p>
+      <div class="article-meta">
+        <time datetime={incident.data.incidentDate.toISOString()}>
+          {incident.data.incidentDate.toISOString().split('T')[0]}
+        </time>
+        <span class="meta-separator">·</span>
+        <span>{incident.data.systems.join(', ')}</span>
+        <span class="meta-separator">·</span>
+        <span class={`severity severity--${incident.data.severity}`}>
+          {incident.data.severity}
+        </span>
+      </div>
+    </header>
+
+    <div class="incident-structure">
+      <section class="incident-section">
+        <h2>Summary</h2>
+        <p>{incident.data.corroboration}</p>
+      </section>
+
+      <section class="incident-section">
+        <h2>Timeline</h2>
+        <div class="timeline">
+          {incident.data.timeline.map((event) => (
+            <div class="timeline-item">
+              <time datetime={event.date.toISOString()}>
+                {event.date.toISOString().split('T')[0]}
+              </time>
+              <p>{event.event}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="incident-section">
+        <h2>Root Cause</h2>
+        <p>{incident.data.rootCause}</p>
+      </section>
+
+      <section class="incident-section">
+        <h2>Contributory Factors</h2>
+        <ul>
+          {incident.data.contributoryFactors.map((factor) => (
+            <li>{factor}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="incident-section">
+        <h2>Sources</h2>
+        <ul class="sources-list">
+          {incident.data.sources.map((source) => (
+            <li>
+              <a href={source.url} target="_blank" rel="noopener noreferrer">
+                {source.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+
+    <div class="article-content">
+      <Content />
+    </div>
+
+    <RelatedContent 
+      title="Related Content"
+      items={[
+        ...incident.data.relatedEssays.map((slug) => ({
+          title: slug,
+          href: `/essays/${slug}/`,
+          type: 'Essay',
+        })),
+        ...incident.data.relatedPatterns.map((slug) => ({
+          title: slug,
+          href: `/essays/${slug}/`,
+          type: 'Pattern',
+        })),
+      ]}
+    />
+  </article>
+</BaseLayout>
+
+<style>
+  .article-header {
+    margin-bottom: 48px;
+    max-width: var(--measure);
+  }
+
+  .article-title {
+    font-size: var(--text-3xl);
+    margin: 12px 0 16px;
+  }
+
+  .article-dek {
+    font-size: var(--text-md);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-sm);
+    color: var(--text-light);
+  }
+
+  .meta-separator {
+    color: var(--border);
+  }
+
+  .severity {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: var(--text-xs);
+  }
+
+  .severity--critical { color: #c0392b; }
+  .severity--high { color: #e67e22; }
+  .severity--moderate { color: #f39c12; }
+  .severity--low { color: var(--text-light); }
+
+  .incident-structure {
+    margin-bottom: 48px;
+  }
+
+  .incident-section {
+    margin-bottom: 32px;
+  }
+
+  .incident-section h2 {
+    font-size: var(--text-lg);
+    margin-bottom: 12px;
+  }
+
+  .timeline {
+    border-left: 2px solid var(--border-light);
+    padding-left: 20px;
+  }
+
+  .timeline-item {
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    background: var(--border);
+    border-radius: 50%;
+  }
+
+  .timeline-item time {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-light);
+    margin-bottom: 4px;
+  }
+
+  .sources-list {
+    list-style: none;
+  }
+
+  .sources-list li {
+    margin-bottom: 8px;
+  }
+
+  .article-content {
+    max-width: var(--measure);
+  }
+</style>

@@ -1,0 +1,176 @@
+---
+---
+
+<div class="search-container">
+  <div class="search-input-wrapper">
+    <input 
+      type="text" 
+      id="search-input" 
+      class="search-input" 
+      placeholder="Search articles..."
+      aria-label="Search"
+    />
+    <span class="search-icon">⌕</span>
+  </div>
+  <div id="search-results" class="search-results hidden"></div>
+</div>
+
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    // @ts-ignore
+    if (typeof window.__pagefind !== 'undefined') {
+      initSearch();
+    } else {
+      const script = document.createElement('script');
+      script.src = '/pagefind/pagefind.js';
+      script.onload = initSearch;
+      document.head.appendChild(script);
+    }
+  });
+
+  function initSearch() {
+    // @ts-ignore
+    window.__pagefind = window.__pagefind || {};
+    
+    const input = document.getElementById('search-input') as HTMLInputElement;
+    const resultsContainer = document.getElementById('search-results');
+    
+    if (!input || !resultsContainer) return;
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+
+    input.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        const query = (e.target as HTMLInputElement).value.trim();
+        
+        if (query.length < 2) {
+          resultsContainer.classList.add('hidden');
+          return;
+        }
+
+        try {
+          // @ts-ignore
+          const search = await window.__pagefind.search(query);
+          const results = await Promise.all(
+            search.results.slice(0, 5).map(async (result: any) => {
+              const data = await result.data();
+              return data;
+            })
+          );
+
+          if (results.length === 0) {
+            resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
+          } else {
+            resultsContainer.innerHTML = results.map((result: any) => `
+              <a href="${result.url}" class="result-item">
+                <span class="result-title">${result.meta?.title || 'Untitled'}</span>
+                <span class="result-excerpt">${result.excerpt}</span>
+              </a>
+            `).join('');
+          }
+          
+          resultsContainer.classList.remove('hidden');
+        } catch (error) {
+          console.error('Search error:', error);
+        }
+      }, 300);
+    });
+
+    // Close results when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target as Node) && !resultsContainer.contains(e.target as Node)) {
+        resultsContainer.classList.add('hidden');
+      }
+    });
+  }
+</script>
+
+<style>
+  .search-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 12px 16px 12px 40px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-family: 'Lora', Georgia, serif;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--text-primary);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: var(--text-base);
+  }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .search-results.hidden {
+    display: none;
+  }
+
+  .result-item {
+    display: block;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .result-item:hover {
+    background: var(--bg);
+  }
+
+  .result-title {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .result-excerpt {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .no-results {
+    padding: 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+</style>

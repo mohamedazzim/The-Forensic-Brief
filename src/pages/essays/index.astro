@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/Card.astro';
+import { getCollection } from 'astro:content';
+
+const essays = await getCollection('essays', ({ data }) => data.status === 'published');
+const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const series = [
+  { id: 'human-in-control', name: 'Human in Control' },
+  { id: 'out-of-bounds', name: 'Out of Bounds' },
+  { id: 'accountable-autonomy', name: 'Accountable Autonomy' },
+  { id: 'six-dimensions', name: 'The Six Dimensions' },
+  { id: 'the-burden', name: 'The Burden' },
+];
+---
+
+<BaseLayout title="Essays" description="Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.">
+  <section class="content-section">
+    <div class="section-header">
+      <h1 class="section-title">Essays</h1>
+      <p class="section-description">Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.</p>
+    </div>
+    <hr class="section-rule">
+
+    <div class="filter-bar">
+      <span class="filter-label">Series:</span>
+      <a href="/essays/" class="filter-link filter-link--active">All</a>
+      {series.map((s) => (
+        <a href={`/essays/${s.id}/`} class="filter-link">{s.name}</a>
+      ))}
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">Category:</span>
+      <a href="/essays/" class="filter-link filter-link--active">Essays</a>
+      <a href="/essays/patterns/" class="filter-link">Patterns</a>
+    </div>
+
+    {sortedEssays.length > 0 ? (
+      <div class="card-grid">
+        {sortedEssays.filter(e => e.data.category === 'essay').map((essay) => (
+          <Card
+            title={essay.data.title}
+            excerpt={essay.data.summary}
+            date={essay.data.date.toISOString().split('T')[0]}
+            category={essay.data.series || 'Essay'}
+            href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
+            linkText="Read essay"
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">No essays published yet.</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .content-section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: var(--text-sm);
+  }
+
+  .filter-label {
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .filter-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    border: none;
+    padding: 4px 8px;
+    transition: color 0.2s;
+  }
+
+  .filter-link:hover {
+    color: var(--text-primary);
+  }
+
+  .filter-link--active {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .empty-state {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 40px 0;
+  }
+</style>

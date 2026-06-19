@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Page Not Found" description="The page you're looking for doesn't exist.">
+  <section class="error-page">
+    <h1 class="error-title">404</h1>
+    <p class="error-message">The page you're looking for doesn't exist.</p>
+    <a href="/" class="error-link">Return to Home</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .error-page {
+    text-align: center;
+    padding: 80px 24px;
+  }
+
+  .error-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 6rem;
+    font-weight: 400;
+    color: var(--text-light);
+    margin-bottom: 16px;
+  }
+
+  .error-message {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+  }
+
+  .error-link {
+    display: inline-block;
+    padding: 12px 24px;
+    background: var(--text-primary);
+    color: var(--bg);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+  }
+
+  .error-link:hover {
+    opacity: 0.9;
+    border: none;
+  }
+</style>

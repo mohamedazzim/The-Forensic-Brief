@@ -1,0 +1,200 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const books = await getCollection('books', ({ data }) => data.status === 'published');
+const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Books" description="Free PDF downloads and hardcopy editions of The Forensic Brief series.">
+  <section class="content-section">
+    <div class="section-header">
+      <h1 class="section-title">Books</h1>
+      <p class="section-description">Free PDF downloads and hardcopy editions of The Forensic Brief series.</p>
+    </div>
+    <hr class="section-rule">
+
+    {sortedBooks.length > 0 ? (
+      <div class="book-grid">
+        {sortedBooks.map((book) => (
+          <article class="book-card">
+            <div class="book-cover">
+              <img 
+                src={book.data.cover} 
+                alt={`Cover of ${book.data.title}`}
+                width="300"
+                height="450"
+                loading="lazy"
+              />
+            </div>
+            <div class="book-info">
+              <span class="book-series">{book.data.series}</span>
+              <h2 class="book-title">
+                <a href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`}>{book.data.title}</a>
+              </h2>
+              <p class="book-blurb">{book.data.blurb}</p>
+              <div class="book-actions">
+                <a 
+                  href={book.data.pdfUrl} 
+                  class="btn btn-primary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download PDF ({book.data.pdfSizeMB} MB)
+                </a>
+                <a 
+                  href={book.data.amazonUrl} 
+                  class="btn btn-secondary"
+                  target="_blank"
+                  rel="sponsored noopener noreferrer"
+                >
+                  Buy on Amazon
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">Books coming soon.</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .content-section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .book-grid {
+    display: grid;
+    gap: 48px;
+  }
+
+  .book-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 32px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 32px;
+  }
+
+  .book-cover img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .book-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .book-series {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    margin-bottom: 8px;
+  }
+
+  .book-title {
+    font-size: var(--text-xl);
+    margin-bottom: 12px;
+  }
+
+  .book-title a {
+    color: inherit;
+    text-decoration: none;
+    border: none;
+  }
+
+  .book-title a:hover {
+    color: var(--text-muted);
+  }
+
+  .book-blurb {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    flex: 1;
+  }
+
+  .book-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 12px 20px;
+    font-size: var(--text-sm);
+    font-family: 'Lora', Georgia, serif;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--text-primary);
+    color: var(--bg);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn:hover {
+    opacity: 0.9;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    .book-card {
+      grid-template-columns: 1fr;
+    }
+
+    .book-cover {
+      max-width: 200px;
+    }
+  }
+</style>

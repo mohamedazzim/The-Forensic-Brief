@@ -1,0 +1,93 @@
+---
+interface Props {
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  href: string;
+  linkText?: string;
+}
+
+const { title, excerpt, date, category, href, linkText = 'Read report' } = Astro.props;
+---
+
+<article class="article-card">
+  <span class="card-category">{category}</span>
+  <h3 class="card-title">
+    <a href={href}>{title}</a>
+  </h3>
+  <p class="card-excerpt">{excerpt}</p>
+  <div class="card-meta">
+    <time datetime={date}>{date}</time>
+    <a href={href} class="card-read-more">{linkText} →</a>
+  </div>
+</article>
+
+<style>
+  .article-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 24px;
+    position: relative;
+  }
+
+  .card-category {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  .card-title a {
+    color: inherit;
+    text-decoration: none;
+    border: none;
+  }
+
+  .card-title a:hover {
+    color: var(--text-muted);
+  }
+
+  .card-excerpt {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--text-light);
+  }
+
+  .card-read-more {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .card-read-more:hover {
+    color: var(--text-muted);
+    border-color: var(--text-muted);
+  }
+</style>

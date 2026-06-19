@@ -1,0 +1,20 @@
+---
+interface Props {
+  title: string;
+  type?: string;
+  series?: string;
+}
+
+const { title, type = 'Article', series } = Astro.props;
+
+// OG Image generation placeholder
+// In production, use @astrojs/og or similar to generate images at build time
+// For now, this provides the meta tags that reference a generated image
+const ogImageUrl = `https://theforensicbrief.com/api/og?title=${encodeURIComponent(title)}&type=${type}${series ? `&series=${series}` : ''}`;
+---
+
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={`${title} - The Forensic Brief`} />
+<meta name="twitter:image" content={ogImageUrl} />
