@@ -21,3 +21,15 @@ Thumbs.db
 
 # Pagefind
 src/content/pagefind/
+
+# Tooling (Raven/Claude/CommandCode)
+.claude/
+.commandcode/
+.raven/
+raven-main/
+CLAUDE.md
+COMMANDCODE.md
+
+# Legacy
+styles.css
+build-font-check.log
