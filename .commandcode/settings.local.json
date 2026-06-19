@@ -1,0 +1,44 @@
+{
+  "version": "4.0.0",
+  "description": "Raven v4.0.0 — Automated governance gate via Andie",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "andie --auto --mode=detect"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "bash": ["git", "python3", "npm", "npx", "pnpm"],
+    "mcp": ["raven-core", "raven-review", "raven-security"]
+  },
+  "governance": {
+    "enforcement": "mandatory",
+    "andie_gate": "automatic",
+    "fallback": "prompt-start"
+  },
+  "skills": {
+    "enabled": true,
+    "path": ".commandcode/skills",
+    "auto_load": ["raven-core", "raven-review", "raven-security", "andie"]
+  },
+  "agents": {
+    "enabled": true,
+    "path": ".commandcode/agents"
+  },
+  "commands": {
+    "enabled": true,
+    "path": ".commandcode/commands"
+  },
+  "mcp": {
+    "enabled": true,
+    "config": ".commandcode/.mcp.json",
+    "servers": ["raven"]
+  }
+}

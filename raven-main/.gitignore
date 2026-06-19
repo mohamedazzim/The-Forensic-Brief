@@ -1,0 +1,31 @@
+
+
+claude-plugins-official/
+.DS_Store
+guard/.git
+raven-plugin.zip
+!plugin/raven-plugin-*.zip
+.claude/.raven/
+codex/.raven/
+
+# Do-not-share working documents
+*.dns
+.model.env
+
+# Internal-only working docs — NEVER share to repo
+local/
+*.md.env
+*.local.md
+
+# Raven secrets — NEVER commit
+.raven/manifest.secrets.json
+**/manifest.secrets.json
+*.secrets.json
+
+# Raven runtime audit logs — local-only, not source
+.raven/audit/
+
+# Python bytecode
+__pycache__/
+*.pyc
+.env

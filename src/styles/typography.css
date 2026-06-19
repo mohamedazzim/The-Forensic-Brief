@@ -1,11 +1,6 @@
 /* ── Font Faces ── */
-/* 
- * Self-hosted fonts from /fonts/ directory.
- * Uncomment @font-face blocks below after placing .woff2 files.
- * Until then, Georgia serif is used as fallback.
- */
+/* Self-hosted fonts from /fonts/ directory */
 
-/*
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -53,7 +48,6 @@
   font-display: swap;
   src: url('/fonts/PlayfairDisplay-Bold.woff2') format('woff2');
 }
-*/
 
 /* ── Base Typography ── */
 
