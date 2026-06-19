@@ -68,3 +68,41 @@ img {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Accessibility: High Contrast Mode ── */
+
+@media (prefers-contrast: high) {
+  :root {
+    --bg: #ffffff;
+    --bg-card: #ffffff;
+    --text-primary: #000000;
+    --text-muted: #333333;
+    --text-light: #555555;
+    --border: #000000;
+    --border-light: #333333;
+  }
+
+  body {
+    background-image: none;
+  }
+}
+
+/* ── Accessibility: Focus Visible Enhancement ── */
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ── Accessibility: Touch Target Size ── */
+
+@media (pointer: coarse) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

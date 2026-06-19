@@ -1,0 +1,75 @@
+---
+interface Props {
+  title: string;
+  pdfUrl?: string;
+}
+
+const { title, pdfUrl } = Astro.props;
+---
+
+<div class="pdf-viewer-placeholder">
+  <div class="pdf-viewer-icon">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+  </div>
+  <p class="pdf-viewer-title">{title}</p>
+  <p class="pdf-viewer-note">PDF preview coming soon</p>
+  {pdfUrl && (
+    <a 
+      href={pdfUrl} 
+      class="pdf-viewer-download"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Open full PDF →
+    </a>
+  )}
+</div>
+
+<style>
+  .pdf-viewer-placeholder {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 48px 24px;
+    text-align: center;
+    margin: 24px 0;
+  }
+
+  .pdf-viewer-icon {
+    color: var(--text-light);
+    margin-bottom: 16px;
+  }
+
+  .pdf-viewer-title {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .pdf-viewer-note {
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+
+  .pdf-viewer-download {
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--text-primary);
+    color: var(--bg);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    border: none;
+    transition: opacity 0.2s;
+  }
+
+  .pdf-viewer-download:hover {
+    opacity: 0.9;
+  }
+</style>

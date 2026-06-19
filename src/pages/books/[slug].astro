@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StructuredData from '../../components/StructuredData.astro';
+import PDFViewer from '../../components/PDFViewer.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -80,6 +81,11 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
         ))}
       </ol>
     </section>
+
+    <PDFViewer 
+      title={`Preview: ${book.data.title}`}
+      pdfUrl={book.data.pdfUrl}
+    />
 
     <section class="book-content article-body">
       <Content />

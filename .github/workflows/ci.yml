@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          test -d dist
+          test -f dist/index.html
+          test -f dist/robots.txt
+          test -f dist/rss.xml
+          test -f dist/sitemap-index.xml
+          test -d dist/pagefind
+
+      - name: Check for broken links (optional)
+        run: |
+          echo "Link checking can be added with a tool like linkinator"

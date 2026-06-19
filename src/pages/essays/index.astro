@@ -1,18 +1,27 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
+import FilterBar from '../../components/FilterBar.astro';
 import { getCollection } from 'astro:content';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const series = [
-  { id: 'human-in-control', name: 'Human in Control' },
-  { id: 'out-of-bounds', name: 'Out of Bounds' },
-  { id: 'accountable-autonomy', name: 'Accountable Autonomy' },
-  { id: 'six-dimensions', name: 'The Six Dimensions' },
-  { id: 'the-burden', name: 'The Burden' },
+const seriesOptions = [
+  { id: 'human-in-control', label: 'Human in Control' },
+  { id: 'out-of-bounds', label: 'Out of Bounds' },
+  { id: 'accountable-autonomy', label: 'Accountable Autonomy' },
+  { id: 'six-dimensions', label: 'The Six Dimensions' },
+  { id: 'the-burden', label: 'The Burden' },
 ];
+
+const categoryOptions = [
+  { id: 'essay', label: 'Essays' },
+  { id: 'pattern', label: 'Patterns' },
+];
+
+const filteredEssays = sortedEssays.filter(e => e.data.category === 'essay');
+const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern');
 ---
 
 <BaseLayout title="Essays" description="Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.">
@@ -23,23 +32,21 @@ const series = [
     </div>
     <hr class="section-rule">
 
-    <div class="filter-bar">
-      <span class="filter-label">Series:</span>
-      <a href="/essays/" class="filter-link filter-link--active">All</a>
-      {series.map((s) => (
-        <a href={`/essays/${s.id}/`} class="filter-link">{s.name}</a>
-      ))}
-    </div>
+    <FilterBar 
+      label="Series" 
+      options={seriesOptions}
+      baseUrl="/essays/"
+    />
 
-    <div class="filter-bar">
-      <span class="filter-label">Category:</span>
-      <a href="/essays/" class="filter-link filter-link--active">Essays</a>
-      <a href="/essays/patterns/" class="filter-link">Patterns</a>
-    </div>
+    <FilterBar 
+      label="Category" 
+      options={categoryOptions}
+      baseUrl="/essays/"
+    />
 
-    {sortedEssays.length > 0 ? (
+    {filteredEssays.length > 0 ? (
       <div class="card-grid">
-        {sortedEssays.filter(e => e.data.category === 'essay').map((essay) => (
+        {filteredEssays.map((essay) => (
           <Card
             title={essay.data.title}
             excerpt={essay.data.summary}
@@ -54,6 +61,29 @@ const series = [
       <p class="empty-state">No essays published yet.</p>
     )}
   </section>
+
+  {filteredPatterns.length > 0 && (
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">Patterns</h2>
+        <p class="section-description">Structured failure-signature analyses extracted from incident data.</p>
+      </div>
+      <hr class="section-rule">
+
+      <div class="card-grid">
+        {filteredPatterns.map((pattern) => (
+          <Card
+            title={pattern.data.title}
+            excerpt={pattern.data.summary}
+            date={pattern.data.date.toISOString().split('T')[0]}
+            category={pattern.data.patternId || 'Pattern'}
+            href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
+            linkText="View pattern"
+          />
+        ))}
+      </div>
+    </section>
+  )}
 </BaseLayout>
 
 <style>
@@ -86,37 +116,6 @@ const series = [
     background: var(--border-light);
     border: none;
     margin: 20px 0 28px;
-  }
-
-  .filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    font-size: var(--text-sm);
-  }
-
-  .filter-label {
-    color: var(--text-light);
-    font-weight: 500;
-  }
-
-  .filter-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    border: none;
-    padding: 4px 8px;
-    transition: color 0.2s;
-  }
-
-  .filter-link:hover {
-    color: var(--text-primary);
-  }
-
-  .filter-link--active {
-    color: var(--text-primary);
-    font-weight: 500;
   }
 
   .card-grid {

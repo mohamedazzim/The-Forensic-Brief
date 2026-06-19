@@ -1,0 +1,61 @@
+---
+interface FilterOption {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  label: string;
+  options: FilterOption[];
+  activeId?: string;
+  baseUrl?: string;
+}
+
+const { label, options, activeId = '', baseUrl = '' } = Astro.props;
+---
+
+<div class="filter-bar">
+  <span class="filter-label">{label}:</span>
+  <a href={baseUrl} class={`filter-link ${!activeId ? 'filter-link--active' : ''}`}>All</a>
+  {options.map((option) => (
+    <a 
+      href={`${baseUrl}?${label.toLowerCase()}=${option.id}`} 
+      class={`filter-link ${activeId === option.id ? 'filter-link--active' : ''}`}
+    >
+      {option.label}
+    </a>
+  ))}
+</div>
+
+<style>
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: var(--text-sm);
+  }
+
+  .filter-label {
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .filter-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    border: none;
+    padding: 4px 8px;
+    transition: color 0.2s;
+  }
+
+  .filter-link:hover {
+    color: var(--text-primary);
+  }
+
+  .filter-link--active {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+</style>

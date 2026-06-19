@@ -1,17 +1,18 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterBar from '../../components/FilterBar.astro';
 import { getCollection } from 'astro:content';
 
 const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
 const sortedArtifacts = artifacts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const artifactTypes = [
-  { id: 'template', name: 'Templates' },
-  { id: 'checklist', name: 'Checklists' },
-  { id: 'table', name: 'Tables' },
-  { id: 'framework', name: 'Frameworks' },
-  { id: 'worksheet', name: 'Worksheets' },
-  { id: 'audit', name: 'Audits' },
+const typeOptions = [
+  { id: 'template', label: 'Templates' },
+  { id: 'checklist', label: 'Checklists' },
+  { id: 'table', label: 'Tables' },
+  { id: 'framework', label: 'Frameworks' },
+  { id: 'worksheet', label: 'Worksheets' },
+  { id: 'audit', label: 'Audits' },
 ];
 ---
 
@@ -23,14 +24,11 @@ const artifactTypes = [
     </div>
     <hr class="section-rule">
 
-    <!-- Type Filter -->
-    <div class="filter-bar">
-      <span class="filter-label">Type:</span>
-      <a href="/artifacts/" class="filter-link filter-link--active">All</a>
-      {artifactTypes.map((type) => (
-        <a href={`/artifacts/?type=${type.id}`} class="filter-link">{type.name}</a>
-      ))}
-    </div>
+    <FilterBar 
+      label="Type" 
+      options={typeOptions}
+      baseUrl="/artifacts/"
+    />
 
     {sortedArtifacts.length > 0 ? (
       <div class="artifact-grid">
@@ -91,37 +89,6 @@ const artifactTypes = [
     background: var(--border-light);
     border: none;
     margin: 20px 0 28px;
-  }
-
-  .filter-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    font-size: var(--text-sm);
-  }
-
-  .filter-label {
-    color: var(--text-light);
-    font-weight: 500;
-  }
-
-  .filter-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    border: none;
-    padding: 4px 8px;
-    transition: color 0.2s;
-  }
-
-  .filter-link:hover {
-    color: var(--text-primary);
-  }
-
-  .filter-link--active {
-    color: var(--text-primary);
-    font-weight: 500;
   }
 
   .artifact-grid {

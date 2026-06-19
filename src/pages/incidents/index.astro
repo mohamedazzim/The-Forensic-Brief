@@ -1,9 +1,26 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
+import FilterBar from '../../components/FilterBar.astro';
 import { getCollection } from 'astro:content';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
+
+const severityOptions = [
+  { id: 'critical', label: 'Critical' },
+  { id: 'high', label: 'High' },
+  { id: 'moderate', label: 'Moderate' },
+  { id: 'low', label: 'Low' },
+];
+
+const domainOptions = [
+  { id: 'customer-service', label: 'Customer Service' },
+  { id: 'lending', label: 'Lending' },
+  { id: 'healthcare', label: 'Healthcare' },
+];
+
+// Get current filter from URL params (simulated for static build)
+// In production, use client-side JS or URL params
 const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
@@ -15,13 +32,25 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
     </div>
     <hr class="section-rule">
 
+    <FilterBar 
+      label="Severity" 
+      options={severityOptions}
+      baseUrl="/incidents/"
+    />
+
+    <FilterBar 
+      label="Domain" 
+      options={domainOptions}
+      baseUrl="/incidents/"
+    />
+
     {sortedIncidents.length > 0 ? (
       <div class="card-grid">
         {sortedIncidents.map((incident) => (
           <Card
             title={incident.data.title}
             excerpt={incident.data.summary}
-            date={incident.data.date.toISOString().split('T')[0]}
+            date={incident.data.incidentDate.toISOString().split('T')[0]}
             category={`${incident.data.severity.toUpperCase()} · ${incident.data.domain}`}
             href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="Read report"
