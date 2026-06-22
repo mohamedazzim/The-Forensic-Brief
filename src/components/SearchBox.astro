@@ -15,8 +15,6 @@
   <div id="search-results" class="search-results hidden"></div>
 </div>
 
-<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
-
 <script is:inline>
   document.addEventListener('DOMContentLoaded', function() {
     var input = document.getElementById('search-input');
@@ -24,18 +22,7 @@
     
     if (!input || !resultsContainer) return;
 
-    var searchLoaded = false;
     var debounceTimer;
-
-    function initSearch() {
-      searchLoaded = true;
-    }
-
-    var pagefindScript = document.createElement('script');
-    pagefindScript.src = '/pagefind/pagefind.js';
-    pagefindScript.type = 'module';
-    pagefindScript.onload = initSearch;
-    document.head.appendChild(pagefindScript);
 
     input.addEventListener('input', function(e) {
       clearTimeout(debounceTimer);
@@ -47,7 +34,7 @@
           return;
         }
 
-        if (!searchLoaded) {
+        if (typeof window.__pagefind === 'undefined') {
           resultsContainer.innerHTML = '<p class="no-results">Search loading...</p>';
           resultsContainer.classList.remove('hidden');
           return;
