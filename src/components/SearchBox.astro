@@ -24,45 +24,45 @@
 
     var debounceTimer;
 
+    function doSearch(query) {
+      if (typeof window.__pagefind === 'undefined') {
+        resultsContainer.innerHTML = '<p class="no-results">Search loading...</p>';
+        resultsContainer.classList.remove('hidden');
+        return;
+      }
+
+      window.__pagefind.search(query).then(function(search) {
+        return Promise.all(
+          search.results.slice(0, 5).map(function(result) {
+            return result.data();
+          })
+        );
+      }).then(function(results) {
+        if (results.length === 0) {
+          resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
+        } else {
+          resultsContainer.innerHTML = results.map(function(result) {
+            return '<a href="' + result.url + '" class="result-item">' +
+              '<span class="result-title">' + (result.meta && result.meta.title ? result.meta.title : 'Untitled') + '</span>' +
+              '<span class="result-excerpt">' + result.excerpt + '</span>' +
+            '</a>';
+          }).join('');
+        }
+        resultsContainer.classList.remove('hidden');
+      }).catch(function(error) {
+        console.error('Search error:', error);
+      });
+    }
+
     input.addEventListener('input', function(e) {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(async function() {
+      debounceTimer = setTimeout(function() {
         var query = e.target.value.trim();
-        
         if (query.length < 2) {
           resultsContainer.classList.add('hidden');
           return;
         }
-
-        if (typeof window.__pagefind === 'undefined') {
-          resultsContainer.innerHTML = '<p class="no-results">Search loading...</p>';
-          resultsContainer.classList.remove('hidden');
-          return;
-        }
-
-        try {
-          var search = await window.__pagefind.search(query);
-          var results = await Promise.all(
-            search.results.slice(0, 5).map(async function(result) {
-              return await result.data();
-            })
-          );
-
-          if (results.length === 0) {
-            resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
-          } else {
-            resultsContainer.innerHTML = results.map(function(result) {
-              return '<a href="' + result.url + '" class="result-item">' +
-                '<span class="result-title">' + (result.meta && result.meta.title ? result.meta.title : 'Untitled') + '</span>' +
-                '<span class="result-excerpt">' + result.excerpt + '</span>' +
-              '</a>';
-            }).join('');
-          }
-          
-          resultsContainer.classList.remove('hidden');
-        } catch (error) {
-          console.error('Search error:', error);
-        }
+        doSearch(query);
       }, 300);
     });
 
