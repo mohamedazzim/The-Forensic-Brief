@@ -17,59 +17,58 @@
 
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
 
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    // @ts-ignore
-    if (typeof window.__pagefind !== 'undefined') {
-      initSearch();
-    } else {
-      const script = document.createElement('script');
-      script.src = '/pagefind/pagefind.js';
-      script.onload = initSearch;
-      document.head.appendChild(script);
-    }
-  });
-
-  function initSearch() {
-    // @ts-ignore
-    window.__pagefind = window.__pagefind || {};
-    
-    const input = document.getElementById('search-input') as HTMLInputElement;
-    const resultsContainer = document.getElementById('search-results');
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('search-input');
+    var resultsContainer = document.getElementById('search-results');
     
     if (!input || !resultsContainer) return;
 
-    let debounceTimer: ReturnType<typeof setTimeout>;
+    var searchLoaded = false;
+    var debounceTimer;
 
-    input.addEventListener('input', (e) => {
+    function initSearch() {
+      searchLoaded = true;
+    }
+
+    var pagefindScript = document.createElement('script');
+    pagefindScript.src = '/pagefind/pagefind.js';
+    pagefindScript.onload = initSearch;
+    document.head.appendChild(pagefindScript);
+
+    input.addEventListener('input', function(e) {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(async () => {
-        const query = (e.target as HTMLInputElement).value.trim();
+      debounceTimer = setTimeout(async function() {
+        var query = e.target.value.trim();
         
         if (query.length < 2) {
           resultsContainer.classList.add('hidden');
           return;
         }
 
+        if (!searchLoaded) {
+          resultsContainer.innerHTML = '<p class="no-results">Search loading...</p>';
+          resultsContainer.classList.remove('hidden');
+          return;
+        }
+
         try {
-          // @ts-ignore
-          const search = await window.__pagefind.search(query);
-          const results = await Promise.all(
-            search.results.slice(0, 5).map(async (result: any) => {
-              const data = await result.data();
-              return data;
+          var search = await window.__pagefind.search(query);
+          var results = await Promise.all(
+            search.results.slice(0, 5).map(async function(result) {
+              return await result.data();
             })
           );
 
           if (results.length === 0) {
             resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
           } else {
-            resultsContainer.innerHTML = results.map((result: any) => `
-              <a href="${result.url}" class="result-item">
-                <span class="result-title">${result.meta?.title || 'Untitled'}</span>
-                <span class="result-excerpt">${result.excerpt}</span>
-              </a>
-            `).join('');
+            resultsContainer.innerHTML = results.map(function(result) {
+              return '<a href="' + result.url + '" class="result-item">' +
+                '<span class="result-title">' + (result.meta && result.meta.title ? result.meta.title : 'Untitled') + '</span>' +
+                '<span class="result-excerpt">' + result.excerpt + '</span>' +
+              '</a>';
+            }).join('');
           }
           
           resultsContainer.classList.remove('hidden');
@@ -79,13 +78,12 @@
       }, 300);
     });
 
-    // Close results when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!input.contains(e.target as Node) && !resultsContainer.contains(e.target as Node)) {
+    document.addEventListener('click', function(e) {
+      if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
         resultsContainer.classList.add('hidden');
       }
     });
-  }
+  });
 </script>
 
 <style>
