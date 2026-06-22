@@ -84,14 +84,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 <style>
   .site-header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     width: 100%;
-    padding: 4rem 1rem 0;
+    padding: 2rem 1rem 0;
   }
 
   .site-title {
     font-family: 'Libre Baskerville', Georgia, serif;
-    font-size: 3rem;
+    font-size: clamp(2rem, 5vw, 2.5rem);
     font-weight: 400;
     margin: 0 0 0.5rem 0;
     letter-spacing: 0.02em;
@@ -103,28 +103,29 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     border: none;
     border-top: 1px solid var(--text-primary);
     width: 100%;
-    max-width: 500px;
-    margin: 0 auto 0.75rem auto;
+    max-width: 400px;
+    margin: 0 auto 0.5rem auto;
   }
 
   .site-subtitle {
     font-family: 'Inter', sans-serif;
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: var(--text-primary);
-    margin: 0 0 3rem 0;
+    margin: 0 0 1.5rem 0;
     font-weight: 400;
   }
 
   .site-nav {
     width: 100%;
     padding: 0 1rem;
+    margin-bottom: 1rem;
   }
 
   .site-nav ul {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 2.5rem;
+    gap: 2rem;
     list-style: none;
     max-width: var(--max-width);
     margin: 0 auto;
@@ -132,7 +133,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
   .site-nav li a {
     font-family: 'Inter', sans-serif;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     color: var(--text-primary);
     text-decoration: none;
     transition: color 0.2s ease;
@@ -145,15 +146,15 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   .site-main {
     width: 100%;
     max-width: var(--max-width);
-    padding: 0 1rem 4rem;
+    padding: 0 1rem 2rem;
   }
 
   .site-footer {
-    margin-top: 6rem;
-    padding: 3rem 0;
+    margin-top: 3rem;
+    padding: 2rem 0;
     border-top: 1px solid var(--border);
     text-align: center;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     width: 100%;
   }
