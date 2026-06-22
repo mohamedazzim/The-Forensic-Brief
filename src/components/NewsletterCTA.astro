@@ -14,20 +14,10 @@ const {
   <h2 class="newsletter-title">{title}</h2>
   <p class="newsletter-description">{description}</p>
   
-  <!-- Substack newsletter form -->
-  <form 
-    class="newsletter-form" 
-    action="https://theforensicbriefazzim.substack.com/api/v1/free?nojs=true" 
-    method="POST"
-  >
-    <input type="hidden" name="first_url" value="/" />
-    <input type="hidden" name="first_referrer" value="" />
-    <input type="hidden" name="current_url" value="/" />
-    <input type="hidden" name="current_referrer" value="" />
-    <input type="hidden" name="source" value="subscribe_page" />
+  <form class="newsletter-form" id="newsletter-form">
     <input 
       type="email" 
-      name="email"
+      id="newsletter-email"
       placeholder="your@email.com" 
       required 
       aria-label="Email address"
@@ -40,6 +30,19 @@ const {
   </p>
 </section>
 
+<script>
+  const form = document.getElementById('newsletter-form');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = (document.getElementById('newsletter-email') as HTMLInputElement)?.value;
+      if (email) {
+        window.open(`https://theforensicbriefazzim.substack.com/subscribe?email=${encodeURIComponent(email)}`, '_blank');
+      }
+    });
+  }
+</script>
+
 <style>
   .newsletter-cta {
     background: var(--bg-card);
@@ -50,7 +53,7 @@ const {
   }
 
   .newsletter-title {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Libre Baskerville', Georgia, serif;
     font-size: 1.5rem;
     margin-bottom: 12px;
   }
