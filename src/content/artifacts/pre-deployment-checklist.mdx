@@ -1,0 +1,74 @@
+---
+title: "Pre-Deployment AI Safety Checklist"
+date: 2024-02-20
+summary: "A practical checklist for teams deploying AI systems in production. Covers governance, safety, monitoring, and incident response."
+author: "Dr. Anandkumar Prakasam"
+tags: ["checklist", "deployment", "governance"]
+status: "published"
+featured: false
+
+artifactType: "checklist"
+version: "1.0"
+license: "CC BY 4.0"
+inlinePreview: true
+
+relatedEssays: ["hitl-is-not-oversight", "automation-bias-makes-auditors-worse"]
+relatedBook: "human-in-control"
+
+downloads:
+  - format: "PDF"
+    url: "https://files.theforensicbrief.com/artifacts/pre-deployment-checklist-v1.pdf"
+    sizeKB: 38
+---
+
+## How to Use This Checklist
+
+Complete every section before deploying an AI system to production. If any item cannot be checked, document the risk and get explicit sign-off from the responsible officer.
+
+## 1. Governance
+
+- [ ] AI use case is documented with clear purpose and scope
+- [ ] Responsible officer is identified and accountable
+- [ ] Risk assessment completed and filed
+- [ ] Legal review of data handling and liability
+- [ ] Regulatory compliance verified (EU AI Act, sector-specific rules)
+
+## 2. Safety & Guardrails
+
+- [ ] Output filtering layer is in place
+- [ ] Content moderation active on all user-facing outputs
+- [ ] Prompt injection defenses tested and validated
+- [ ] Fallback behavior defined for system failures
+- [ ] Human escalation path documented and tested
+
+## 3. Human Oversight
+
+- [ ] Human review process defined for AI outputs
+- [ ] Override capability exists and is tested
+- [ ] Auditor independence maintained (no automation bias)
+- [ ] Escalation triggers defined with clear thresholds
+- [ ] Staff trained on system limitations and failure modes
+
+## 4. Monitoring & Alerting
+
+- [ ] Output quality metrics defined and tracked
+- [ ] Anomaly detection active
+- [ ] User feedback mechanism in place
+- [ ] Performance degradation alerts configured
+- [ ] Incident logging system active
+
+## 5. Incident Response
+
+- [ ] Incident response plan documented
+- [ ] Kill switch / rollback capability tested
+- [ ] Communication templates prepared
+- [ ] Post-incident review process defined
+- [ ] Regulatory notification requirements understood
+
+## 6. Ongoing Review
+
+- [ ] Quarterly review scheduled
+- [ ] Accuracy benchmarks established
+- [ ] Drift detection configured
+- [ ] User impact assessment periodic
+- [ ] Model update process documented
