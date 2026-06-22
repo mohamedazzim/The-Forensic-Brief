@@ -30,17 +30,20 @@ const {
   </p>
 </section>
 
-<script>
-  const form = document.getElementById('newsletter-form');
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = (document.getElementById('newsletter-email') as HTMLInputElement)?.value;
-      if (email) {
-        window.open(`https://theforensicbriefazzim.substack.com/subscribe?email=${encodeURIComponent(email)}`, '_blank');
-      }
-    });
-  }
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('newsletter-form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var emailInput = document.getElementById('newsletter-email');
+        var email = emailInput ? emailInput.value : '';
+        if (email) {
+          window.open('https://theforensicbriefazzim.substack.com/subscribe?email=' + encodeURIComponent(email), '_blank');
+        }
+      });
+    }
+  });
 </script>
 
 <style>
