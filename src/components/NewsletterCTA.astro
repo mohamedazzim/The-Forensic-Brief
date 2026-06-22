@@ -14,13 +14,13 @@ const {
   <h2 class="newsletter-title">{title}</h2>
   <p class="newsletter-description">{description}</p>
   
-  <!-- 
-    Provider-agnostic newsletter form.
-    Replace the action URL with your Buttondown/ConvertKit form endpoint.
-    Example for Buttondown: action="https://buttondown.com/api/emails/embed-subscribe/YOUR_USERNAME"
-    Example for ConvertKit: action="https://app.convertkit.com/forms/YOUR_FORM_ID/subscribe"
-  -->
-  <form class="newsletter-form" action="#" method="POST">
+  <!-- Substack newsletter form -->
+  <form 
+    class="newsletter-form" 
+    action="https://theforensicbriefazzim.substack.com/api/v1/free" 
+    method="POST"
+    target="_blank"
+  >
     <input 
       type="email" 
       name="email"
