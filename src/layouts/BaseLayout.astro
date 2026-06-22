@@ -47,17 +47,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
     <!-- Pagefind search (only available after build) -->
     <link href="/pagefind/pagefind-ui.css" rel="stylesheet" media="print" onload="this.media='all'">
-    <script is:inline>
-      (function() {
-        var s = document.createElement('script');
-        s.src = '/pagefind/pagefind.js';
-        s.type = 'module';
-        s.onerror = function() {
-          window.__pagefind_unavailable = true;
-        };
-        document.head.appendChild(s);
-      })();
-    </script>
   </head>
   <body class="bg-bible-scripture">
     <a href="#main-content" class="skip-to-content">Skip to content</a>

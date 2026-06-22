@@ -15,54 +15,71 @@
   <div id="search-results" class="search-results hidden"></div>
 </div>
 
-<script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
+<script type="module">
+  var pagefind = null;
+
+  async function loadPagefind() {
+    try {
+      var mod = await import('/pagefind/pagefind.js');
+      pagefind = mod;
+      await pagefind.init();
+      return true;
+    } catch(e) {
+      console.warn('Pagefind not available:', e.message);
+      return false;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async function() {
     var input = document.getElementById('search-input');
     var resultsContainer = document.getElementById('search-results');
-    
     if (!input || !resultsContainer) return;
 
+    await loadPagefind();
     var debounceTimer;
-
-    function doSearch(query) {
-      if (window.__pagefind_unavailable || typeof window.__pagefind === 'undefined') {
-        resultsContainer.innerHTML = '<p class="no-results">Search requires a build. Run npm run build first.</p>';
-        resultsContainer.classList.remove('hidden');
-        return;
-      }
-
-      window.__pagefind.search(query).then(function(search) {
-        return Promise.all(
-          search.results.slice(0, 5).map(function(result) {
-            return result.data();
-          })
-        );
-      }).then(function(results) {
-        if (results.length === 0) {
-          resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
-        } else {
-          resultsContainer.innerHTML = results.map(function(result) {
-            return '<a href="' + result.url + '" class="result-item">' +
-              '<span class="result-title">' + (result.meta && result.meta.title ? result.meta.title : 'Untitled') + '</span>' +
-              '<span class="result-excerpt">' + result.excerpt + '</span>' +
-            '</a>';
-          }).join('');
-        }
-        resultsContainer.classList.remove('hidden');
-      }).catch(function(error) {
-        console.error('Search error:', error);
-      });
-    }
 
     input.addEventListener('input', function(e) {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(function() {
+      debounceTimer = setTimeout(async function() {
         var query = e.target.value.trim();
         if (query.length < 2) {
           resultsContainer.classList.add('hidden');
           return;
         }
-        doSearch(query);
+        if (!pagefind) {
+          resultsContainer.innerHTML = '<p class="no-results">Search requires a build. Run npm run build first.</p>';
+          resultsContainer.classList.remove('hidden');
+          return;
+        }
+        try {
+          var search = await pagefind.search(query);
+          var results = await Promise.all(
+            search.results.slice(0, 8).map(function(r) { return r.data(); })
+          );
+          if (results.length === 0) {
+            resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
+          } else {
+            resultsContainer.innerHTML = '<div class="results-header">Results for "' + query + '"</div>' +
+              results.map(function(r) {
+                var category = getCategory(r);
+                var date = r.meta && r.meta.date ? formatDate(r.meta.date) : '';
+                var excerpt = r.plain_excerpt || r.excerpt || '';
+                excerpt = excerpt.replace(/<[^>]+>/g, '').substring(0, 150);
+                if (excerpt.length === 150) excerpt += '...';
+                return '<a href="' + r.url + '" class="result-item">' +
+                  '<div class="result-top">' +
+                    (category ? '<span class="result-category">' + category + '</span>' : '') +
+                    (date ? '<span class="result-date">' + date + '</span>' : '') +
+                  '</div>' +
+                  '<span class="result-title">' + (r.meta && r.meta.title ? r.meta.title : 'Untitled') + '</span>' +
+                  '<span class="result-excerpt">' + excerpt + '</span>' +
+                '</a>';
+              }).join('');
+          }
+          resultsContainer.classList.remove('hidden');
+        } catch (err) {
+          console.error('Search error:', err);
+        }
       }, 300);
     });
 
@@ -71,6 +88,29 @@
         resultsContainer.classList.add('hidden');
       }
     });
+
+    function getCategory(r) {
+      var url = r.url || '';
+      if (url.includes('/incidents/')) return 'Incident Report';
+      if (url.includes('/essays/')) return 'Essay';
+      if (url.includes('/books/')) return 'Book';
+      if (url.includes('/observations/')) return 'Observation';
+      if (url.includes('/artifacts/')) return 'Artifact';
+      if (url.includes('/topics/')) return 'Topic';
+      if (url.includes('/about/')) return 'About';
+      if (url.includes('/methodology/')) return 'Methodology';
+      return '';
+    }
+
+    function formatDate(d) {
+      if (!d) return '';
+      try {
+        var date = new Date(d);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch(e) {
+        return d;
+      }
+    }
   });
 </script>
 
@@ -114,11 +154,11 @@
     top: 100%;
     left: 0;
     right: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     z-index: 100;
-    max-height: 400px;
+    max-height: 480px;
     overflow-y: auto;
   }
 
@@ -126,29 +166,64 @@
     display: none;
   }
 
+  .results-header {
+    padding: 10px 16px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-light);
+  }
+
   .result-item {
     display: block;
-    padding: 16px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border-light);
     text-decoration: none;
-    transition: background 0.2s;
+    transition: background 0.15s;
+  }
+
+  .result-item:last-child {
+    border-bottom: none;
   }
 
   .result-item:hover {
-    background: var(--bg);
+    background: var(--bg-card);
+  }
+
+  .result-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .result-category {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+
+  .result-date {
+    font-size: 0.7rem;
+    color: var(--text-light);
   }
 
   .result-title {
     display: block;
-    font-size: var(--text-sm);
+    font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-primary);
+    line-height: 1.4;
     margin-bottom: 4px;
   }
 
   .result-excerpt {
     display: block;
-    font-size: var(--text-xs);
+    font-size: 0.8rem;
     color: var(--text-muted);
     line-height: 1.5;
   }
