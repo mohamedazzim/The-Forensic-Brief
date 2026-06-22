@@ -33,6 +33,7 @@
 
     var pagefindScript = document.createElement('script');
     pagefindScript.src = '/pagefind/pagefind.js';
+    pagefindScript.type = 'module';
     pagefindScript.onload = initSearch;
     document.head.appendChild(pagefindScript);
 
