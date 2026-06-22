@@ -17,10 +17,14 @@ const {
   <!-- Substack newsletter form -->
   <form 
     class="newsletter-form" 
-    action="https://theforensicbriefazzim.substack.com/api/v1/free" 
+    action="https://theforensicbriefazzim.substack.com/api/v1/free?nojs=true" 
     method="POST"
-    target="_blank"
   >
+    <input type="hidden" name="first_url" value="/" />
+    <input type="hidden" name="first_referrer" value="" />
+    <input type="hidden" name="current_url" value="/" />
+    <input type="hidden" name="current_referrer" value="" />
+    <input type="hidden" name="source" value="subscribe_page" />
     <input 
       type="email" 
       name="email"
