@@ -1,20 +1,20 @@
 :root {
   /* ── Background & Paper ── */
-  --bg: #f0ebe2;
-  --bg-card: #faf7f2;
+  --bg: #F8F7F4;
+  --bg-card: #F8F7F4;
   --line-gap: 32px;
 
   /* ── Text ── */
-  --text-primary: #1a2535;
-  --text-muted: #6b7a8d;
-  --text-light: #9aa4b0;
+  --text-primary: #1F2933;
+  --text-muted: #4A5568;
+  --text-light: #6B7280;
 
   /* ── Borders ── */
-  --border: #c8c0b4;
-  --border-light: #ddd8d0;
+  --border: #D1D5DB;
+  --border-light: #E5E7EB;
 
   /* ── Accent ── */
-  --accent: #1a2535;
+  --accent: #1E3A8A;
 
   /* ── Type Scale (1.25 ratio) ── */
   --text-xs: 0.64rem;
@@ -25,7 +25,7 @@
   --text-xl: 1.563rem;
   --text-2xl: 1.953rem;
   --text-3xl: 2.441rem;
-  --text-4xl: 3.052rem;
+  --text-4xl: 3rem;
 
   /* ── Spacing ── */
   --space-xs: 0.25rem;
@@ -37,20 +37,6 @@
   --space-3xl: 4rem;
 
   /* ── Layout ── */
-  --max-width: 900px;
+  --max-width: 800px;
   --measure: 66ch;
 }
-
-/* 
- * TODO: Dark theme (optional, not implemented)
- * 
- * Do not activate automatically. Only add if explicitly requested.
- * Must preserve the old bond-sheet aesthetic as the default.
- * 
- * Dark theme values:
- * --bg: #1a1a2e;
- * --bg-card: #16213e;
- * --text-primary: #eaeaea;
- * --text-muted: #a0a0a0;
- * --border: #2a2a4a;
- */
