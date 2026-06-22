@@ -1,134 +1,131 @@
 ---
 ---
 
-<div class="search-container" id="search-container">
-  <div class="search-input-wrapper">
-    <span class="search-icon">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-    </span>
+<div class="search-root" id="search-root">
+  <div class="search-bar">
+    <svg class="search-bar-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input 
       type="text" 
       id="search-input" 
-      class="search-input" 
-      placeholder="Search incidents, essays, topics..."
-      aria-label="Search"
+      class="search-bar-input" 
+      placeholder="Search the publication..."
+      aria-label="Search articles, essays, incidents"
       aria-autocomplete="list"
-      aria-controls="search-dropdown"
+      aria-controls="search-panel"
       aria-expanded="false"
       role="combobox"
     />
-    <kbd class="search-shortcut">ESC</kbd>
+    <span class="search-bar-hint">ESC</span>
   </div>
-  <div id="search-dropdown" class="search-dropdown" role="listbox" aria-label="Search results"></div>
+  <div id="search-panel" class="search-panel" role="listbox"></div>
 </div>
 
 <script type="module">
   (function() {
     var pagefind = null;
-    var isLoading = false;
-    var activeIndex = -1;
-    var currentResults = [];
+    var activeIdx = -1;
+    var cards = [];
+    var latestQuery = '';
 
+    var root = document.getElementById('search-root');
     var input = document.getElementById('search-input');
-    var dropdown = document.getElementById('search-dropdown');
-    var container = document.getElementById('search-container');
-    if (!input || !dropdown || !container) return;
+    var panel = document.getElementById('search-panel');
+    if (!root || !input || !panel) return;
 
-    async function loadPagefind() {
-      try {
-        var mod = await import('/pagefind/pagefind.js');
+    function init() {
+      import('/pagefind/pagefind.js').then(function(mod) {
         pagefind = mod;
-        await pagefind.init();
-      } catch(e) {
-        console.warn('Pagefind not available');
-      }
+        return pagefind.init();
+      }).catch(function() {});
     }
 
-    function getCategory(url) {
-      if (url.includes('/incidents/')) return 'Incident';
-      if (url.includes('/essays/')) return 'Essay';
-      if (url.includes('/books/')) return 'Book';
-      if (url.includes('/observations/')) return 'Observation';
-      if (url.includes('/artifacts/')) return 'Artifact';
-      if (url.includes('/topics/')) return 'Topic';
-      if (url.includes('/about/')) return 'About';
-      if (url.includes('/methodology/')) return 'Methodology';
+    function cat(url) {
+      if (/\/incidents\//.test(url)) return 'Incident';
+      if (/\/essays\//.test(url)) return 'Essay';
+      if (/\/observations\//.test(url)) return 'Observation';
+      if (/\/books\//.test(url)) return 'Book';
+      if (/\/artifacts\//.test(url)) return 'Artifact';
+      if (/\/topics\//.test(url)) return 'Topic';
       return 'Page';
     }
 
-    function groupResults(results) {
-      var groups = {};
+    function groupByCategory(results) {
       var order = ['Incident', 'Essay', 'Observation', 'Book', 'Artifact', 'Topic'];
-      results.forEach(function(r) {
-        var cat = getCategory(r.url);
-        if (!groups[cat]) groups[cat] = [];
-        groups[cat].push(r);
-      });
+      var map = {};
+      results.forEach(function(r) { var c = cat(r.url); if (!map[c]) map[c] = []; map[c].push(r); });
       var sorted = {};
-      order.forEach(function(k) { if (groups[k]) sorted[k] = groups[k]; });
-      Object.keys(groups).forEach(function(k) { if (!sorted[k]) sorted[k] = groups[k]; });
+      order.forEach(function(k) { if (map[k]) sorted[k] = map[k]; });
+      Object.keys(map).forEach(function(k) { if (!sorted[k]) sorted[k] = map[k]; });
       return sorted;
     }
 
-    function highlight(text, query) {
-      if (!query || !text) return text || '';
-      var clean = text.replace(/<[^>]+>/g, '');
-      var terms = query.toLowerCase().split(/\s+/).filter(function(t) { return t.length > 1; });
-      terms.forEach(function(term) {
-        var regex = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        clean = clean.replace(regex, '<mark>$1</mark>');
-      });
-      return clean;
-    }
-
-    function formatDate(d) {
+    function fmtDate(d) {
       if (!d) return '';
-      try { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); }
-      catch(e) { return ''; }
+      try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch(e) { return ''; }
     }
 
-    function renderSkeleton() {
-      return '<div class="search-skeleton">' +
-        '<div class="skeleton-item"><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>' +
-        '<div class="skeleton-item"><div class="skeleton-line w80"></div><div class="skeleton-line w30"></div></div>' +
-        '<div class="skeleton-item"><div class="skeleton-line w50"></div><div class="skeleton-line w45"></div></div>' +
+    function cleanExcerpt(raw) {
+      if (!raw) return '';
+      var text = raw.replace(/<[^>]+>/g, '').replace(/\u200B/g, '').trim();
+      var sentences = text.split(/(?<=[.!?])\s+/);
+      var best = '';
+      for (var i = 0; i < sentences.length; i++) {
+        if (sentences[i].length > 20) { best = sentences[i]; break; }
+      }
+      if (!best && sentences.length) best = sentences[0];
+      if (best.length > 160) best = best.substring(0, 157) + '...';
+      return best;
+    }
+
+    function hl(text, query) {
+      if (!query || !text) return text || '';
+      var terms = query.toLowerCase().split(/\s+/).filter(function(t) { return t.length > 1; });
+      var out = text;
+      terms.forEach(function(t) {
+        var re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        out = out.replace(re, '<mark>$1</mark>');
+      });
+      return out;
+    }
+
+    function skeletonHTML() {
+      return '<div class="sp-skel">' +
+        '<div class="sp-skel-item"><div class="sp-skel-badge"></div><div class="sp-skel-line" style="width:65%"></div><div class="sp-skel-line sm" style="width:80%"></div></div>' +
+        '<div class="sp-skel-item"><div class="sp-skel-badge"></div><div class="sp-skel-line" style="width:55%"></div><div class="sp-skel-line sm" style="width:70%"></div></div>' +
+        '<div class="sp-skel-item"><div class="sp-skel-badge"></div><div class="sp-skel-line" style="width:45%"></div><div class="sp-skel-line sm" style="width:60%"></div></div>' +
       '</div>';
     }
 
-    function renderEmpty(query) {
-      return '<div class="search-empty">' +
-        '<div class="empty-title">No results found</div>' +
-        '<div class="empty-sub">Try searching for:</div>' +
-        '<div class="empty-suggestions">' +
-          '<button class="empty-tag" data-query="AI governance">AI governance</button>' +
-          '<button class="empty-tag" data-query="human oversight">Human oversight</button>' +
-          '<button class="empty-tag" data-query="automation bias">Automation bias</button>' +
-          '<button class="empty-tag" data-query="EU AI Act">EU AI Act</button>' +
-          '<button class="empty-tag" data-query="red teaming">Red teaming</button>' +
+    function emptyHTML() {
+      return '<div class="sp-empty">' +
+        '<div class="sp-empty-title">No results found</div>' +
+        '<div class="sp-empty-sub">Try one of these searches</div>' +
+        '<div class="sp-empty-tags">' +
+          '<button class="sp-tag" data-q="AI governance">AI governance</button>' +
+          '<button class="sp-tag" data-q="human oversight">Human oversight</button>' +
+          '<button class="sp-tag" data-q="automation bias">Automation bias</button>' +
+          '<button class="sp-tag" data-q="EU AI Act">EU AI Act</button>' +
+          '<button class="sp-tag" data-q="red teaming">Red teaming</button>' +
+          '<button class="sp-tag" data-q="Air Canada">Air Canada</button>' +
         '</div>' +
       '</div>';
     }
 
-    function renderResults(groups, query) {
+    function resultsHTML(groups, query) {
       var html = '';
-      Object.keys(groups).forEach(function(category) {
-        var items = groups[category];
-        html += '<div class="result-group">' +
-          '<div class="group-label">' + category + '</div>';
+      Object.keys(groups).forEach(function(catName) {
+        var items = groups[catName];
+        html += '<div class="sp-group"><div class="sp-group-label">' + catName + '</div>';
         items.forEach(function(r) {
-          var title = r.meta && r.meta.title ? r.meta.title : 'Untitled';
-          var excerpt = r.plain_excerpt || '';
-          excerpt = excerpt.replace(/<[^>]+>/g, '');
-          if (excerpt.length > 140) excerpt = excerpt.substring(0, 140) + '...';
-          var date = r.meta && r.meta.date ? formatDate(r.meta.date) : '';
-          html += '<a href="' + r.url + '" class="result-card" role="option" data-index="' + currentResults.indexOf(r) + '">' +
-            '<div class="card-main">' +
-              '<div class="card-title">' + highlight(title, query) + '</div>' +
-              (excerpt ? '<div class="card-excerpt">' + highlight(excerpt, query) + '</div>' : '') +
+          var title = r.meta && r.meta.title ? r.meta.title : '';
+          var snippet = cleanExcerpt(r.plain_excerpt || r.raw_content || '');
+          var date = r.meta && r.meta.date ? fmtDate(r.meta.date) : '';
+          html += '<a href="' + r.url + '" class="sp-card" role="option">' +
+            '<div class="sp-card-body">' +
+              '<div class="sp-card-title">' + hl(title, query) + '</div>' +
+              (snippet ? '<div class="sp-card-snippet">' + hl(snippet, query) + '</div>' : '') +
             '</div>' +
-            '<div class="card-meta">' +
-              (date ? '<span class="card-date">' + date + '</span>' : '') +
-            '</div>' +
+            (date ? '<div class="sp-card-date">' + date + '</div>' : '') +
           '</a>';
         });
         html += '</div>';
@@ -136,385 +133,372 @@
       return html;
     }
 
-    function openDropdown() {
-      dropdown.classList.add('open');
-      input.setAttribute('aria-expanded', 'true');
-    }
-
-    function closeDropdown() {
-      dropdown.classList.remove('open');
-      input.setAttribute('aria-expanded', 'false');
-      activeIndex = -1;
-    }
-
-    function updateActive() {
-      var cards = dropdown.querySelectorAll('.result-card');
+    function open() { panel.classList.add('open'); input.setAttribute('aria-expanded', 'true'); }
+    function close() { panel.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); activeIdx = -1; }
+    function markActive() {
+      cards = panel.querySelectorAll('.sp-card');
       cards.forEach(function(c, i) {
-        c.classList.toggle('active', i === activeIndex);
-        if (i === activeIndex) c.scrollIntoView({ block: 'nearest' });
+        c.classList.toggle('active', i === activeIdx);
+        if (i === activeIdx) c.scrollIntoView({ block: 'nearest' });
       });
     }
 
-    var debounceTimer;
+    var timer;
     input.addEventListener('input', function(e) {
-      clearTimeout(debounceTimer);
-      var query = e.target.value.trim();
-      if (query.length < 2) {
-        closeDropdown();
-        return;
-      }
-      debounceTimer = setTimeout(async function() {
-        if (!pagefind) {
-          dropdown.innerHTML = '<div class="search-loading-text">Search requires a build.</div>';
-          openDropdown();
-          return;
-        }
-        isLoading = true;
-        dropdown.innerHTML = renderSkeleton();
-        openDropdown();
+      clearTimeout(timer);
+      var q = e.target.value.trim();
+      latestQuery = q;
+      if (q.length < 2) { close(); return; }
+      timer = setTimeout(async function() {
+        if (!pagefind) { panel.innerHTML = '<div class="sp-msg">Search available after build</div>'; open(); return; }
+        panel.innerHTML = skeletonHTML(); open();
         try {
-          var search = await pagefind.search(query);
-          var results = await Promise.all(
-            search.results.slice(0, 12).map(function(r) { return r.data(); })
-          );
-          currentResults = results;
-          activeIndex = -1;
-          if (results.length === 0) {
-            dropdown.innerHTML = renderEmpty(query);
-          } else {
-            var groups = groupResults(results);
-            dropdown.innerHTML = renderResults(groups, query);
-          }
-        } catch(err) {
-          dropdown.innerHTML = '<div class="search-loading-text">Search error. Try again.</div>';
-        }
-        isLoading = false;
+          var res = await pagefind.search(q);
+          var data = await Promise.all(res.results.slice(0, 10).map(function(r) { return r.data(); }));
+          if (latestQuery !== q) return;
+          if (data.length === 0) { panel.innerHTML = emptyHTML(); }
+          else { panel.innerHTML = resultsHTML(groupByCategory(data), q); }
+          activeIdx = -1;
+        } catch(err) { panel.innerHTML = '<div class="sp-msg">Something went wrong</div>'; }
       }, 250);
     });
 
     input.addEventListener('keydown', function(e) {
-      var cards = dropdown.querySelectorAll('.result-card');
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        activeIndex = Math.min(activeIndex + 1, cards.length - 1);
-        updateActive();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        activeIndex = Math.max(activeIndex - 1, 0);
-        updateActive();
-      } else if (e.key === 'Enter' && activeIndex >= 0) {
-        e.preventDefault();
-        if (cards[activeIndex]) cards[activeIndex].click();
-      } else if (e.key === 'Escape') {
-        closeDropdown();
-        input.blur();
-      }
+      cards = panel.querySelectorAll('.sp-card');
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, cards.length - 1); markActive(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); markActive(); }
+      else if (e.key === 'Enter' && activeIdx >= 0 && cards[activeIdx]) { e.preventDefault(); cards[activeIdx].click(); }
+      else if (e.key === 'Escape') { close(); input.blur(); }
     });
 
-    document.addEventListener('click', function(e) {
-      if (!container.contains(e.target)) closeDropdown();
+    document.addEventListener('click', function(e) { if (!root.contains(e.target)) close(); });
+    input.addEventListener('focus', function() { if (panel.innerHTML.trim()) open(); });
+
+    panel.addEventListener('click', function(e) {
+      var tag = e.target.closest('.sp-tag');
+      if (tag) { input.value = tag.getAttribute('data-q'); input.dispatchEvent(new Event('input')); }
     });
 
-    input.addEventListener('focus', function() {
-      if (dropdown.innerHTML.trim()) openDropdown();
-    });
-
-    dropdown.addEventListener('click', function(e) {
-      var tag = e.target.closest('.empty-tag');
-      if (tag) {
-        input.value = tag.getAttribute('data-query');
-        input.dispatchEvent(new Event('input'));
-      }
-    });
-
-    loadPagefind();
+    init();
   })();
 </script>
 
 <style>
-  .search-container {
+  .search-root {
     position: relative;
     width: 100%;
-    max-width: 520px;
+    max-width: 500px;
   }
 
-  .search-input-wrapper {
+  /* ── Input ── */
+  .search-bar {
     position: relative;
     display: flex;
     align-items: center;
   }
 
-  .search-input {
+  .search-bar-input {
     width: 100%;
-    padding: 14px 16px 14px 44px;
-    border: 1px solid #e5e5e5;
-    border-radius: 12px;
-    background: #fff;
+    padding: 12px 60px 12px 40px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background: #F8F7F4;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 15px;
-    color: #1a1a1a;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    font-size: 14px;
+    color: var(--text-primary);
     outline: none;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
   }
 
-  .search-input::placeholder {
-    color: #999;
+  .search-bar-input::placeholder {
+    color: var(--text-light);
+    font-style: italic;
   }
 
-  .search-input:focus {
-    border-color: #1a2535;
-    box-shadow: 0 0 0 3px rgba(26, 37, 53, 0.08);
+  .search-bar-input:focus {
+    border-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
   }
 
-  .search-icon {
+  .search-bar-icon {
     position: absolute;
-    left: 14px;
+    left: 13px;
     top: 50%;
     transform: translateY(-50%);
-    color: #999;
-    display: flex;
-    align-items: center;
+    color: var(--text-light);
     pointer-events: none;
   }
 
-  .search-shortcut {
+  .search-bar-hint {
     position: absolute;
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 11px;
+    font-size: 10px;
     font-family: 'Inter', monospace;
-    color: #bbb;
-    background: #f5f5f5;
-    border: 1px solid #e5e5e5;
+    color: var(--border);
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-light);
     border-radius: 4px;
-    padding: 2px 6px;
+    padding: 2px 5px;
     pointer-events: none;
+    letter-spacing: 0.04em;
   }
 
-  .search-dropdown {
+  /* ── Panel ── */
+  .search-panel {
     display: none;
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: #fff;
-    border: 1px solid #e5e5e5;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    max-height: 420px;
+    background: rgba(248, 247, 244, 0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.06);
+    max-height: 440px;
     overflow-y: auto;
+    overflow-x: hidden;
     z-index: 200;
     padding: 6px;
   }
 
-  .search-dropdown.open {
+  .search-panel.open {
     display: block;
   }
 
-  .result-group {
+  .search-panel::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .search-panel::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+
+  /* ── Group ── */
+  .sp-group {
     margin-bottom: 2px;
   }
 
-  .result-group:not(:last-child) {
-    border-bottom: 1px solid #f0f0f0;
+  .sp-group:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     margin-bottom: 4px;
     padding-bottom: 4px;
   }
 
-  .group-label {
-    font-size: 11px;
+  .sp-group-label {
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #999;
-    padding: 10px 12px 4px;
+    letter-spacing: 0.12em;
+    color: var(--text-light);
+    opacity: 0.65;
+    padding: 10px 14px 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .result-card {
+  .sp-group-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  /* ── Card ── */
+  .sp-card {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border-radius: 8px;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background 0.15s ease, transform 0.15s ease;
   }
 
-  .result-card:hover,
-  .result-card.active {
-    background: #fafafa;
+  .sp-card:hover,
+  .sp-card.active {
+    background: rgba(0, 0, 0, 0.025);
   }
 
-  .result-card.active {
+  .sp-card.active {
     transform: translateY(-1px);
   }
 
-  .card-main {
+  .sp-card-body {
     flex: 1;
     min-width: 0;
   }
 
-  .card-title {
+  .sp-card-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
     font-size: 15px;
-    font-weight: 500;
-    color: #1a1a1a;
+    font-weight: 600;
     line-height: 1.4;
-    margin-bottom: 2px;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+    transition: color 0.15s ease;
   }
 
-  .result-card:hover .card-title,
-  .result-card.active .card-title {
-    color: #1E3A8A;
+  .sp-card:hover .sp-card-title,
+  .sp-card.active .sp-card-title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
   }
 
-  .card-excerpt {
+  .sp-card-snippet {
     font-size: 13px;
-    color: #666;
-    line-height: 1.5;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.6;
+    color: var(--text-muted);
+    opacity: 0.75;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .card-meta {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-top: 2px;
-  }
-
-  .card-date {
-    font-size: 12px;
-    color: #999;
+  .sp-card-date {
+    font-size: 11px;
+    color: var(--text-light);
+    opacity: 0.5;
     white-space: nowrap;
+    padding-top: 3px;
   }
 
-  .result-card mark {
-    background: rgba(255, 220, 120, 0.45);
-    padding: 0 2px;
+  .sp-card mark {
+    background: rgba(200, 170, 100, 0.3);
+    padding: 0 1px;
     border-radius: 2px;
     color: inherit;
   }
 
-  .search-skeleton {
+  /* ── Skeleton ── */
+  .sp-skel {
     padding: 8px;
   }
 
-  .skeleton-item {
-    padding: 10px 12px;
+  .sp-skel-item {
+    padding: 12px 14px;
     border-radius: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
 
-  .skeleton-line {
-    height: 12px;
+  .sp-skel-badge {
+    width: 48px;
+    height: 9px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+  }
+
+  .sp-skel-line {
+    height: 11px;
     border-radius: 6px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.07) 50%, rgba(0,0,0,0.04) 75%);
     background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    animation: sp-shimmer 1.6s infinite;
     margin-bottom: 8px;
   }
 
-  .skeleton-line:last-child {
+  .sp-skel-line.sm {
+    height: 10px;
     margin-bottom: 0;
   }
 
-  .w80 { width: 80%; }
-  .w60 { width: 60%; }
-  .w50 { width: 50%; }
-  .w45 { width: 45%; }
-  .w40 { width: 40%; }
-  .w30 { width: 30%; }
-
-  @keyframes shimmer {
+  @keyframes sp-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
 
-  .search-empty {
-    padding: 24px 16px;
+  /* ── Empty ── */
+  .sp-empty {
+    padding: 28px 16px;
     text-align: center;
   }
 
-  .empty-title {
+  .sp-empty-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
     font-size: 15px;
-    font-weight: 500;
-    color: #1a1a1a;
+    font-weight: 400;
+    color: var(--text-primary);
     margin-bottom: 6px;
   }
 
-  .empty-sub {
+  .sp-empty-sub {
     font-size: 13px;
-    color: #999;
-    margin-bottom: 12px;
+    color: var(--text-light);
+    margin-bottom: 14px;
   }
 
-  .empty-suggestions {
+  .sp-empty-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     justify-content: center;
   }
 
-  .empty-tag {
-    font-size: 13px;
+  .sp-tag {
+    font-size: 12px;
     font-family: 'Inter', sans-serif;
-    padding: 6px 12px;
-    border: 1px solid #e5e5e5;
+    padding: 5px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 20px;
-    background: #fafafa;
-    color: #555;
+    background: transparent;
+    color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.15s ease;
   }
 
-  .empty-tag:hover {
-    background: #1a2535;
-    color: #fff;
-    border-color: #1a2535;
+  .sp-tag:hover {
+    background: var(--text-primary);
+    color: var(--bg);
+    border-color: var(--text-primary);
   }
 
-  .search-loading-text {
-    padding: 20px;
+  .sp-msg {
+    padding: 24px;
     text-align: center;
     font-size: 13px;
-    color: #999;
+    color: var(--text-light);
+    font-style: italic;
   }
 
+  /* ── Mobile ── */
   @media (max-width: 600px) {
-    .search-container {
+    .search-root {
       max-width: 100%;
     }
 
-    .search-input {
+    .search-bar-input {
       font-size: 16px;
-      padding: 12px 14px 12px 40px;
+      padding: 11px 50px 11px 38px;
     }
 
-    .search-shortcut {
+    .search-bar-hint {
       display: none;
     }
 
-    .search-dropdown {
-      border-radius: 10px;
+    .search-panel {
+      border-radius: 8px;
       max-height: 50vh;
     }
 
-    .result-card {
-      padding: 12px;
+    .sp-card {
+      padding: 10px 12px;
     }
 
-    .card-title {
+    .sp-card-title {
       font-size: 14px;
     }
 
-    .card-excerpt {
+    .sp-card-snippet {
       font-size: 12px;
     }
   }
