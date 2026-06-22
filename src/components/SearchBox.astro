@@ -25,8 +25,8 @@
     var debounceTimer;
 
     function doSearch(query) {
-      if (typeof window.__pagefind === 'undefined') {
-        resultsContainer.innerHTML = '<p class="no-results">Search loading...</p>';
+      if (window.__pagefind_unavailable || typeof window.__pagefind === 'undefined') {
+        resultsContainer.innerHTML = '<p class="no-results">Search requires a build. Run npm run build first.</p>';
         resultsContainer.classList.remove('hidden');
         return;
       }
