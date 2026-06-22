@@ -1,97 +1,51 @@
 ---
 ---
 
-<div class="search-container">
+<div class="search-container" id="search-container">
   <div class="search-input-wrapper">
+    <span class="search-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    </span>
     <input 
       type="text" 
       id="search-input" 
       class="search-input" 
-      placeholder="Search articles..."
+      placeholder="Search incidents, essays, topics..."
       aria-label="Search"
+      aria-autocomplete="list"
+      aria-controls="search-dropdown"
+      aria-expanded="false"
+      role="combobox"
     />
-    <span class="search-icon">⌕</span>
+    <kbd class="search-shortcut">ESC</kbd>
   </div>
-  <div id="search-results" class="search-results hidden"></div>
+  <div id="search-dropdown" class="search-dropdown" role="listbox" aria-label="Search results"></div>
 </div>
 
 <script type="module">
-  var pagefind = null;
+  (function() {
+    var pagefind = null;
+    var isLoading = false;
+    var activeIndex = -1;
+    var currentResults = [];
 
-  async function loadPagefind() {
-    try {
-      var mod = await import('/pagefind/pagefind.js');
-      pagefind = mod;
-      await pagefind.init();
-      return true;
-    } catch(e) {
-      console.warn('Pagefind not available:', e.message);
-      return false;
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', async function() {
     var input = document.getElementById('search-input');
-    var resultsContainer = document.getElementById('search-results');
-    if (!input || !resultsContainer) return;
+    var dropdown = document.getElementById('search-dropdown');
+    var container = document.getElementById('search-container');
+    if (!input || !dropdown || !container) return;
 
-    await loadPagefind();
-    var debounceTimer;
-
-    input.addEventListener('input', function(e) {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(async function() {
-        var query = e.target.value.trim();
-        if (query.length < 2) {
-          resultsContainer.classList.add('hidden');
-          return;
-        }
-        if (!pagefind) {
-          resultsContainer.innerHTML = '<p class="no-results">Search requires a build. Run npm run build first.</p>';
-          resultsContainer.classList.remove('hidden');
-          return;
-        }
-        try {
-          var search = await pagefind.search(query);
-          var results = await Promise.all(
-            search.results.slice(0, 8).map(function(r) { return r.data(); })
-          );
-          if (results.length === 0) {
-            resultsContainer.innerHTML = '<p class="no-results">No results found.</p>';
-          } else {
-            resultsContainer.innerHTML = '<div class="results-header">Results for "' + query + '"</div>' +
-              results.map(function(r) {
-                var category = getCategory(r);
-                var date = r.meta && r.meta.date ? formatDate(r.meta.date) : '';
-                var excerpt = r.plain_excerpt || r.excerpt || '';
-                excerpt = excerpt.replace(/<[^>]+>/g, '').substring(0, 150);
-                if (excerpt.length === 150) excerpt += '...';
-                return '<a href="' + r.url + '" class="result-item">' +
-                  '<div class="result-top">' +
-                    (category ? '<span class="result-category">' + category + '</span>' : '') +
-                    (date ? '<span class="result-date">' + date + '</span>' : '') +
-                  '</div>' +
-                  '<span class="result-title">' + (r.meta && r.meta.title ? r.meta.title : 'Untitled') + '</span>' +
-                  '<span class="result-excerpt">' + excerpt + '</span>' +
-                '</a>';
-              }).join('');
-          }
-          resultsContainer.classList.remove('hidden');
-        } catch (err) {
-          console.error('Search error:', err);
-        }
-      }, 300);
-    });
-
-    document.addEventListener('click', function(e) {
-      if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
-        resultsContainer.classList.add('hidden');
+    async function loadPagefind() {
+      try {
+        var mod = await import('/pagefind/pagefind.js');
+        pagefind = mod;
+        await pagefind.init();
+      } catch(e) {
+        console.warn('Pagefind not available');
       }
-    });
+    }
 
-    function getCategory(r) {
-      var url = r.url || '';
-      if (url.includes('/incidents/')) return 'Incident Report';
+    function getCategory(url) {
+      if (url.includes('/incidents/')) return 'Incident';
       if (url.includes('/essays/')) return 'Essay';
       if (url.includes('/books/')) return 'Book';
       if (url.includes('/observations/')) return 'Observation';
@@ -99,139 +53,469 @@
       if (url.includes('/topics/')) return 'Topic';
       if (url.includes('/about/')) return 'About';
       if (url.includes('/methodology/')) return 'Methodology';
-      return '';
+      return 'Page';
+    }
+
+    function groupResults(results) {
+      var groups = {};
+      var order = ['Incident', 'Essay', 'Observation', 'Book', 'Artifact', 'Topic'];
+      results.forEach(function(r) {
+        var cat = getCategory(r.url);
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(r);
+      });
+      var sorted = {};
+      order.forEach(function(k) { if (groups[k]) sorted[k] = groups[k]; });
+      Object.keys(groups).forEach(function(k) { if (!sorted[k]) sorted[k] = groups[k]; });
+      return sorted;
+    }
+
+    function highlight(text, query) {
+      if (!query || !text) return text || '';
+      var clean = text.replace(/<[^>]+>/g, '');
+      var terms = query.toLowerCase().split(/\s+/).filter(function(t) { return t.length > 1; });
+      terms.forEach(function(term) {
+        var regex = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        clean = clean.replace(regex, '<mark>$1</mark>');
+      });
+      return clean;
     }
 
     function formatDate(d) {
       if (!d) return '';
-      try {
-        var date = new Date(d);
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-      } catch(e) {
-        return d;
-      }
+      try { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); }
+      catch(e) { return ''; }
     }
-  });
+
+    function renderSkeleton() {
+      return '<div class="search-skeleton">' +
+        '<div class="skeleton-item"><div class="skeleton-line w60"></div><div class="skeleton-line w40"></div></div>' +
+        '<div class="skeleton-item"><div class="skeleton-line w80"></div><div class="skeleton-line w30"></div></div>' +
+        '<div class="skeleton-item"><div class="skeleton-line w50"></div><div class="skeleton-line w45"></div></div>' +
+      '</div>';
+    }
+
+    function renderEmpty(query) {
+      return '<div class="search-empty">' +
+        '<div class="empty-title">No results found</div>' +
+        '<div class="empty-sub">Try searching for:</div>' +
+        '<div class="empty-suggestions">' +
+          '<button class="empty-tag" data-query="AI governance">AI governance</button>' +
+          '<button class="empty-tag" data-query="human oversight">Human oversight</button>' +
+          '<button class="empty-tag" data-query="automation bias">Automation bias</button>' +
+          '<button class="empty-tag" data-query="EU AI Act">EU AI Act</button>' +
+          '<button class="empty-tag" data-query="red teaming">Red teaming</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderResults(groups, query) {
+      var html = '';
+      Object.keys(groups).forEach(function(category) {
+        var items = groups[category];
+        html += '<div class="result-group">' +
+          '<div class="group-label">' + category + '</div>';
+        items.forEach(function(r) {
+          var title = r.meta && r.meta.title ? r.meta.title : 'Untitled';
+          var excerpt = r.plain_excerpt || '';
+          excerpt = excerpt.replace(/<[^>]+>/g, '');
+          if (excerpt.length > 140) excerpt = excerpt.substring(0, 140) + '...';
+          var date = r.meta && r.meta.date ? formatDate(r.meta.date) : '';
+          html += '<a href="' + r.url + '" class="result-card" role="option" data-index="' + currentResults.indexOf(r) + '">' +
+            '<div class="card-main">' +
+              '<div class="card-title">' + highlight(title, query) + '</div>' +
+              (excerpt ? '<div class="card-excerpt">' + highlight(excerpt, query) + '</div>' : '') +
+            '</div>' +
+            '<div class="card-meta">' +
+              (date ? '<span class="card-date">' + date + '</span>' : '') +
+            '</div>' +
+          '</a>';
+        });
+        html += '</div>';
+      });
+      return html;
+    }
+
+    function openDropdown() {
+      dropdown.classList.add('open');
+      input.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeDropdown() {
+      dropdown.classList.remove('open');
+      input.setAttribute('aria-expanded', 'false');
+      activeIndex = -1;
+    }
+
+    function updateActive() {
+      var cards = dropdown.querySelectorAll('.result-card');
+      cards.forEach(function(c, i) {
+        c.classList.toggle('active', i === activeIndex);
+        if (i === activeIndex) c.scrollIntoView({ block: 'nearest' });
+      });
+    }
+
+    var debounceTimer;
+    input.addEventListener('input', function(e) {
+      clearTimeout(debounceTimer);
+      var query = e.target.value.trim();
+      if (query.length < 2) {
+        closeDropdown();
+        return;
+      }
+      debounceTimer = setTimeout(async function() {
+        if (!pagefind) {
+          dropdown.innerHTML = '<div class="search-loading-text">Search requires a build.</div>';
+          openDropdown();
+          return;
+        }
+        isLoading = true;
+        dropdown.innerHTML = renderSkeleton();
+        openDropdown();
+        try {
+          var search = await pagefind.search(query);
+          var results = await Promise.all(
+            search.results.slice(0, 12).map(function(r) { return r.data(); })
+          );
+          currentResults = results;
+          activeIndex = -1;
+          if (results.length === 0) {
+            dropdown.innerHTML = renderEmpty(query);
+          } else {
+            var groups = groupResults(results);
+            dropdown.innerHTML = renderResults(groups, query);
+          }
+        } catch(err) {
+          dropdown.innerHTML = '<div class="search-loading-text">Search error. Try again.</div>';
+        }
+        isLoading = false;
+      }, 250);
+    });
+
+    input.addEventListener('keydown', function(e) {
+      var cards = dropdown.querySelectorAll('.result-card');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, cards.length - 1);
+        updateActive();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+        updateActive();
+      } else if (e.key === 'Enter' && activeIndex >= 0) {
+        e.preventDefault();
+        if (cards[activeIndex]) cards[activeIndex].click();
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+        input.blur();
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!container.contains(e.target)) closeDropdown();
+    });
+
+    input.addEventListener('focus', function() {
+      if (dropdown.innerHTML.trim()) openDropdown();
+    });
+
+    dropdown.addEventListener('click', function(e) {
+      var tag = e.target.closest('.empty-tag');
+      if (tag) {
+        input.value = tag.getAttribute('data-query');
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+
+    loadPagefind();
+  })();
 </script>
 
 <style>
   .search-container {
     position: relative;
     width: 100%;
-    max-width: 400px;
+    max-width: 520px;
   }
 
   .search-input-wrapper {
     position: relative;
+    display: flex;
+    align-items: center;
   }
 
   .search-input {
     width: 100%;
-    padding: 12px 16px 12px 40px;
-    border: 1px solid var(--border);
-    background: var(--bg);
+    padding: 14px 16px 14px 44px;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    background: #fff;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: var(--text-sm);
-    color: var(--text-primary);
+    font-size: 15px;
+    color: #1a1a1a;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  .search-input::placeholder {
+    color: #999;
   }
 
   .search-input:focus {
-    outline: none;
-    border-color: var(--text-primary);
+    border-color: #1a2535;
+    box-shadow: 0 0 0 3px rgba(26, 37, 53, 0.08);
   }
 
   .search-icon {
     position: absolute;
-    left: 12px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-light);
-    font-size: var(--text-base);
-  }
-
-  .search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    z-index: 100;
-    max-height: 480px;
-    overflow-y: auto;
-  }
-
-  .search-results.hidden {
-    display: none;
-  }
-
-  .results-header {
-    padding: 10px 16px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border-light);
-  }
-
-  .result-item {
-    display: block;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-light);
-    text-decoration: none;
-    transition: background 0.15s;
-  }
-
-  .result-item:last-child {
-    border-bottom: none;
-  }
-
-  .result-item:hover {
-    background: var(--bg-card);
-  }
-
-  .result-top {
+    color: #999;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 4px;
+    pointer-events: none;
   }
 
-  .result-category {
-    font-size: 0.7rem;
+  .search-shortcut {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-family: 'Inter', monospace;
+    color: #bbb;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    padding: 2px 6px;
+    pointer-events: none;
+  }
+
+  .search-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    max-height: 420px;
+    overflow-y: auto;
+    z-index: 200;
+    padding: 6px;
+  }
+
+  .search-dropdown.open {
+    display: block;
+  }
+
+  .result-group {
+    margin-bottom: 2px;
+  }
+
+  .result-group:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+  }
+
+  .group-label {
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--accent);
+    letter-spacing: 0.08em;
+    color: #999;
+    padding: 10px 12px 4px;
   }
 
-  .result-date {
-    font-size: 0.7rem;
-    color: var(--text-light);
+  .result-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
 
-  .result-title {
-    display: block;
-    font-size: 0.9rem;
+  .result-card:hover,
+  .result-card.active {
+    background: #fafafa;
+  }
+
+  .result-card.active {
+    transform: translateY(-1px);
+  }
+
+  .card-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-size: 15px;
     font-weight: 500;
-    color: var(--text-primary);
+    color: #1a1a1a;
     line-height: 1.4;
+    margin-bottom: 2px;
+  }
+
+  .result-card:hover .card-title,
+  .result-card.active .card-title {
+    color: #1E3A8A;
+  }
+
+  .card-excerpt {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .card-meta {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 2px;
+  }
+
+  .card-date {
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap;
+  }
+
+  .result-card mark {
+    background: rgba(255, 220, 120, 0.45);
+    padding: 0 2px;
+    border-radius: 2px;
+    color: inherit;
+  }
+
+  .search-skeleton {
+    padding: 8px;
+  }
+
+  .skeleton-item {
+    padding: 10px 12px;
+    border-radius: 8px;
     margin-bottom: 4px;
   }
 
-  .result-excerpt {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.5;
+  .skeleton-line {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 8px;
   }
 
-  .no-results {
-    padding: 16px;
+  .skeleton-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .w80 { width: 80%; }
+  .w60 { width: 60%; }
+  .w50 { width: 50%; }
+  .w45 { width: 45%; }
+  .w40 { width: 40%; }
+  .w30 { width: 30%; }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .search-empty {
+    padding: 24px 16px;
     text-align: center;
-    color: var(--text-muted);
-    font-size: var(--text-sm);
+  }
+
+  .empty-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+  }
+
+  .empty-sub {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 12px;
+  }
+
+  .empty-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .empty-tag {
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    padding: 6px 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 20px;
+    background: #fafafa;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .empty-tag:hover {
+    background: #1a2535;
+    color: #fff;
+    border-color: #1a2535;
+  }
+
+  .search-loading-text {
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+  }
+
+  @media (max-width: 600px) {
+    .search-container {
+      max-width: 100%;
+    }
+
+    .search-input {
+      font-size: 16px;
+      padding: 12px 14px 12px 40px;
+    }
+
+    .search-shortcut {
+      display: none;
+    }
+
+    .search-dropdown {
+      border-radius: 10px;
+      max-height: 50vh;
+    }
+
+    .result-card {
+      padding: 12px;
+    }
+
+    .card-title {
+      font-size: 14px;
+    }
+
+    .card-excerpt {
+      font-size: 12px;
+    }
   }
 </style>
