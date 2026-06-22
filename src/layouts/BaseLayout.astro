@@ -84,9 +84,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 <style>
   .site-header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 1.5rem;
     width: 100%;
-    padding: 4rem 1rem 0;
+    padding: 3rem 1rem 0;
   }
 
   .site-title {
@@ -104,21 +104,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     border-top: 1px solid var(--text-primary);
     width: 100%;
     max-width: 400px;
-    margin: 0 auto 0.75rem auto;
+    margin: 0 auto 0.5rem auto;
   }
 
   .site-subtitle {
     font-family: 'Inter', sans-serif;
     font-size: 1.1rem;
     color: #1F2933;
-    margin: 0 0 3rem 0;
+    margin: 0;
     font-weight: 400;
   }
 
   .site-nav {
     width: 100%;
     padding: 0 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
   }
 
   .site-nav ul {
@@ -129,6 +129,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     list-style: none;
     max-width: var(--max-width);
     margin: 0 auto;
+    padding: 1rem 0;
   }
 
   .site-nav li a {
@@ -184,11 +185,20 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   }
 
   @media (max-width: 600px) {
+    .site-header {
+      padding: 2rem 1rem 0;
+    }
     .site-title {
-      font-size: 2rem;
+      font-size: 1.75rem;
+    }
+    .site-subtitle {
+      font-size: 0.95rem;
     }
     .site-nav ul {
-      gap: 1.5rem;
+      gap: 1rem;
+    }
+    .site-nav li a {
+      font-size: 0.85rem;
     }
   }
 </style>
