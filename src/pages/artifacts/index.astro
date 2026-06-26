@@ -79,11 +79,6 @@ const currentTopic = Astro.url.searchParams.get('topic') ?? '';
               <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`}>{artifact.data.title}</a>
             </h2>
             <p class="artifact-summary">{artifact.data.summary}</p>
-            <div class="artifact-downloads">
-              {artifact.data.downloads.map((download) => (
-                <span class="download-badge">{download.format}</span>
-              ))}
-            </div>
             <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`} class="artifact-link">
               View artifact →
             </a>
@@ -199,20 +194,6 @@ const currentTopic = Astro.url.searchParams.get('topic') ?? '';
     line-height: 1.6;
     margin-bottom: 16px;
     flex: 1;
-  }
-
-  .artifact-downloads {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .download-badge {
-    font-size: var(--text-xs);
-    padding: 4px 8px;
-    background: var(--bg);
-    border: 1px solid var(--border-light);
-    color: var(--text-light);
   }
 
   .artifact-link {
