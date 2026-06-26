@@ -8,7 +8,9 @@ const {
   title = 'Stay Informed', 
   description = 'Get notified when new incidents, essays, and artifacts are published.' 
 } = Astro.props;
-const newsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL || '';
+const configuredNewsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() || '';
+const defaultNewsletterUrl = import.meta.env.DEV ? '' : 'https://theforensicbriefazzim.substack.com/';
+const newsletterUrl = configuredNewsletterUrl || defaultNewsletterUrl;
 ---
 
 <section class="newsletter-cta">
@@ -16,17 +18,10 @@ const newsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL || '';
   <p class="newsletter-description">{description}</p>
   
   {newsletterUrl ? (
-  <form class="newsletter-form" id="newsletter-form" action={newsletterUrl} method="post" target="_blank" rel="noopener noreferrer">
-    <input 
-      type="email" 
-      id="newsletter-email"
-      name="email"
-      placeholder="your@email.com" 
-      required 
-      aria-label="Email address"
-    />
-    <button type="submit">Subscribe</button>
-  </form>
+  <div class="newsletter-action">
+    <a class="newsletter-button" href={newsletterUrl} target="_blank" rel="noopener noreferrer">Subscribe on Substack</a>
+    <p class="newsletter-action-note">You will subscribe on Substack in a new tab.</p>
+  </div>
   ) : (
   <div class="newsletter-disabled" role="status" aria-live="polite">
     <p>Newsletter signup is not configured yet.</p>
@@ -60,42 +55,34 @@ const newsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL || '';
     font-size: var(--text-sm);
   }
 
-  .newsletter-form {
-    display: flex;
-    gap: 12px;
+  .newsletter-action {
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+  }
+
+  .newsletter-button {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-
-  .newsletter-form input {
-    flex: 1;
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 0.9rem;
-  }
-
-  .newsletter-form input:focus {
-    outline: none;
-    border-color: var(--text-primary);
-  }
-
-  .newsletter-form button {
     padding: 12px 24px;
     background: var(--text-primary);
     color: var(--bg);
     border: none;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 0.9rem;
-    cursor: pointer;
+    text-decoration: none;
     transition: opacity 0.2s;
   }
 
-  .newsletter-form button:hover {
+  .newsletter-button:hover {
     opacity: 0.9;
+  }
+
+  .newsletter-action-note {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--text-xs);
   }
 
   .newsletter-disabled {
@@ -126,8 +113,8 @@ const newsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL || '';
   }
 
   @media (max-width: 600px) {
-    .newsletter-form {
-      flex-direction: column;
+    .newsletter-action {
+      justify-items: stretch;
     }
   }
 </style>

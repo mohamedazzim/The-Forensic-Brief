@@ -32,4 +32,21 @@ assert(html.includes('Search the publication'), 'Search input missing');
 
 assert(readdirSync(join(dist, 'pagefind')).length > 0, 'Pagefind output missing');
 
+const newsletterPages = [
+  'index.html',
+  'essays/hitl-is-not-oversight/index.html',
+  'incidents/air-canada-chatbot-refund/index.html',
+  'observations/index.html',
+  'essays/index.html',
+  'artifacts/index.html',
+];
+
+newsletterPages.forEach((route) => {
+  const pageHtml = readFileSync(join(dist, route), 'utf8');
+  assert(pageHtml.includes('theforensicbriefazzim.substack.com'), `${route} missing Substack URL`);
+  assert(pageHtml.includes('Subscribe on Substack'), `${route} missing newsletter CTA text`);
+  assert(!pageHtml.includes('Newsletter signup is not configured yet'), `${route} still shows disabled newsletter copy`);
+  assert(!pageHtml.includes('newsletter-form'), `${route} still contains form-based newsletter markup`);
+});
+
 console.log('smoke-check passed');
