@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
@@ -21,6 +22,9 @@ const categoryOptions = [
   { id: 'pattern', label: 'Patterns' },
 ];
 
+const currentSeries = Astro.url.searchParams.get('series') ?? '';
+const currentCategory = Astro.url.searchParams.get('category') ?? '';
+
 const filteredEssays = sortedEssays.filter(e => e.data.category === 'essay');
 const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern');
 ---
@@ -34,6 +38,15 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
       url: 'https://theforensicbrief.com/essays/',
     }}
   />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Essays', url: '/essays/' },
+      ],
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Essays</h1>
@@ -45,12 +58,14 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
       label="Series" 
       options={seriesOptions}
       baseUrl="/essays/"
+      activeId={currentSeries}
     />
 
     <FilterBar 
       label="Category" 
       options={categoryOptions}
       baseUrl="/essays/"
+      activeId={currentCategory}
     />
 
     {filteredEssays.length > 0 ? (
@@ -97,6 +112,10 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
       </div>
     </section>
   )}
+
+  <p class="empty-state" hidden>No essays match this filter.</p>
+
+  <NewsletterCTA />
 </BaseLayout>
 
 <script is:inline>

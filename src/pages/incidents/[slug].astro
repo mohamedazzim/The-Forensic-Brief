@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RelatedContent from '../../components/RelatedContent.astro';
+import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
@@ -135,6 +136,8 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
         }),
       ].filter(Boolean)}
     />
+
+    <NewsletterCTA />
   </article>
 </BaseLayout>
 

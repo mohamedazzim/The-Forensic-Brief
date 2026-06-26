@@ -62,6 +62,16 @@ function getHref(item: any) {
       url: `https://theforensicbrief.com/topics/${tag}/`,
     }}
   />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Topics', url: '/topics/' },
+        { name: tag, url: `/topics/${tag}/` },
+      ],
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <span class="eyebrow">Topic</span>

@@ -1,4 +1,4 @@
-/* ── Font Faces ── */
+/* Font faces */
 /* Self-hosted fonts from /fonts/ directory */
 
 @font-face {
@@ -26,7 +26,7 @@
   src: url('/fonts/LibreBaskerville-Bold.woff2') format('woff2');
 }
 
-/* ── Base Typography ── */
+/* Base typography */
 
 html {
   font-size: 16px;
@@ -42,9 +42,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Headings ── */
+/* Headings */
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Libre Baskerville', Georgia, serif;
   font-weight: 400;
   line-height: 1.3;
@@ -56,29 +61,36 @@ h2 { font-size: 1.5rem; }
 h3 { font-size: 1.25rem; }
 h4 { font-size: 1.125rem; }
 
-/* ── Article Body ── */
+/* Article body */
 
-.article-body p {
-  text-align: justify;
-  hyphens: auto;
-  -webkit-hyphens: auto;
-  text-wrap: pretty;
-  margin-bottom: 1rem;
-  font-size: 1rem;
+@media (min-width: 600px) {
+  .article-body .article-content p,
+  .article-body .incident-section p,
+  .article-body .prose-body p {
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    text-wrap: pretty;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+  }
 }
 
 .article-body {
   hanging-punctuation: first;
 }
 
-@media (max-width: 600px) {
-  .article-body p {
+@media (max-width: 599px) {
+  .article-body .article-content p,
+  .article-body .incident-section p,
+  .article-body .prose-body p {
     text-align: left;
     hyphens: manual;
+    -webkit-hyphens: manual;
   }
 }
 
-/* ── Links ── */
+/* Links */
 
 a {
   color: var(--accent);
@@ -90,7 +102,7 @@ a:hover {
   color: var(--text-muted);
 }
 
-/* ── Eyebrows (UI Labels) ── */
+/* Eyebrows / UI labels */
 
 .eyebrow {
   font-family: 'Inter', sans-serif;
@@ -101,7 +113,7 @@ a:hover {
   color: var(--text-light);
 }
 
-/* ── Pull Quotes ── */
+/* Pull quotes */
 
 .text-center { text-align: center; }
 .text-right { text-align: right; }
@@ -114,7 +126,7 @@ blockquote {
   color: var(--text-muted);
 }
 
-/* ── Horizontal Rules ── */
+/* Horizontal rules */
 
 hr {
   border: none;
@@ -122,9 +134,10 @@ hr {
   margin: 2rem 0;
 }
 
-/* ── Lists ── */
+/* Lists */
 
-ul, ol {
+ul,
+ol {
   margin-bottom: 1.5rem;
   padding-left: 1.5rem;
 }
@@ -133,7 +146,7 @@ li {
   margin-bottom: 0.5rem;
 }
 
-/* ── Code ── */
+/* Code */
 
 code {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
@@ -156,7 +169,7 @@ pre code {
   background-color: transparent;
 }
 
-/* ── Tables ── */
+/* Tables */
 
 table {
   width: 100%;
@@ -164,7 +177,8 @@ table {
   margin-bottom: 1.5rem;
 }
 
-th, td {
+th,
+td {
   padding: 0.75rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
@@ -175,7 +189,7 @@ th {
   font-family: 'Inter', sans-serif;
 }
 
-/* ── Images ── */
+/* Images */
 
 img {
   max-width: 100%;
@@ -184,7 +198,7 @@ img {
   margin: 1.5rem 0;
 }
 
-/* ── Responsive Typography ── */
+/* Responsive typography */
 
 @media (max-width: 600px) {
   h1 { font-size: var(--text-3xl); }

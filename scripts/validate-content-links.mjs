@@ -33,6 +33,19 @@ const html = htmlFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
 const requiredPaths = ['/sitemap.xml', '/feed.xml', '/rss.xml', '/robots.txt', '/search/', '/pagefind/'];
 requiredPaths.forEach((p) => assert(html.includes(p) || existsSync(join(dist, p.replace(/^\//, ''))), `Missing required path reference or file: ${p}`));
 
+function readHtml(relativePath) {
+  const filePath = join(dist, relativePath);
+  assert(existsSync(filePath), `Missing generated file: ${relativePath}`);
+  return readFileSync(filePath, 'utf8');
+}
+
+function assertJsonLd(relativePath, patterns) {
+  const pageHtml = readHtml(relativePath);
+  patterns.forEach((pattern) => {
+    assert(pageHtml.includes(pattern), `${relativePath} missing JSON-LD token: ${pattern}`);
+  });
+}
+
 const missingLinkPatterns = [
   '/essays/blind-acceptance-rate/',
   '/artifacts/blind-acceptance-rate-audit/',
@@ -44,6 +57,20 @@ const missingLinkPatterns = [
 missingLinkPatterns.forEach((pattern) => {
   assert(!html.includes(pattern) || existsSync(join(dist, pattern.replace(/^\//, ''), 'index.html')), `Broken internal link reference: ${pattern}`);
 });
+
+assertJsonLd('index.html', ['"@type":"WebSite"', '"@type":"Organization"']);
+assertJsonLd(join('incidents', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('essays', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('books', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('observations', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('artifacts', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('topics', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('topics', 'red-teaming', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('essays', 'patterns', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('essays', 'hitl-is-not-oversight', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('incidents', 'air-canada-chatbot-refund', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('books', 'human-in-control', 'index.html'), ['"@type":"Book"', '"@type":"BreadcrumbList"']);
+assertJsonLd(join('artifacts', 'decision-envelope', 'index.html'), ['"@type":"CreativeWork"', '"@type":"BreadcrumbList"']);
 
 const emptyImages = [...html.matchAll(/<(meta|img)[^>]+(?:og:image|twitter:image|src)=["']([^"']*)["']/gi)]
   .filter((m) => !m[2]);

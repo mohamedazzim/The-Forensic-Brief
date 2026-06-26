@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
@@ -74,6 +75,8 @@ const statusColors: Record<string, string> = {
         </div>
       </section>
     )}
+
+    <NewsletterCTA />
   </article>
 </BaseLayout>
 

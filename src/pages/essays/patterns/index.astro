@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Card from '../../../components/Card.astro';
+import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'pattern');
@@ -8,6 +9,24 @@ const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.v
 ---
 
 <BaseLayout title="Patterns" description="Structured failure-signature analyses extracted from incident data.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Patterns',
+      description: 'Structured failure-signature analyses extracted from incident data.',
+      url: 'https://theforensicbrief.com/essays/patterns/',
+    }}
+  />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Essays', url: '/essays/' },
+        { name: 'Patterns', url: '/essays/patterns/' },
+      ],
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Patterns</h1>

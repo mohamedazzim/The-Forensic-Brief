@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
@@ -22,9 +23,12 @@ const topicOptions = uniqueTopics.map((topic) => ({
   id: topic,
   label: topic.charAt(0).toUpperCase() + topic.slice(1).replace(/-/g, ' '),
 }));
+
+const currentType = Astro.url.searchParams.get('type') ?? '';
+const currentTopic = Astro.url.searchParams.get('topic') ?? '';
 ---
 
-<BaseLayout title="Artifacts" description="Reusable templates and tools for AI governance â€” free to download and adapt.">
+<BaseLayout title="Artifacts" description="Reusable templates and tools for AI governance — free to download and adapt.">
   <StructuredData
     type="collection"
     data={{
@@ -33,10 +37,19 @@ const topicOptions = uniqueTopics.map((topic) => ({
       url: 'https://theforensicbrief.com/artifacts/',
     }}
   />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Artifacts', url: '/artifacts/' },
+      ],
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Artifacts</h1>
-      <p class="section-description">Reusable templates and tools for AI governance â€” free to download and adapt.</p>
+      <p class="section-description">Reusable templates and tools for AI governance — free to download and adapt.</p>
     </div>
     <hr class="section-rule">
 
@@ -44,12 +57,14 @@ const topicOptions = uniqueTopics.map((topic) => ({
       label="Type" 
       options={typeOptions}
       baseUrl="/artifacts/"
+      activeId={currentType}
     />
 
     <FilterBar 
       label="Topic" 
       options={topicOptions}
       baseUrl="/artifacts/"
+      activeId={currentTopic}
     />
 
     {sortedArtifacts.length > 0 ? (
@@ -70,7 +85,7 @@ const topicOptions = uniqueTopics.map((topic) => ({
               ))}
             </div>
             <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`} class="artifact-link">
-              View artifact â†’
+              View artifact →
             </a>
           </article>
         ))}
@@ -79,6 +94,8 @@ const topicOptions = uniqueTopics.map((topic) => ({
       <p class="empty-state">No artifacts published yet.</p>
     )}
   </section>
+
+  <NewsletterCTA />
 </BaseLayout>
 
 <script is:inline>

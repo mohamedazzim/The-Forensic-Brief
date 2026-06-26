@@ -26,6 +26,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate content
+        run: npm run validate:content
+
+      - name: Smoke test
+        run: npm run test:e2e
+
       - name: Verify build output
         run: |
           test -d dist

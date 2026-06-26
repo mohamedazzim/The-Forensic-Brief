@@ -1,6 +1,6 @@
 ---
 interface Props {
-  type: 'article' | 'book' | 'breadcrumb' | 'webpage' | 'collection';
+  type: 'article' | 'book' | 'breadcrumb' | 'webpage' | 'collection' | 'organization' | 'creativework';
   data: Record<string, any>;
 }
 
@@ -49,9 +49,9 @@ if (type === 'article') {
       name: 'The Forensic Brief',
     },
     url: `https://theforensicbrief.com${data.url}`,
-    image: data.cover,
-    isbn: data.isbn,
-    numberOfPages: data.pages,
+    ...(data.cover ? { image: data.cover } : {}),
+    ...(data.isbn ? { isbn: data.isbn } : {}),
+    ...(data.pages ? { numberOfPages: data.pages } : {}),
   };
 } else if (type === 'breadcrumb') {
   structuredData = {
@@ -87,6 +87,32 @@ if (type === 'article') {
   };
   if (data.breadcrumbs) {
     structuredData.breadcrumb = data.breadcrumbs;
+  }
+} else if (type === 'organization') {
+  structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: data.name || 'The Forensic Brief',
+    url: data.url || 'https://theforensicbrief.com',
+  };
+} else if (type === 'creativework') {
+  structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: data.title,
+    description: data.summary,
+    url: `https://theforensicbrief.com${data.url}`,
+    author: {
+      '@type': 'Person',
+      name: data.author || 'Dr. Anandkumar Prakasam',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'The Forensic Brief',
+    },
+  };
+  if (data.license) {
+    structuredData.license = data.license;
   }
 }
 ---

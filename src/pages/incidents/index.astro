@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
@@ -23,10 +24,15 @@ const domainOptions = [
 // Extract unique vendors from incidents
 const allVendors = incidents.flatMap(incident => incident.data.systems);
 const uniqueVendors = [...new Set(allVendors)];
+const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 const vendorOptions = uniqueVendors.map(vendor => ({
-  id: vendor.toLowerCase().replace(/\s+/g, '-'),
+  id: slugify(vendor),
   label: vendor,
 }));
+
+const currentSeverity = Astro.url.searchParams.get('severity') ?? '';
+const currentDomain = Astro.url.searchParams.get('domain') ?? '';
+const currentVendor = Astro.url.searchParams.get('vendor') ?? '';
 
 // Get current filter from URL params (simulated for static build)
 // In production, use client-side JS or URL params
@@ -42,6 +48,15 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
       url: 'https://theforensicbrief.com/incidents/',
     }}
   />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Incidents', url: '/incidents/' },
+      ],
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Incidents</h1>
@@ -53,18 +68,21 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
       label="Severity" 
       options={severityOptions}
       baseUrl="/incidents/"
+      activeId={currentSeverity}
     />
 
     <FilterBar 
       label="Domain" 
       options={domainOptions}
       baseUrl="/incidents/"
+      activeId={currentDomain}
     />
 
     <FilterBar 
       label="Vendor" 
       options={vendorOptions}
       baseUrl="/incidents/"
+      activeId={currentVendor}
     />
 
     {sortedIncidents.length > 0 ? (
@@ -79,7 +97,7 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
             linkText="Read report"
             dataSeverity={incident.data.severity}
             dataDomain={incident.data.domain.toLowerCase().replace(/\s+/g, '-')}
-            dataVendor={incident.data.systems.join(' ').toLowerCase().replace(/\s+/g, '-')}
+            dataVendor={incident.data.systems.map(slugify).join(' ')}
           />
         ))}
       </div>
@@ -87,6 +105,8 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
       <p class="empty-state">No incidents published yet.</p>
     )}
   </section>
+
+  <NewsletterCTA />
 </BaseLayout>
 
 <script is:inline>

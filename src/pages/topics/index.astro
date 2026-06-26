@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const allContent = [
@@ -23,6 +24,23 @@ const sortedTags = Object.entries(tagCounts)
 ---
 
 <BaseLayout title="Topics" description="Browse content by topic.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Topics',
+      description: 'Browse all content by topic.',
+      url: 'https://theforensicbrief.com/topics/',
+    }}
+  />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Topics', url: '/topics/' },
+      ],
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Topics</h1>

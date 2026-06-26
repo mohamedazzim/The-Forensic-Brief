@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
+import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
@@ -15,6 +16,15 @@ const sortedObservations = observations.sort((a, b) => b.data.date.valueOf() - a
       name: 'Observations',
       description: 'Preliminary field notes and lab notebook entries on AI system behavior.',
       url: 'https://theforensicbrief.com/observations/',
+    }}
+  />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Observations', url: '/observations/' },
+      ],
     }}
   />
   <section class="content-section">
@@ -41,6 +51,8 @@ const sortedObservations = observations.sort((a, b) => b.data.date.valueOf() - a
       <p class="empty-state">No observations published yet.</p>
     )}
   </section>
+
+  <NewsletterCTA />
 </BaseLayout>
 
 <style>

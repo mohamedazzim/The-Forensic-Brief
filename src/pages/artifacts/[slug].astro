@@ -23,11 +23,12 @@ const relatedBook = artifact.data.relatedBook
 
 <BaseLayout title={artifact.data.title} description={artifact.data.summary}>
   <StructuredData
-    type="collection"
+    type="creativework"
     data={{
       name: artifact.data.title,
       description: artifact.data.summary,
       url: `/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`,
+      license: artifact.data.license,
     }}
   />
   <StructuredData

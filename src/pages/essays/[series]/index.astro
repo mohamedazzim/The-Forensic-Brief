@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Card from '../../../components/Card.astro';
+import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -21,6 +22,24 @@ const sortedItems = items.sort((a, b) => a.data.seriesNo - b.data.seriesNo);
 ---
 
 <BaseLayout title={`Series: ${series}`} description={`Essays in the ${series} series.`}>
+  <StructuredData
+    type="collection"
+    data={{
+      name: `Series: ${series}`,
+      description: `Essays in the ${series} series.`,
+      url: `https://theforensicbrief.com/essays/${series}/`,
+    }}
+  />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Essays', url: '/essays/' },
+        { name: series, url: `/essays/${series}/` },
+      ],
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <span class="eyebrow">Essay Series</span>
