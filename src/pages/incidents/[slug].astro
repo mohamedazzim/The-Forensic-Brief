@@ -62,6 +62,13 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
       </div>
     </header>
 
+    <section class="methodology-snippet">
+      <h2>Methodology</h2>
+      <p>
+        This report follows the site methodology: use public sources, corroborate claims where possible, and separate documented facts from interpretation. See the full <a href="/methodology/">Methodology</a> page for the sourcing and editorial rules used across the publication.
+      </p>
+    </section>
+
     <div class="incident-structure">
       <section class="incident-section">
         <h2>Summary</h2>
@@ -186,6 +193,25 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
 
   .incident-structure {
     margin-bottom: 48px;
+  }
+
+  .methodology-snippet {
+    max-width: var(--measure);
+    margin-bottom: 32px;
+    padding: 20px 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+  }
+
+  .methodology-snippet h2 {
+    font-size: var(--text-lg);
+    margin-bottom: 8px;
+  }
+
+  .methodology-snippet p {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    color: var(--text-muted);
   }
 
   .incident-section {

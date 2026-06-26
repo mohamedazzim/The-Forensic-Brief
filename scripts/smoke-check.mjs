@@ -21,8 +21,12 @@ const routes = [
   'index.html',
   'search/index.html',
   'incidents/index.html',
+  'incidents/feed.xml',
   'essays/index.html',
+  'essays/feed.xml',
   'essays/patterns/index.html',
+  'essays/detection-drop-line-600/index.html',
+  'essays/human-in-control/feed.xml',
   'books/index.html',
   'artifacts/index.html',
   'observations/index.html',
@@ -41,6 +45,8 @@ assert(html.includes('Search the publication'), 'Search input missing');
 
 assert(readdirSync(join(dist, 'pagefind')).length > 0, 'Pagefind output missing');
 
+const countMatches = (text, pattern) => (text.match(pattern) || []).length;
+
 const newsletterPages = [
   'index.html',
   'essays/hitl-is-not-oversight/index.html',
@@ -58,6 +64,10 @@ newsletterPages.forEach((route) => {
   assert(!pageHtml.includes('newsletter-form'), `${route} still contains form-based newsletter markup`);
 });
 
+const incidentPage = readFileSync(join(dist, 'incidents/air-canada-chatbot-refund/index.html'), 'utf8');
+assert(incidentPage.includes('Methodology'), 'Incident page missing methodology snippet');
+assert(countMatches(incidentPage, /<h1\b/g) === 1, 'Incident page should expose exactly one H1');
+
 const artifactPages = [
   'artifacts/mris-template/index.html',
   'artifacts/decision-envelope/index.html',
@@ -69,6 +79,10 @@ for (const route of artifactPages) {
   assert(pageHtml.includes('unavailable') || pageHtml.includes('href="https://files.theforensicbrief.com/artifacts/'), `${route} should either show unavailable downloads or active R2 links`);
   assert(!pageHtml.includes('PDF preview coming soon'), `${route} should not expose the old PDF preview placeholder`);
 }
+
+const page404 = readFileSync(join(dist, '404.html'), 'utf8');
+assert(page404.includes('/search/'), '404 page missing explicit search link');
+assert(page404.includes('Return to Home'), '404 page missing home link');
 
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
 const coverUrl = 'https://files.theforensicbrief.com/books/human-in-control-cover.jpg';
@@ -85,6 +99,8 @@ if (coverAvailable) {
   assert(!bookPage.includes(coverUrl), 'Book page should not render a broken cover image');
 }
 
+assert(countMatches(bookPage, /<h1\b/g) === 1, 'Book page should expose exactly one H1');
+
 if (pdfAvailable) {
   assert(bookPage.includes('Download PDF (2.4 MB)'), 'Book page missing active PDF download when asset is reachable');
 } else {
@@ -93,5 +109,9 @@ if (pdfAvailable) {
 }
 
 assert(!bookPage.includes('PDF preview coming soon'), 'Book page should not expose the old preview placeholder');
+
+const patternPage = readFileSync(join(dist, 'essays/detection-drop-line-600/index.html'), 'utf8');
+assert(patternPage.includes('P-ATTENTION-DECAY'), 'Pattern page missing pattern identifier');
+assert(countMatches(patternPage, /<h1\b/g) === 1, 'Pattern page should expose exactly one H1');
 
 console.log('smoke-check passed');

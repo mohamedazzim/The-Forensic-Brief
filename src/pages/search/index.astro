@@ -1,13 +1,34 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SearchBox from '../../components/SearchBox.astro';
+import StructuredData from '../../components/StructuredData.astro';
 ---
 
 <BaseLayout title="Search" description="Search the publication using Pagefind.">
+  <StructuredData
+    type="webpage"
+    data={{
+      name: 'Search',
+      url: 'https://theforensicbrief.com/search/',
+      searchUrl: 'https://theforensicbrief.com/search/?q={q}',
+    }}
+  />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Search', url: '/search/' },
+      ],
+    }}
+  />
   <section class="search-page">
     <h1>Search</h1>
     <p>Search incidents, essays, books, observations, artifacts, and topics.</p>
     <SearchBox />
+    <p class="search-help">
+      Need a starting point? Try <a href="/incidents/">Incidents</a>, <a href="/essays/">Essays</a>, or <a href="/topics/">Topics</a>.
+    </p>
   </section>
 </BaseLayout>
 
@@ -15,5 +36,11 @@ import SearchBox from '../../components/SearchBox.astro';
   .search-page {
     max-width: 720px;
     margin: 0 auto;
+  }
+
+  .search-help {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
   }
 </style>

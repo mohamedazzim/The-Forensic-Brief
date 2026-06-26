@@ -14,11 +14,59 @@ export async function getStaticPaths() {
   }));
 }
 
+const essays = await getCollection('essays');
+const books = await getCollection('books');
+const artifacts = await getCollection('artifacts');
+const incidents = await getCollection('incidents');
+
 const { essay } = Astro.props;
 const { Content } = await essay.render();
 
 const isPattern = essay.data.category === 'pattern';
 const essayUrl = `/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`;
+
+const seriesItems = essay.data.series
+  ? essays
+      .filter((item) => item.data.category === 'essay' && item.data.series === essay.data.series)
+      .sort((a, b) => (a.data.seriesNo ?? 0) - (b.data.seriesNo ?? 0))
+  : [];
+
+const currentSeriesIndex = seriesItems.findIndex((item) => item.id === essay.id);
+const prevEssay = currentSeriesIndex > 0 ? seriesItems[currentSeriesIndex - 1] : null;
+const nextEssay = currentSeriesIndex >= 0 && currentSeriesIndex < seriesItems.length - 1 ? seriesItems[currentSeriesIndex + 1] : null;
+
+const relatedBook = essay.data.book
+  ? books.find((book) => book.id.replace(/\.(md|mdx)$/, '') === essay.data.book)
+  : null;
+
+const relatedArtifact = essay.data.artifact
+  ? artifacts.find((artifact) => artifact.id.replace(/\.(md|mdx)$/, '') === essay.data.artifact)
+  : null;
+
+const relatedIncidentItems = essay.data.relatedIncidents
+  .map((slug) => {
+    const incident = incidents.find((item) => item.id.replace(/\.(md|mdx)$/, '') === slug);
+    return incident ? {
+      title: incident.data.title,
+      href: `/incidents/${slug}/`,
+      type: 'Incident',
+    } : null;
+  })
+  .filter(Boolean);
+
+const relatedContentItems = [
+  ...(relatedBook ? [{
+    title: relatedBook.data.title,
+    href: `/books/${relatedBook.id.replace(/\.(md|mdx)$/, '')}/`,
+    type: 'Book',
+  }] : []),
+  ...(relatedArtifact ? [{
+    title: relatedArtifact.data.title,
+    href: `/artifacts/${relatedArtifact.id.replace(/\.(md|mdx)$/, '')}/`,
+    type: 'Artifact',
+  }] : []),
+  ...relatedIncidentItems,
+];
 ---
 
 <BaseLayout title={essay.data.title} description={essay.data.summary}>
@@ -89,11 +137,28 @@ const essayUrl = `/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`;
     </div>
 
     <SeriesNav 
-      prev={essay.data.prev}
-      next={essay.data.next}
-      book={essay.data.book}
-      artifact={essay.data.artifact}
+      prev={prevEssay ? {
+        slug: prevEssay.id.replace(/\.(md|mdx)$/, ''),
+        title: prevEssay.data.title,
+      } : undefined}
+      next={nextEssay ? {
+        slug: nextEssay.id.replace(/\.(md|mdx)$/, ''),
+        title: nextEssay.data.title,
+      } : undefined}
+      book={relatedBook ? {
+        slug: relatedBook.id.replace(/\.(md|mdx)$/, ''),
+        title: relatedBook.data.title,
+      } : undefined}
+      artifact={relatedArtifact ? {
+        slug: relatedArtifact.id.replace(/\.(md|mdx)$/, ''),
+        title: relatedArtifact.data.title,
+      } : undefined}
       series={essay.data.series}
+    />
+
+    <RelatedContent 
+      title="Related Content"
+      items={relatedContentItems}
     />
 
     {essay.data.tags.length > 0 && (

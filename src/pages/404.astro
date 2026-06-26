@@ -1,9 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SearchBox from '../components/SearchBox.astro';
+import StructuredData from '../components/StructuredData.astro';
 ---
 
 <BaseLayout title="Page Not Found" description="The page you're looking for doesn't exist.">
+  <StructuredData
+    type="webpage"
+    data={{
+      name: 'Page Not Found',
+      url: 'https://theforensicbrief.com/404.html',
+    }}
+  />
   <section class="error-page">
     <h1 class="error-title">404</h1>
     <p class="error-message">The page you're looking for doesn't exist.</p>
@@ -11,7 +19,10 @@ import SearchBox from '../components/SearchBox.astro';
       <p>Try searching for what you're looking for:</p>
       <SearchBox />
     </div>
-    <a href="/" class="error-link">Return to Home</a>
+    <div class="error-links">
+      <a href="/search/" class="error-link">Open Search</a>
+      <a href="/" class="error-link">Return to Home</a>
+    </div>
   </section>
 </BaseLayout>
 
@@ -48,6 +59,13 @@ import SearchBox from '../components/SearchBox.astro';
   .error-link:hover {
     opacity: 0.9;
     border: none;
+  }
+
+  .error-links {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
   .search-recovery {

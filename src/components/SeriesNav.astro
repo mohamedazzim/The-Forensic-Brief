@@ -1,9 +1,21 @@
 ---
 interface Props {
-  prev?: string;
-  next?: string;
-  book?: string;
-  artifact?: string;
+  prev?: {
+    slug: string;
+    title: string;
+  };
+  next?: {
+    slug: string;
+    title: string;
+  };
+  book?: {
+    slug: string;
+    title: string;
+  };
+  artifact?: {
+    slug: string;
+    title: string;
+  };
   series?: string;
 }
 
@@ -18,39 +30,54 @@ const seriesNames: Record<string, string> = {
 };
 ---
 
-<nav class="series-nav" aria-label="Series navigation">
-  <div class="series-nav-main">
-    {prev && (
-      <a href={`/essays/${prev}/`} class="nav-link nav-prev">
-        <span class="nav-label">← Previous</span>
-      </a>
-    )}
-    
-    <div class="series-nav-center">
-      {series && (
-        <a href={`/essays/${series}/`} class="nav-link nav-series">
-          {seriesNames[series] || series}
-        </a>
-      )}
-      {book && (
-        <a href={`/books/${book}/`} class="nav-link nav-book">
-          Read the Book
-        </a>
-      )}
-      {artifact && (
-        <a href={`/artifacts/${artifact}/`} class="nav-link nav-artifact">
-          View Artifact
-        </a>
-      )}
-    </div>
+{(prev || next || series || book || artifact) && (
+  <nav class="series-nav" aria-label="Series navigation">
+    <div class="series-nav-main">
+      <div class="series-nav-side">
+        {prev ? (
+          <a href={`/essays/${prev.slug}/`} class="nav-link nav-prev">
+            <span class="nav-label">← Previous</span>
+            <span class="nav-title">{prev.title}</span>
+          </a>
+        ) : (
+          <span class="nav-placeholder" aria-hidden="true"></span>
+        )}
+      </div>
 
-    {next && (
-      <a href={`/essays/${next}/`} class="nav-link nav-next">
-        <span class="nav-label">Next →</span>
-      </a>
-    )}
-  </div>
-</nav>
+      <div class="series-nav-center">
+        {series && (
+          <a href={`/essays/${series}/`} class="nav-link nav-series">
+            <span class="nav-label">Series</span>
+            <span class="nav-title">{seriesNames[series] || series}</span>
+          </a>
+        )}
+        {book && (
+          <a href={`/books/${book.slug}/`} class="nav-link nav-book">
+            <span class="nav-label">Book</span>
+            <span class="nav-title">{book.title}</span>
+          </a>
+        )}
+        {artifact && (
+          <a href={`/artifacts/${artifact.slug}/`} class="nav-link nav-artifact">
+            <span class="nav-label">Artifact</span>
+            <span class="nav-title">{artifact.title}</span>
+          </a>
+        )}
+      </div>
+
+      <div class="series-nav-side series-nav-side--end">
+        {next ? (
+          <a href={`/essays/${next.slug}/`} class="nav-link nav-next">
+            <span class="nav-label">Next →</span>
+            <span class="nav-title">{next.title}</span>
+          </a>
+        ) : (
+          <span class="nav-placeholder" aria-hidden="true"></span>
+        )}
+      </div>
+    </div>
+  </nav>
+)}
 
 <style>
   .series-nav {
@@ -60,20 +87,30 @@ const seriesNames: Record<string, string> = {
   }
 
   .series-nav-main {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: 16px;
   }
 
-  .series-nav-center {
+  .series-nav-side {
     display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
+    min-height: 48px;
+  }
+
+  .series-nav-side--end {
+    justify-content: flex-end;
+  }
+
+  .nav-placeholder {
+    display: block;
+    min-width: 1px;
   }
 
   .nav-link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
     font-size: var(--text-sm);
     color: var(--text-muted);
     text-decoration: none;
@@ -86,23 +123,45 @@ const seriesNames: Record<string, string> = {
   }
 
   .nav-label {
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
   }
 
-  .nav-series {
+  .nav-title {
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+
+  .nav-series .nav-title,
+  .nav-book .nav-title,
+  .nav-artifact .nav-title {
     font-weight: 500;
     color: var(--text-primary);
   }
 
+  .series-nav-center {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   @media (max-width: 600px) {
     .series-nav-main {
-      flex-direction: column;
+      grid-template-columns: 1fr;
       gap: 12px;
     }
 
     .series-nav-center {
       flex-direction: column;
       align-items: center;
+    }
+
+    .series-nav-side,
+    .series-nav-side--end {
+      justify-content: center;
     }
   }
 </style>

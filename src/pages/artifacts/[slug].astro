@@ -79,6 +79,9 @@ const downloadAvailability = await Promise.all(
       </div>
       <h1 class="artifact-title">{artifact.data.title}</h1>
       <p class="artifact-summary">{artifact.data.summary}</p>
+      {artifact.data.updated && (
+        <p class="artifact-updated">Last updated {artifact.data.updated.toISOString().split('T')[0]}</p>
+      )}
 
       <div class="artifact-downloads">
         <span class="downloads-label">Download:</span>
@@ -171,6 +174,12 @@ const downloadAvailability = await Promise.all(
     color: var(--text-muted);
     line-height: 1.6;
     margin-bottom: 24px;
+  }
+
+  .artifact-updated {
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    margin-bottom: 16px;
   }
 
   .artifact-downloads {
