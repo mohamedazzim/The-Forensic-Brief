@@ -34,6 +34,16 @@ const essayUrl = `/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`;
       image: essay.data.ogImage,
     }} 
   />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Essays', url: '/essays/' },
+        { name: essay.data.title, url: essayUrl },
+      ],
+    }}
+  />
 
   <article class="article-body">
     <header class="article-header">

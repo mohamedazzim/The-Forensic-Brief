@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -25,6 +26,14 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
 ---
 
 <BaseLayout title="Essays" description="Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Essays',
+      description: 'Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.',
+      url: 'https://theforensicbrief.com/essays/',
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Essays</h1>
@@ -54,6 +63,8 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
             category={essay.data.series || 'Essay'}
             href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="Read essay"
+            dataSeries={essay.data.series || ''}
+            dataCategory="essay"
           />
         ))}
       </div>
@@ -79,12 +90,28 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
             category={pattern.data.patternId || 'Pattern'}
             href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="View pattern"
+            dataSeries={pattern.data.series || ''}
+            dataCategory="pattern"
           />
         ))}
       </div>
     </section>
   )}
 </BaseLayout>
+
+<script is:inline>
+  const params = new URLSearchParams(window.location.search);
+  const series = params.get('series');
+  const category = params.get('category');
+  let shown = 0;
+  document.querySelectorAll('.article-card').forEach((card) => {
+    const match = (!series || card.getAttribute('data-series') === series) && (!category || card.getAttribute('data-category') === category);
+    card.hidden = !match;
+    if (match) shown += 1;
+  });
+  const empty = document.querySelector('.empty-state');
+  if (empty) empty.hidden = shown > 0;
+</script>
 
 <style>
   .content-section {

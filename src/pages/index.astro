@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Card from '../components/Card.astro';
 import SearchBox from '../components/SearchBox.astro';
 import NewsletterCTA from '../components/NewsletterCTA.astro';
+import StructuredData from '../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
@@ -33,6 +34,22 @@ const featuredBooks = books
 ---
 
 <BaseLayout title="Home">
+  <StructuredData
+    type="webpage"
+    data={{
+      name: 'The Forensic Brief',
+      url: 'https://theforensicbrief.com',
+      searchUrl: 'https://theforensicbrief.com/search/?q={q}',
+    }}
+  />
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'The Forensic Brief',
+      description: 'Post-Incident Analysis of AI Failure',
+      url: 'https://theforensicbrief.com/',
+    }}
+  />
   <section class="search-section">
     <SearchBox />
   </section>

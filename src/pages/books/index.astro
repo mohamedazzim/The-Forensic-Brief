@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const books = await getCollection('books', ({ data }) => data.status === 'published');
@@ -7,6 +8,14 @@ const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.val
 ---
 
 <BaseLayout title="Books" description="Free PDF downloads and hardcopy editions of The Forensic Brief series.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Books',
+      description: 'Free PDF downloads and hardcopy editions of The Forensic Brief series.',
+      url: 'https://theforensicbrief.com/books/',
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Books</h1>
@@ -42,14 +51,18 @@ const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.val
                 >
                   Download PDF ({book.data.pdfSizeMB} MB)
                 </a>
-                <a 
-                  href={book.data.amazonUrl} 
-                  class="btn btn-secondary"
-                  target="_blank"
-                  rel="sponsored noopener noreferrer"
-                >
-                  Buy on Amazon
-                </a>
+                {book.data.amazonUrl ? (
+                  <a 
+                    href={book.data.amazonUrl} 
+                    class="btn btn-secondary"
+                    target="_blank"
+                    rel="sponsored noopener noreferrer"
+                  >
+                    Buy on Amazon
+                  </a>
+                ) : (
+                  <span class="btn btn-secondary btn-disabled" aria-disabled="true">Amazon link unavailable</span>
+                )}
               </div>
             </div>
           </article>
@@ -179,6 +192,11 @@ const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.val
 
   .btn:hover {
     opacity: 0.9;
+  }
+
+  .btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .empty-state {

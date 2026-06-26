@@ -7,6 +7,8 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build && npx pagefind --site dist",
+    "validate:content": "node scripts/validate-content-links.mjs",
+    "test:e2e": "node scripts/smoke-check.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

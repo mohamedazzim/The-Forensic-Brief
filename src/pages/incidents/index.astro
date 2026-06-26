@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
@@ -33,6 +34,14 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
 ---
 
 <BaseLayout title="Incidents" description="Documented AI failure events with evidence-based post-mortems and structured timelines.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Incidents',
+      description: 'Documented AI failure events with evidence-based post-mortems and structured timelines.',
+      url: 'https://theforensicbrief.com/incidents/',
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Incidents</h1>
@@ -68,6 +77,9 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
             category={`${incident.data.severity.toUpperCase()} · ${incident.data.domain}`}
             href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="Read report"
+            dataSeverity={incident.data.severity}
+            dataDomain={incident.data.domain.toLowerCase().replace(/\s+/g, '-')}
+            dataVendor={incident.data.systems.join(' ').toLowerCase().replace(/\s+/g, '-')}
           />
         ))}
       </div>
@@ -76,6 +88,21 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
     )}
   </section>
 </BaseLayout>
+
+<script is:inline>
+  const params = new URLSearchParams(window.location.search);
+  const filters = { severity: params.get('severity'), domain: params.get('domain'), vendor: params.get('vendor') };
+  let shown = 0;
+  document.querySelectorAll('.article-card').forEach((card) => {
+    const match = (!filters.severity || card.getAttribute('data-severity') === filters.severity)
+      && (!filters.domain || card.getAttribute('data-domain') === filters.domain)
+      && (!filters.vendor || (card.getAttribute('data-vendor') || '').includes(filters.vendor));
+    card.hidden = !match;
+    if (match) shown += 1;
+  });
+  const empty = document.querySelector('.empty-state');
+  if (empty) empty.hidden = shown > 0;
+</script>
 
 <style>
   .content-section {

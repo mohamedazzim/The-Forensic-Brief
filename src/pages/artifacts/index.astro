@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
@@ -15,20 +16,27 @@ const typeOptions = [
   { id: 'audit', label: 'Audits' },
 ];
 
-// Extract unique topics from artifacts
-const allTopics = artifacts.flatMap(artifact => artifact.data.tags);
+const allTopics = artifacts.flatMap((artifact) => artifact.data.tags);
 const uniqueTopics = [...new Set(allTopics)];
-const topicOptions = uniqueTopics.map(topic => ({
+const topicOptions = uniqueTopics.map((topic) => ({
   id: topic,
   label: topic.charAt(0).toUpperCase() + topic.slice(1).replace(/-/g, ' '),
 }));
 ---
 
-<BaseLayout title="Artifacts" description="Reusable templates and tools for AI governance — free to download and adapt.">
+<BaseLayout title="Artifacts" description="Reusable templates and tools for AI governance â€” free to download and adapt.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Artifacts',
+      description: 'Reusable templates and tools for AI governance.',
+      url: 'https://theforensicbrief.com/artifacts/',
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Artifacts</h1>
-      <p class="section-description">Reusable templates and tools for AI governance — free to download and adapt.</p>
+      <p class="section-description">Reusable templates and tools for AI governance â€” free to download and adapt.</p>
     </div>
     <hr class="section-rule">
 
@@ -47,7 +55,7 @@ const topicOptions = uniqueTopics.map(topic => ({
     {sortedArtifacts.length > 0 ? (
       <div class="artifact-grid">
         {sortedArtifacts.map((artifact) => (
-          <article class="artifact-card">
+          <article class="artifact-card" data-type={artifact.data.artifactType} data-topics={artifact.data.tags.join(' ')}>
             <div class="artifact-header">
               <span class="artifact-type">{artifact.data.artifactType}</span>
               <span class="artifact-version">v{artifact.data.version}</span>
@@ -62,7 +70,7 @@ const topicOptions = uniqueTopics.map(topic => ({
               ))}
             </div>
             <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`} class="artifact-link">
-              View artifact →
+              View artifact â†’
             </a>
           </article>
         ))}
@@ -72,6 +80,20 @@ const topicOptions = uniqueTopics.map(topic => ({
     )}
   </section>
 </BaseLayout>
+
+<script is:inline>
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('type');
+  const topic = params.get('topic');
+  let shown = 0;
+  document.querySelectorAll('.artifact-card').forEach((card) => {
+    const match = (!type || card.getAttribute('data-type') === type) && (!topic || (card.getAttribute('data-topics') || '').includes(topic));
+    card.hidden = !match;
+    if (match) shown += 1;
+  });
+  const empty = document.querySelector('.empty-state');
+  if (empty) empty.hidden = shown > 0;
+</script>
 
 <style>
   .content-section {

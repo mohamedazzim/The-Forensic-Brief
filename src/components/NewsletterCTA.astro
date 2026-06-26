@@ -8,43 +8,36 @@ const {
   title = 'Stay Informed', 
   description = 'Get notified when new incidents, essays, and artifacts are published.' 
 } = Astro.props;
+const newsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL || '';
 ---
 
 <section class="newsletter-cta">
   <h2 class="newsletter-title">{title}</h2>
   <p class="newsletter-description">{description}</p>
   
-  <form class="newsletter-form" id="newsletter-form">
+  {newsletterUrl ? (
+  <form class="newsletter-form" id="newsletter-form" action={newsletterUrl} method="post" target="_blank" rel="noopener noreferrer">
     <input 
       type="email" 
       id="newsletter-email"
+      name="email"
       placeholder="your@email.com" 
       required 
       aria-label="Email address"
     />
     <button type="submit">Subscribe</button>
   </form>
+  ) : (
+  <div class="newsletter-disabled" role="status" aria-live="polite">
+    <p>Newsletter signup is not configured yet.</p>
+    <button type="button" disabled>Subscribe</button>
+  </div>
+  )}
   
   <p class="newsletter-privacy">
     No spam. Unsubscribe anytime. View our <a href="/disclaimer/">privacy policy</a>.
   </p>
 </section>
-
-<script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    var form = document.getElementById('newsletter-form');
-    if (form) {
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var emailInput = document.getElementById('newsletter-email');
-        var email = emailInput ? emailInput.value : '';
-        if (email) {
-          window.open('https://theforensicbriefazzim.substack.com/subscribe?email=' + encodeURIComponent(email), '_blank');
-        }
-      });
-    }
-  });
-</script>
 
 <style>
   .newsletter-cta {
@@ -103,6 +96,22 @@ const {
 
   .newsletter-form button:hover {
     opacity: 0.9;
+  }
+
+  .newsletter-disabled {
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+  }
+
+  .newsletter-disabled p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .newsletter-disabled button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .newsletter-privacy {

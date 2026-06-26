@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const essays = await getCollection('essays');
@@ -15,9 +16,30 @@ export async function getStaticPaths() {
 
 const { artifact } = Astro.props;
 const { Content } = await artifact.render();
+const relatedBook = artifact.data.relatedBook
+  ? books.find((b) => b.id.replace(/\.(md|mdx)$/, '') === artifact.data.relatedBook)
+  : null;
 ---
 
 <BaseLayout title={artifact.data.title} description={artifact.data.summary}>
+  <StructuredData
+    type="collection"
+    data={{
+      name: artifact.data.title,
+      description: artifact.data.summary,
+      url: `/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`,
+    }}
+  />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Artifacts', url: '/artifacts/' },
+        { name: artifact.data.title, url: `/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/` },
+      ],
+    }}
+  />
   <article class="artifact-page">
     <header class="artifact-header">
       <div class="artifact-meta-top">
@@ -64,11 +86,11 @@ const { Content } = await artifact.render();
       </section>
     )}
 
-    {artifact.data.relatedBook && (
+    {relatedBook && (
       <section class="related-section">
         <h2>Related Book</h2>
         <p><a href={`/books/${artifact.data.relatedBook}/`}>
-          {books.find(b => b.id.replace(/\.(md|mdx)$/, '') === artifact.data.relatedBook)?.data.title || artifact.data.relatedBook}
+          {relatedBook.data.title}
         </a></p>
       </section>
     )}
