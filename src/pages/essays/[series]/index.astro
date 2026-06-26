@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Card from '../../../components/Card.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const essays = await getCollection('essays');
+  const seriesNames = [...new Set(essays.map((essay) => essay.data.series).filter(Boolean))];
+
+  return seriesNames.map((series) => {
+    const items = essays.filter((essay) => essay.data.series === series);
+    return {
+      params: { series },
+      props: { series, items },
+    };
+  });
+}
+
+const { series, items } = Astro.props;
+const sortedItems = items.sort((a, b) => a.data.seriesNo - b.data.seriesNo);
+---
+
+<BaseLayout title={`Series: ${series}`} description={`Essays in the ${series} series.`}>
+  <section class="content-section">
+    <div class="section-header">
+      <span class="eyebrow">Essay Series</span>
+      <h1 class="section-title">{series}</h1>
+      <p class="section-description">{sortedItems.length} essay{sortedItems.length === 1 ? '' : 's'} in this series.</p>
+    </div>
+    <hr class="section-rule">
+
+    <div class="card-grid">
+      {sortedItems.map((essay) => (
+        <Card
+          title={essay.data.title}
+          excerpt={essay.data.summary}
+          date={essay.data.date.toISOString().split('T')[0]}
+          category={essay.data.category === 'pattern' ? 'Pattern' : 'Essay'}
+          href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
+          linkText="Read more"
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .content-section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+    margin-top: 8px;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+</style>

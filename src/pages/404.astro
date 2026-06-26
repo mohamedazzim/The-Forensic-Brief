@@ -1,11 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBox from '../components/SearchBox.astro';
 ---
 
 <BaseLayout title="Page Not Found" description="The page you're looking for doesn't exist.">
   <section class="error-page">
     <h1 class="error-title">404</h1>
     <p class="error-message">The page you're looking for doesn't exist.</p>
+    <div class="search-recovery">
+      <p>Try searching for what you're looking for:</p>
+      <SearchBox />
+    </div>
     <a href="/" class="error-link">Return to Home</a>
   </section>
 </BaseLayout>
@@ -43,5 +48,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .error-link:hover {
     opacity: 0.9;
     border: none;
+  }
+
+  .search-recovery {
+    margin: 32px 0;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .search-recovery p {
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-size: 0.9rem;
   }
 </style>

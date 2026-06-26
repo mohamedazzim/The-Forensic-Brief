@@ -7,12 +7,27 @@ import { getCollection } from 'astro:content';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay');
+const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
+const observations = await getCollection('observations', ({ data }) => data.status === 'published');
+const books = await getCollection('books', ({ data }) => data.status === 'published');
 
 const featuredIncidents = incidents
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 
 const featuredEssays = essays
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const featuredArtifacts = artifacts
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const recentObservations = observations
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const featuredBooks = books
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 ---
@@ -69,7 +84,58 @@ const featuredEssays = essays
     </div>
     <hr class="section-rule">
     <div class="books-strip">
-      <p class="coming-soon">Books available in the <a href="/books/">Books section</a>.</p>
+      {featuredBooks.map((book) => (
+        <a href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`} class="book-item">
+          <img 
+            src={book.data.cover} 
+            alt={`Cover of ${book.data.title}`}
+            width="120"
+            height="180"
+            loading="lazy"
+          />
+          <span class="book-title">{book.data.title}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">Artifacts</h2>
+      <p class="section-description">Reusable templates and tools for AI governance — free to download and adapt.</p>
+    </div>
+    <hr class="section-rule">
+    <div class="card-grid">
+      {featuredArtifacts.map((artifact) => (
+        <Card
+          title={artifact.data.title}
+          excerpt={artifact.data.summary}
+          date={artifact.data.date.toISOString().split('T')[0]}
+          category={artifact.data.artifactType}
+          href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`}
+          linkText="Open artifact"
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">Observations</h2>
+      <p class="section-description">Preliminary field notes and research observations.</p>
+    </div>
+    <hr class="section-rule">
+    <div class="card-grid">
+      {recentObservations.map((observation) => (
+        <Card
+          title={observation.data.title}
+          excerpt={observation.data.summary}
+          date={observation.data.date.toISOString().split('T')[0]}
+          category={observation.data.observationStatus}
+          href={`/observations/${observation.id.replace(/\.(md|mdx)$/, '')}/`}
+          linkText="Read observation"
+        />
+      ))}
     </div>
   </section>
 
@@ -126,18 +192,35 @@ const featuredEssays = essays
   }
 
   .books-strip {
-    padding: 40px 0;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 24px 0;
+    flex-wrap: wrap;
   }
 
-  .coming-soon {
-    color: var(--text-muted);
-    font-style: italic;
+  .book-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    transition: transform 0.2s;
   }
 
-  .coming-soon a {
+  .book-item:hover {
+    transform: translateY(-4px);
+  }
+
+  .book-item img {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
+  }
+
+  .book-title {
+    font-size: var(--text-sm);
     color: var(--text-primary);
-    text-decoration: underline;
+    text-align: center;
+    max-width: 120px;
   }
 
   @media (max-width: 600px) {

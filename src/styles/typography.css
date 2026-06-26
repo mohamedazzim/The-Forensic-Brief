@@ -59,13 +59,23 @@ h4 { font-size: 1.125rem; }
 /* ── Article Body ── */
 
 .article-body p {
-  text-align: left;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
   margin-bottom: 1rem;
   font-size: 1rem;
 }
 
 .article-body {
   hanging-punctuation: first;
+}
+
+@media (max-width: 600px) {
+  .article-body p {
+    text-align: left;
+    hyphens: manual;
+  }
 }
 
 /* ── Links ── */

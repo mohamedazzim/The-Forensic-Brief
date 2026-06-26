@@ -14,6 +14,14 @@ const typeOptions = [
   { id: 'worksheet', label: 'Worksheets' },
   { id: 'audit', label: 'Audits' },
 ];
+
+// Extract unique topics from artifacts
+const allTopics = artifacts.flatMap(artifact => artifact.data.tags);
+const uniqueTopics = [...new Set(allTopics)];
+const topicOptions = uniqueTopics.map(topic => ({
+  id: topic,
+  label: topic.charAt(0).toUpperCase() + topic.slice(1).replace(/-/g, ' '),
+}));
 ---
 
 <BaseLayout title="Artifacts" description="Reusable templates and tools for AI governance — free to download and adapt.">
@@ -27,6 +35,12 @@ const typeOptions = [
     <FilterBar 
       label="Type" 
       options={typeOptions}
+      baseUrl="/artifacts/"
+    />
+
+    <FilterBar 
+      label="Topic" 
+      options={topicOptions}
       baseUrl="/artifacts/"
     />
 

@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Card from '../../../components/Card.astro';
+import { getCollection } from 'astro:content';
+
+const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'pattern');
+const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Patterns" description="Structured failure-signature analyses extracted from incident data.">
+  <section class="content-section">
+    <div class="section-header">
+      <h1 class="section-title">Patterns</h1>
+      <p class="section-description">Structured failure-signature analyses extracted from incident data.</p>
+    </div>
+    <hr class="section-rule">
+
+    {sortedEssays.length > 0 ? (
+      <div class="card-grid">
+        {sortedEssays.map((pattern) => (
+          <Card
+            title={pattern.data.title}
+            excerpt={pattern.data.summary}
+            date={pattern.data.date.toISOString().split('T')[0]}
+            category={pattern.data.patternId || 'Pattern'}
+            href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
+            linkText="View pattern"
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">No patterns published yet.</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .content-section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.25;
+  }
+
+  .section-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    border: none;
+    margin: 20px 0 28px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .empty-state {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 40px 0;
+  }
+</style>

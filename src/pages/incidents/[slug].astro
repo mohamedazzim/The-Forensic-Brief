@@ -4,6 +4,8 @@ import RelatedContent from '../../components/RelatedContent.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
+const essays = await getCollection('essays');
+
 export async function getStaticPaths() {
   const incidents = await getCollection('incidents');
   return incidents.map((incident) => ({
@@ -52,7 +54,7 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
     <div class="incident-structure">
       <section class="incident-section">
         <h2>Summary</h2>
-        <p>{incident.data.corroboration}</p>
+        <p>{incident.data.summary}</p>
       </section>
 
       <section class="incident-section">
@@ -84,7 +86,8 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
       </section>
 
       <section class="incident-section">
-        <h2>Sources</h2>
+        <h2>Evidence / Sources</h2>
+        <p class="corroboration">{incident.data.corroboration}</p>
         <ul class="sources-list">
           {incident.data.sources.map((source) => (
             <li>
@@ -104,17 +107,23 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
     <RelatedContent 
       title="Related Content"
       items={[
-        ...incident.data.relatedEssays.map((slug) => ({
-          title: slug,
-          href: `/essays/${slug}/`,
-          type: 'Essay',
-        })),
-        ...incident.data.relatedPatterns.map((slug) => ({
-          title: slug,
-          href: `/essays/${slug}/`,
-          type: 'Pattern',
-        })),
-      ]}
+        ...incident.data.relatedEssays.map((slug) => {
+          const essay = essays.find(e => e.id.replace(/\.(md|mdx)$/, '') === slug);
+          return essay ? {
+            title: essay.data.title,
+            href: `/essays/${slug}/`,
+            type: 'Essay',
+          } : null;
+        }),
+        ...incident.data.relatedPatterns.map((slug) => {
+          const essay = essays.find(e => e.id.replace(/\.(md|mdx)$/, '') === slug);
+          return essay ? {
+            title: essay.data.title,
+            href: `/essays/${slug}/`,
+            type: 'Pattern',
+          } : null;
+        }),
+      ].filter(Boolean)}
     />
   </article>
 </BaseLayout>
@@ -201,6 +210,15 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
     font-size: var(--text-xs);
     color: var(--text-light);
     margin-bottom: 4px;
+  }
+
+  .corroboration {
+    font-style: italic;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--bg-card);
+    border-left: 3px solid var(--border);
   }
 
   .sources-list {

@@ -19,6 +19,14 @@ const domainOptions = [
   { id: 'healthcare', label: 'Healthcare' },
 ];
 
+// Extract unique vendors from incidents
+const allVendors = incidents.flatMap(incident => incident.data.systems);
+const uniqueVendors = [...new Set(allVendors)];
+const vendorOptions = uniqueVendors.map(vendor => ({
+  id: vendor.toLowerCase().replace(/\s+/g, '-'),
+  label: vendor,
+}));
+
 // Get current filter from URL params (simulated for static build)
 // In production, use client-side JS or URL params
 const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -41,6 +49,12 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
     <FilterBar 
       label="Domain" 
       options={domainOptions}
+      baseUrl="/incidents/"
+    />
+
+    <FilterBar 
+      label="Vendor" 
+      options={vendorOptions}
       baseUrl="/incidents/"
     />
 
