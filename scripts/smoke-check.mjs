@@ -58,6 +58,18 @@ newsletterPages.forEach((route) => {
   assert(!pageHtml.includes('newsletter-form'), `${route} still contains form-based newsletter markup`);
 });
 
+const artifactPages = [
+  'artifacts/mris-template/index.html',
+  'artifacts/decision-envelope/index.html',
+];
+
+for (const route of artifactPages) {
+  const pageHtml = readFileSync(join(dist, route), 'utf8');
+  assert(pageHtml.includes('Download:'), `${route} missing artifact download header`);
+  assert(pageHtml.includes('unavailable') || pageHtml.includes('href="https://files.theforensicbrief.com/artifacts/'), `${route} should either show unavailable downloads or active R2 links`);
+  assert(!pageHtml.includes('PDF preview coming soon'), `${route} should not expose the old PDF preview placeholder`);
+}
+
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
 const coverUrl = 'https://files.theforensicbrief.com/books/human-in-control-cover.jpg';
 const pdfUrl = 'https://files.theforensicbrief.com/books/human-in-control.pdf';

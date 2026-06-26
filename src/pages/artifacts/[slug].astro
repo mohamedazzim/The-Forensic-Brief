@@ -19,6 +19,36 @@ const { Content } = await artifact.render();
 const relatedBook = artifact.data.relatedBook
   ? books.find((b) => b.id.replace(/\.(md|mdx)$/, '') === artifact.data.relatedBook)
   : null;
+
+const isRemoteUrl = (value?: string) => /^https?:\/\//i.test(value || '');
+
+async function isReachable(url?: string) {
+  if (!url) return false;
+  if (!isRemoteUrl(url)) return true;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      redirect: 'follow',
+    });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+const downloadAvailability = await Promise.all(
+  artifact.data.downloads.map(async (download) => ({
+    ...download,
+    available: await isReachable(download.url),
+  }))
+);
 ---
 
 <BaseLayout title={artifact.data.title} description={artifact.data.summary}>
@@ -52,16 +82,26 @@ const relatedBook = artifact.data.relatedBook
 
       <div class="artifact-downloads">
         <span class="downloads-label">Download:</span>
-        {artifact.data.downloads.map((download) => (
-          <a 
-            href={download.url} 
-            class="download-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {download.format} ({download.sizeKB} KB)
-          </a>
-        ))}
+        {downloadAvailability.some((download) => download.available) ? (
+          downloadAvailability.map((download) => (
+            download.available ? (
+              <a 
+                href={download.url} 
+                class="download-btn"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {download.format} ({download.sizeKB} KB)
+              </a>
+            ) : (
+              <span class="download-btn download-btn--disabled" aria-disabled="true">
+                {download.format} unavailable ({download.sizeKB} KB)
+              </span>
+            )
+          ))
+        ) : (
+          <span class="downloads-unavailable">Downloads unavailable</span>
+        )}
       </div>
 
       <div class="artifact-license">
@@ -160,6 +200,16 @@ const relatedBook = artifact.data.relatedBook
 
   .download-btn:hover {
     opacity: 0.9;
+  }
+
+  .download-btn--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .downloads-unavailable {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
   }
 
   .artifact-license {

@@ -105,6 +105,27 @@ if (pdfAvailable) {
 
 assert(!bookHtml.includes('PDF preview coming soon'), 'Book page should not expose the old preview placeholder');
 
+const artifactRoutes = [
+  join('artifacts', 'mris-template', 'index.html'),
+  join('artifacts', 'decision-envelope', 'index.html'),
+];
+
+for (const route of artifactRoutes) {
+  const artifactHtml = readHtml(route);
+  assert(!artifactHtml.includes('PDF preview coming soon'), `${route} should not expose PDF preview placeholder`);
+
+  const downloadLinks = [...artifactHtml.matchAll(/href="(https:\/\/files\.theforensicbrief\.com\/artifacts\/[^"]+)"/g)].map((match) => match[1]);
+  assert(artifactHtml.includes('Download:'), `${route} missing download header or unavailable state`);
+  if (downloadLinks.length === 0) {
+    assert(artifactHtml.includes('Downloads unavailable') || artifactHtml.includes('unavailable ('), `${route} should show an unavailable state when no active downloads are rendered`);
+  } else {
+    for (const url of downloadLinks) {
+      const available = await remoteAvailable(url);
+      assert(available, `${route} exposes an active download link to an unreachable asset: ${url}`);
+    }
+  }
+}
+
 const emptyImages = [...html.matchAll(/<(meta|img)[^>]+(?:og:image|twitter:image|src)=["']([^"']*)["']/gi)]
   .filter((m) => !m[2]);
 assert(emptyImages.length === 0, 'Empty image metadata or src found');
