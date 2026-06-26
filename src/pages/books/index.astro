@@ -6,6 +6,37 @@ import { getCollection } from 'astro:content';
 
 const books = await getCollection('books', ({ data }) => data.status === 'published');
 const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const isRemoteUrl = (value?: string) => /^https?:\/\//i.test(value || '');
+
+async function isReachable(url?: string) {
+  if (!url) return false;
+  if (!isRemoteUrl(url)) return true;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      redirect: 'follow',
+    });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+const booksWithAvailability = await Promise.all(
+  sortedBooks.map(async (book) => ({
+    ...book,
+    coverAvailable: await isReachable(book.data.cover),
+    pdfAvailable: await isReachable(book.data.pdfUrl),
+  }))
+);
 ---
 
 <BaseLayout title="Books" description="Free PDF downloads and hardcopy editions of The Forensic Brief series.">
@@ -33,18 +64,24 @@ const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.val
     </div>
     <hr class="section-rule">
 
-    {sortedBooks.length > 0 ? (
+    {booksWithAvailability.length > 0 ? (
       <div class="book-grid">
-        {sortedBooks.map((book) => (
+        {booksWithAvailability.map((book) => (
           <article class="book-card">
             <div class="book-cover">
-              <img 
-                src={book.data.cover} 
-                alt={`Cover of ${book.data.title}`}
-                width="300"
-                height="450"
-                loading="lazy"
-              />
+              {book.coverAvailable ? (
+                <img 
+                  src={book.data.cover} 
+                  alt={`Cover of ${book.data.title}`}
+                  width="300"
+                  height="450"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="book-cover-fallback" role="img" aria-label={`Cover unavailable for ${book.data.title}`}>
+                  <span>Cover unavailable</span>
+                </div>
+              )}
             </div>
             <div class="book-info">
               <span class="book-series">{book.data.series}</span>
@@ -53,14 +90,18 @@ const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.val
               </h2>
               <p class="book-blurb">{book.data.blurb}</p>
               <div class="book-actions">
-                <a 
-                  href={book.data.pdfUrl} 
-                  class="btn btn-primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Download PDF ({book.data.pdfSizeMB} MB)
-                </a>
+                {book.pdfAvailable ? (
+                  <a 
+                    href={book.data.pdfUrl} 
+                    class="btn btn-primary"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Download PDF ({book.data.pdfSizeMB} MB)
+                  </a>
+                ) : (
+                  <span class="btn btn-primary btn-disabled" aria-disabled="true">PDF unavailable</span>
+                )}
                 {book.data.amazonUrl ? (
                   <a 
                     href={book.data.amazonUrl} 
@@ -136,6 +177,20 @@ const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.val
     width: 100%;
     height: auto;
     display: block;
+  }
+
+  .book-cover-fallback {
+    width: 100%;
+    min-height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    background: var(--bg);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
   }
 
   .book-info {

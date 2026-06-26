@@ -1,39 +1,24 @@
 ---
-// Analytics placeholder for Cloudflare Web Analytics
-// Replace CLOUDFLARE_ANALYTICS_TOKEN with actual token when available
-// Or use Cloudflare Pages built-in analytics
-
 interface Props {
   token?: string;
 }
 
 const { token } = Astro.props;
+const analyticsToken = token ?? import.meta.env.PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN;
 ---
-
-<!-- Cloudflare Web Analytics placeholder -->
-<!-- 
-  To enable:
-  1. Go to Cloudflare Dashboard > Web Analytics
-  2. Get your token
-  3. Add token prop or set CLOUDFLARE_ANALYTICS_TOKEN env var
-  4. Uncomment the script tag below
--->
-
-<!--
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' 
-  data-cf-beacon='{"token": "YOUR_TOKEN_HERE"}'></script>
--->
-
-<!-- Event tracking placeholder -->
-<script>
-  // Custom event tracking for downloads, newsletter signups, etc.
-  window.trackEvent = (eventName: string, properties?: Record<string, any>) => {
-    // Placeholder: log to console in development
-    if (import.meta.env.DEV) {
-      console.log('[Analytics]', eventName, properties);
-    }
-    
-    // In production, send to Cloudflare Web Analytics or custom endpoint
-    // Example: fetch('/api/analytics', { method: 'POST', body: JSON.stringify({ eventName, properties }) });
-  };
-</script>
+{analyticsToken ? (
+  <>
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={`{"token":"${analyticsToken}"}`}
+    ></script>
+    <script>
+      window.trackEvent = (eventName, properties) => {
+        if (import.meta.env.DEV) {
+          console.log('[Analytics]', eventName, properties);
+        }
+      };
+    </script>
+  </>
+) : null}
