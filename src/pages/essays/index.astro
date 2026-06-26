@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -25,6 +26,14 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
 ---
 
 <BaseLayout title="Essays" description="Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Essays',
+      description: 'Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.',
+      url: 'https://theforensicbrief.com/essays/',
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Essays</h1>

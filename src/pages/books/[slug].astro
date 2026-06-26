@@ -30,6 +30,16 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
       pages: book.data.pages,
     }} 
   />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Books', url: '/books/' },
+        { name: book.data.title, url: bookUrl },
+      ],
+    }}
+  />
 
   <article class="book-page">
     <div class="book-header">

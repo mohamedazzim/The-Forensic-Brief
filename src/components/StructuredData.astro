@@ -1,6 +1,6 @@
 ---
 interface Props {
-  type: 'article' | 'book' | 'breadcrumb';
+  type: 'article' | 'book' | 'breadcrumb' | 'webpage' | 'collection';
   data: Record<string, any>;
 }
 
@@ -64,6 +64,30 @@ if (type === 'article') {
       item: `https://theforensicbrief.com${item.url}`,
     })),
   };
+} else if (type === 'webpage') {
+  structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: data.name || 'The Forensic Brief',
+    url: data.url || 'https://theforensicbrief.com',
+    potentialAction: data.searchUrl ? {
+      '@type': 'SearchAction',
+      target: data.searchUrl,
+      'query-input': 'required name=q',
+    } : undefined,
+  };
+  if (!data.searchUrl) delete structuredData.potentialAction;
+} else if (type === 'collection') {
+  structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: data.name,
+    description: data.description,
+    url: data.url,
+  };
+  if (data.breadcrumbs) {
+    structuredData.breadcrumb = data.breadcrumbs;
+  }
 }
 ---
 

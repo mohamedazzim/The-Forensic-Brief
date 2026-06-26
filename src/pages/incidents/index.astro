@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import FilterBar from '../../components/FilterBar.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
@@ -33,6 +34,14 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
 ---
 
 <BaseLayout title="Incidents" description="Documented AI failure events with evidence-based post-mortems and structured timelines.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Incidents',
+      description: 'Documented AI failure events with evidence-based post-mortems and structured timelines.',
+      url: 'https://theforensicbrief.com/incidents/',
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Incidents</h1>

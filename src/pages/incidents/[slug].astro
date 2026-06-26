@@ -32,6 +32,16 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
       image: incident.data.ogImage,
     }} 
   />
+  <StructuredData
+    type="breadcrumb"
+    data={{
+      items: [
+        { name: 'Home', url: '/' },
+        { name: 'Incidents', url: '/incidents/' },
+        { name: incident.data.title, url: incidentUrl },
+      ],
+    }}
+  />
 
   <article class="article-body">
     <header class="article-header">

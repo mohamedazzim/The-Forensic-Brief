@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -53,6 +54,14 @@ function getHref(item: any) {
 ---
 
 <BaseLayout title={`Topic: ${tag}`} description={`All content tagged with "${tag}".`}>
+  <StructuredData
+    type="collection"
+    data={{
+      name: `Topic: ${tag}`,
+      description: `All content tagged with "${tag}".`,
+      url: `https://theforensicbrief.com/topics/${tag}/`,
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <span class="eyebrow">Topic</span>

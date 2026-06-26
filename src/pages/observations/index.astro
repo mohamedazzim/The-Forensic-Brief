@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
+import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const observations = await getCollection('observations', ({ data }) => data.status === 'published');
@@ -8,6 +9,14 @@ const sortedObservations = observations.sort((a, b) => b.data.date.valueOf() - a
 ---
 
 <BaseLayout title="Observations" description="Preliminary field notes and lab notebook entries on AI system behavior.">
+  <StructuredData
+    type="collection"
+    data={{
+      name: 'Observations',
+      description: 'Preliminary field notes and lab notebook entries on AI system behavior.',
+      url: 'https://theforensicbrief.com/observations/',
+    }}
+  />
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Observations</h1>
