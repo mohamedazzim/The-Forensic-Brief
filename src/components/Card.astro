@@ -6,12 +6,19 @@ interface Props {
   category: string;
   href: string;
   linkText?: string;
+  dataSeries?: string;
+  dataCategory?: string;
+  dataSeverity?: string;
+  dataDomain?: string;
+  dataVendor?: string;
+  dataType?: string;
+  dataTopics?: string;
 }
 
-const { title, excerpt, date, category, href, linkText = 'Read report' } = Astro.props;
+const { title, excerpt, date, category, href, linkText = 'Read report', dataSeries, dataCategory, dataSeverity, dataDomain, dataVendor, dataType, dataTopics } = Astro.props;
 ---
 
-<article class="article-card">
+<article class="article-card" data-series={dataSeries} data-category={dataCategory} data-severity={dataSeverity} data-domain={dataDomain} data-vendor={dataVendor} data-type={dataType} data-topics={dataTopics}>
   <span class="card-category">{category}</span>
   <h3 class="card-title">
     <a href={href}>{title}</a>

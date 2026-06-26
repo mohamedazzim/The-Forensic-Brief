@@ -47,7 +47,7 @@ const topicOptions = uniqueTopics.map(topic => ({
     {sortedArtifacts.length > 0 ? (
       <div class="artifact-grid">
         {sortedArtifacts.map((artifact) => (
-          <article class="artifact-card">
+          <article class="artifact-card" data-type={artifact.data.artifactType} data-topics={artifact.data.tags.join(' ')}>
             <div class="artifact-header">
               <span class="artifact-type">{artifact.data.artifactType}</span>
               <span class="artifact-version">v{artifact.data.version}</span>
@@ -72,6 +72,20 @@ const topicOptions = uniqueTopics.map(topic => ({
     )}
   </section>
 </BaseLayout>
+
+<script is:inline>
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('type');
+  const topic = params.get('topic');
+  let shown = 0;
+  document.querySelectorAll('.artifact-card').forEach((card) => {
+    const match = (!type || card.getAttribute('data-type') === type) && (!topic || (card.getAttribute('data-topics') || '').includes(topic));
+    card.hidden = !match;
+    if (match) shown += 1;
+  });
+  const empty = document.querySelector('.empty-state');
+  if (empty) empty.hidden = shown > 0;
+</script>
 
 <style>
   .content-section {

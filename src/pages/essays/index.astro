@@ -54,6 +54,8 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
             category={essay.data.series || 'Essay'}
             href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="Read essay"
+            dataSeries={essay.data.series || ''}
+            dataCategory="essay"
           />
         ))}
       </div>
@@ -79,12 +81,28 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
             category={pattern.data.patternId || 'Pattern'}
             href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="View pattern"
+            dataSeries={pattern.data.series || ''}
+            dataCategory="pattern"
           />
         ))}
       </div>
     </section>
   )}
 </BaseLayout>
+
+<script is:inline>
+  const params = new URLSearchParams(window.location.search);
+  const series = params.get('series');
+  const category = params.get('category');
+  let shown = 0;
+  document.querySelectorAll('.article-card').forEach((card) => {
+    const match = (!series || card.getAttribute('data-series') === series) && (!category || card.getAttribute('data-category') === category);
+    card.hidden = !match;
+    if (match) shown += 1;
+  });
+  const empty = document.querySelector('.empty-state');
+  if (empty) empty.hidden = shown > 0;
+</script>
 
 <style>
   .content-section {

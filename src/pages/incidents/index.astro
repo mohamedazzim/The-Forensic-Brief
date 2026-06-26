@@ -68,6 +68,9 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
             category={`${incident.data.severity.toUpperCase()} · ${incident.data.domain}`}
             href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="Read report"
+            dataSeverity={incident.data.severity}
+            dataDomain={incident.data.domain.toLowerCase().replace(/\s+/g, '-')}
+            dataVendor={incident.data.systems.join(' ').toLowerCase().replace(/\s+/g, '-')}
           />
         ))}
       </div>
@@ -76,6 +79,21 @@ const sortedIncidents = incidents.sort((a, b) => b.data.date.valueOf() - a.data.
     )}
   </section>
 </BaseLayout>
+
+<script is:inline>
+  const params = new URLSearchParams(window.location.search);
+  const filters = { severity: params.get('severity'), domain: params.get('domain'), vendor: params.get('vendor') };
+  let shown = 0;
+  document.querySelectorAll('.article-card').forEach((card) => {
+    const match = (!filters.severity || card.getAttribute('data-severity') === filters.severity)
+      && (!filters.domain || card.getAttribute('data-domain') === filters.domain)
+      && (!filters.vendor || (card.getAttribute('data-vendor') || '').includes(filters.vendor));
+    card.hidden = !match;
+    if (match) shown += 1;
+  });
+  const empty = document.querySelector('.empty-state');
+  if (empty) empty.hidden = shown > 0;
+</script>
 
 <style>
   .content-section {

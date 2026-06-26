@@ -31,6 +31,7 @@
     var input = document.getElementById('search-input');
     var panel = document.getElementById('search-panel');
     if (!root || !input || !panel) return;
+    var initialQuery = new URLSearchParams(window.location.search).get('q');
 
     function init() {
       import('/pagefind/pagefind.js').then(function(mod) {
@@ -180,6 +181,10 @@
     });
 
     init();
+    if (initialQuery) {
+      input.value = initialQuery;
+      input.dispatchEvent(new Event('input'));
+    }
   })();
 </script>
 

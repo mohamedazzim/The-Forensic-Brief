@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SearchBox from '../../components/SearchBox.astro';
+---
+
+<BaseLayout title="Search" description="Search the publication using Pagefind.">
+  <section class="search-page">
+    <h1>Search</h1>
+    <p>Search incidents, essays, books, observations, artifacts, and topics.</p>
+    <SearchBox />
+  </section>
+</BaseLayout>
+
+<style>
+  .search-page {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+</style>

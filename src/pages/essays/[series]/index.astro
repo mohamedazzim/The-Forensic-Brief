@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays');
-  const seriesNames = [...new Set(essays.map((essay) => essay.data.series).filter(Boolean))];
+  const seriesNames = ['human-in-control', 'out-of-bounds', 'accountable-autonomy', 'six-dimensions', 'the-burden'];
 
   return seriesNames.map((series) => {
     const items = essays.filter((essay) => essay.data.series === series);
@@ -29,6 +29,7 @@ const sortedItems = items.sort((a, b) => a.data.seriesNo - b.data.seriesNo);
     </div>
     <hr class="section-rule">
 
+    {sortedItems.length > 0 ? (
     <div class="card-grid">
       {sortedItems.map((essay) => (
         <Card
@@ -41,6 +42,9 @@ const sortedItems = items.sort((a, b) => a.data.seriesNo - b.data.seriesNo);
         />
       ))}
     </div>
+    ) : (
+      <p class="empty-state">No published essays in this series yet.</p>
+    )}
   </section>
 </BaseLayout>
 
@@ -81,5 +85,10 @@ const sortedItems = items.sort((a, b) => a.data.seriesNo - b.data.seriesNo);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 20px;
+  }
+
+  .empty-state {
+    color: var(--text-muted);
+    font-style: italic;
   }
 </style>

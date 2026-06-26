@@ -48,22 +48,30 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
         <p class="book-blurb">{book.data.blurb}</p>
 
         <div class="book-actions">
-          <a 
-            href={book.data.pdfUrl} 
-            class="btn btn-primary btn-large"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Download PDF ({book.data.pdfSizeMB} MB)
-          </a>
-          <a 
-            href={book.data.amazonUrl} 
-            class="btn btn-secondary btn-large"
-            target="_blank"
-            rel="sponsored noopener noreferrer"
-          >
-            Buy on Amazon
-          </a>
+          {book.data.pdfUrl ? (
+            <a 
+              href={book.data.pdfUrl} 
+              class="btn btn-primary btn-large"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Download PDF ({book.data.pdfSizeMB} MB)
+            </a>
+          ) : (
+            <span class="btn btn-primary btn-large btn-disabled" aria-disabled="true">PDF unavailable</span>
+          )}
+          {book.data.amazonUrl ? (
+            <a 
+              href={book.data.amazonUrl} 
+              class="btn btn-secondary btn-large"
+              target="_blank"
+              rel="sponsored noopener noreferrer"
+            >
+              Buy on Amazon
+            </a>
+          ) : (
+            <span class="btn btn-secondary btn-large btn-disabled" aria-disabled="true">Amazon link unavailable</span>
+          )}
         </div>
 
         <div class="book-meta">
@@ -176,6 +184,11 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
 
   .btn:hover {
     opacity: 0.9;
+  }
+
+  .btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   .book-meta {
