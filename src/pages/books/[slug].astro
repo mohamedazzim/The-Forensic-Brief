@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StructuredData from '../../components/StructuredData.astro';
-import PDFViewer from '../../components/PDFViewer.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -15,6 +14,34 @@ export async function getStaticPaths() {
 const { book } = Astro.props;
 const { Content } = await book.render();
 const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
+
+const isRemoteUrl = (value?: string) => /^https?:\/\//i.test(value || '');
+
+async function isReachable(url?: string) {
+  if (!url) return false;
+  if (!isRemoteUrl(url)) return true;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      redirect: 'follow',
+    });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+const [coverAvailable, pdfAvailable] = await Promise.all([
+  isReachable(book.data.cover),
+  isReachable(book.data.pdfUrl),
+]);
 ---
 
 <BaseLayout title={book.data.title} description={book.data.summary}>
@@ -25,7 +52,7 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
       summary: book.data.summary,
       author: book.data.author,
       url: bookUrl,
-      cover: book.data.cover,
+      cover: coverAvailable ? book.data.cover : undefined,
       isbn: book.data.isbn,
       pages: book.data.pages,
     }} 
@@ -44,12 +71,19 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
   <article class="book-page">
     <div class="book-header">
       <div class="book-cover-large">
-        <img 
-          src={book.data.cover} 
-          alt={`Cover of ${book.data.title}`}
-          width="400"
-          height="600"
-        />
+        {coverAvailable ? (
+          <img 
+            src={book.data.cover} 
+            alt={`Cover of ${book.data.title}`}
+            width="400"
+            height="600"
+          />
+        ) : (
+          <div class="book-cover-fallback" role="img" aria-label={`Cover unavailable for ${book.data.title}`}>
+            <span class="book-cover-fallback-label">Cover unavailable</span>
+            <span class="book-cover-fallback-title">{book.data.title}</span>
+          </div>
+        )}
       </div>
       <div class="book-details">
         <span class="eyebrow">Book</span>
@@ -58,7 +92,7 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
         <p class="book-blurb">{book.data.blurb}</p>
 
         <div class="book-actions">
-          {book.data.pdfUrl ? (
+          {pdfAvailable ? (
             <a 
               href={book.data.pdfUrl} 
               class="btn btn-primary btn-large"
@@ -100,11 +134,6 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
       </ol>
     </section>
 
-    <PDFViewer 
-      title={`Preview: ${book.data.title}`}
-      pdfUrl={book.data.pdfUrl}
-    />
-
     <section class="book-content article-body">
       <Content />
     </section>
@@ -128,6 +157,33 @@ const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
     height: auto;
     display: block;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .book-cover-fallback {
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+  }
+
+  .book-cover-fallback-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .book-cover-fallback-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+    line-height: 1.4;
   }
 
   .book-details {

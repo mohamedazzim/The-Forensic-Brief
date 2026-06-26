@@ -46,6 +46,15 @@ function assertJsonLd(relativePath, patterns) {
   });
 }
 
+async function remoteAvailable(url) {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 const missingLinkPatterns = [
   '/essays/blind-acceptance-rate/',
   '/artifacts/blind-acceptance-rate-audit/',
@@ -71,6 +80,30 @@ assertJsonLd(join('essays', 'hitl-is-not-oversight', 'index.html'), ['"@type":"A
 assertJsonLd(join('incidents', 'air-canada-chatbot-refund', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('books', 'human-in-control', 'index.html'), ['"@type":"Book"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('artifacts', 'decision-envelope', 'index.html'), ['"@type":"CreativeWork"', '"@type":"BreadcrumbList"']);
+
+const bookHtml = readHtml(join('books', 'human-in-control', 'index.html'));
+const coverUrl = 'https://files.theforensicbrief.com/books/human-in-control-cover.jpg';
+const pdfUrl = 'https://files.theforensicbrief.com/books/human-in-control.pdf';
+const [coverAvailable, pdfAvailable] = await Promise.all([
+  remoteAvailable(coverUrl),
+  remoteAvailable(pdfUrl),
+]);
+
+if (coverAvailable) {
+  assert(bookHtml.includes(coverUrl), 'Book page missing cover image when asset is reachable');
+} else {
+  assert(bookHtml.includes('Cover unavailable'), 'Book page missing cover fallback when asset is unreachable');
+  assert(!bookHtml.includes(coverUrl), 'Book page should not render a broken cover image');
+}
+
+if (pdfAvailable) {
+  assert(bookHtml.includes('Download PDF (2.4 MB)'), 'Book page missing active PDF download when asset is reachable');
+} else {
+  assert(bookHtml.includes('PDF unavailable'), 'Book page missing disabled PDF state when asset is unreachable');
+  assert(!bookHtml.includes(pdfUrl), 'Book page should not render an active broken PDF link');
+}
+
+assert(!bookHtml.includes('PDF preview coming soon'), 'Book page should not expose the old preview placeholder');
 
 const emptyImages = [...html.matchAll(/<(meta|img)[^>]+(?:og:image|twitter:image|src)=["']([^"']*)["']/gi)]
   .filter((m) => !m[2]);
