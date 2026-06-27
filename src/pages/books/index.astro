@@ -65,7 +65,7 @@ const booksWithAvailability = await Promise.all(
     <hr class="section-rule">
 
     {booksWithAvailability.length > 0 ? (
-      <div class="book-grid">
+      <div class:list={['book-grid', booksWithAvailability.length === 1 && 'book-grid--single']}>
         {booksWithAvailability.map((book) => (
           <article class="book-card">
             <a 
@@ -167,6 +167,10 @@ const booksWithAvailability = await Promise.all(
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 32px;
     align-items: start;
+  }
+
+  .book-grid--single {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .book-card {
@@ -275,6 +279,7 @@ const booksWithAvailability = await Promise.all(
     text-decoration: none;
     transition: opacity 0.2s;
     border: none;
+    white-space: nowrap;
   }
 
   .btn-primary {
@@ -353,6 +358,16 @@ const booksWithAvailability = await Promise.all(
       padding: 10px 12px;
       font-size: 0.72rem;
       text-align: center;
+    }
+  }
+
+  @media (min-width: 601px) {
+    .book-grid--single .book-card {
+      grid-column: 1 / -1;
+    }
+
+    .book-actions {
+      flex-wrap: nowrap;
     }
   }
 </style>
