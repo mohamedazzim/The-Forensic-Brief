@@ -56,7 +56,10 @@ const socialImage = ogImage || defaultOgImage;
     <a href="#main-content" class="skip-to-content">Skip to content</a>
 
     <header class="site-header">
-      <div class="site-title" role="heading" aria-level="1">The Forensic Brief</div>
+      <div class="site-brand">
+        <img class="site-brand-logo" src="/forensic-favicon-cream.png" alt="" aria-hidden="true" width="28" height="28">
+        <div class="site-title" role="heading" aria-level="1">The Forensic Brief</div>
+      </div>
       <hr class="header-divider">
       <p class="site-subtitle">Post-Incident Analysis of AI Failure</p>
     </header>
@@ -94,6 +97,21 @@ const socialImage = ogImage || defaultOgImage;
     margin-bottom: 1.5rem;
     width: 100%;
     padding: 3rem 1rem 0;
+  }
+
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 0 auto 0.5rem;
+  }
+
+  .site-brand-logo {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: block;
+    flex: 0 0 auto;
   }
 
   .site-title {
@@ -194,6 +212,13 @@ const socialImage = ogImage || defaultOgImage;
   @media (max-width: 600px) {
     .site-header {
       padding: 2rem 1rem 0;
+    }
+    .site-brand {
+      gap: 0.5rem;
+    }
+    .site-brand-logo {
+      width: 1.5rem;
+      height: 1.5rem;
     }
     .site-title {
       font-size: 1.75rem;
