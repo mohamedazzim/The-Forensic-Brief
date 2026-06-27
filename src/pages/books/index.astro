@@ -171,12 +171,14 @@ const booksWithAvailability = await Promise.all(
 
   .book-card {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 24px;
+    row-gap: 16px;
     background: var(--bg-card);
     border: 1px solid var(--border-light);
-    padding: 32px;
+    padding: 28px;
   }
 
   .book-card-link {
@@ -193,8 +195,12 @@ const booksWithAvailability = await Promise.all(
 
   .book-cover {
     pointer-events: none;
-    max-width: 240px;
-    align-self: center;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    max-width: 180px;
+    width: 100%;
+    align-self: start;
+    justify-self: start;
   }
 
   .book-cover img {
@@ -221,6 +227,9 @@ const booksWithAvailability = await Promise.all(
     display: flex;
     flex-direction: column;
     pointer-events: none;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
   }
 
   .book-series {
@@ -252,6 +261,10 @@ const booksWithAvailability = await Promise.all(
     position: relative;
     z-index: 2;
     pointer-events: auto;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    margin-top: 4px;
   }
 
   .btn {
@@ -294,10 +307,47 @@ const booksWithAvailability = await Promise.all(
   @media (max-width: 600px) {
     .book-grid {
       grid-template-columns: 1fr;
+      gap: 20px;
     }
 
     .book-card {
-      padding: 24px;
+      grid-template-columns: 88px minmax(0, 1fr);
+      column-gap: 16px;
+      row-gap: 12px;
+      padding: 18px;
+    }
+
+    .book-cover {
+      max-width: 88px;
+    }
+
+    .book-cover-fallback {
+      min-height: 132px;
+      padding: 12px;
+      font-size: 0.72rem;
+    }
+
+    .book-series {
+      margin-bottom: 6px;
+    }
+
+    .book-title {
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+    }
+
+    .book-blurb {
+      font-size: 0.82rem;
+      margin-bottom: 14px;
+    }
+
+    .book-actions {
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      font-size: 0.75rem;
     }
   }
 </style>
