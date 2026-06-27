@@ -85,7 +85,12 @@ assert(page404.includes('/search/'), '404 page missing explicit search link');
 assert(page404.includes('Return to Home'), '404 page missing home link');
 
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
-const coverUrl = 'https://files.theforensicbrief.com/books/human-in-control-cover.jpg';
+const booksIndex = readFileSync(join(dist, 'books/index.html'), 'utf8');
+assert(booksIndex.includes('book-grid'), 'Books index missing grid layout');
+assert(booksIndex.includes('href="/books/human-in-control/"') || booksIndex.includes('href="/books/human-in-control/index.html"'), 'Books index missing book detail link');
+
+const coverUrl = 'https://files.theforensicbrief.com/books/human-in-control-front-cover.jpg';
+const backCoverUrl = 'https://files.theforensicbrief.com/books/human-in-control-back-cover.jpg';
 const pdfUrl = 'https://files.theforensicbrief.com/books/human-in-control.pdf';
 const [coverAvailable, pdfAvailable] = await Promise.all([
   remoteAvailable(coverUrl),
@@ -97,6 +102,13 @@ if (coverAvailable) {
 } else {
   assert(bookPage.includes('Cover unavailable'), 'Book page missing cover fallback when asset is unreachable');
   assert(!bookPage.includes(coverUrl), 'Book page should not render a broken cover image');
+}
+
+const backCoverAvailable = await remoteAvailable(backCoverUrl);
+if (backCoverAvailable) {
+  assert(bookPage.includes(backCoverUrl), 'Book page missing back cover image when asset is reachable');
+  assert(bookPage.includes('data-cover-preview-trigger'), 'Book page missing back cover preview trigger when asset is reachable');
+  assert(bookPage.includes('book-cover-dialog'), 'Book page missing back cover dialog when asset is reachable');
 }
 
 assert(countMatches(bookPage, /<h1\b/g) === 1, 'Book page should expose exactly one H1');

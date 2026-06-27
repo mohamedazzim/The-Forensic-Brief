@@ -82,7 +82,8 @@ assertJsonLd(join('books', 'human-in-control', 'index.html'), ['"@type":"Book"',
 assertJsonLd(join('artifacts', 'decision-envelope', 'index.html'), ['"@type":"CreativeWork"', '"@type":"BreadcrumbList"']);
 
 const bookHtml = readHtml(join('books', 'human-in-control', 'index.html'));
-const coverUrl = 'https://files.theforensicbrief.com/books/human-in-control-cover.jpg';
+const coverUrl = 'https://files.theforensicbrief.com/books/human-in-control-front-cover.jpg';
+const backCoverUrl = 'https://files.theforensicbrief.com/books/human-in-control-back-cover.jpg';
 const pdfUrl = 'https://files.theforensicbrief.com/books/human-in-control.pdf';
 const [coverAvailable, pdfAvailable] = await Promise.all([
   remoteAvailable(coverUrl),
@@ -94,6 +95,13 @@ if (coverAvailable) {
 } else {
   assert(bookHtml.includes('Cover unavailable'), 'Book page missing cover fallback when asset is unreachable');
   assert(!bookHtml.includes(coverUrl), 'Book page should not render a broken cover image');
+}
+
+const backCoverAvailable = await remoteAvailable(backCoverUrl);
+if (backCoverAvailable) {
+  assert(bookHtml.includes(backCoverUrl), 'Book page missing back cover image when asset is reachable');
+  assert(bookHtml.includes('data-cover-preview-trigger'), 'Book page missing back cover preview trigger when asset is reachable');
+  assert(bookHtml.includes('book-cover-dialog'), 'Book page missing back cover dialog when asset is reachable');
 }
 
 if (pdfAvailable) {

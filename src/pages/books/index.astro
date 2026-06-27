@@ -68,6 +68,11 @@ const booksWithAvailability = await Promise.all(
       <div class="book-grid">
         {booksWithAvailability.map((book) => (
           <article class="book-card">
+            <a 
+              class="book-card-link" 
+              href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`}
+              aria-label={`Open ${book.data.title} book details`}
+            ></a>
             <div class="book-cover">
               {book.coverAvailable ? (
                 <img 
@@ -85,9 +90,7 @@ const booksWithAvailability = await Promise.all(
             </div>
             <div class="book-info">
               <span class="book-series">{book.data.series}</span>
-              <h2 class="book-title">
-                <a href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`}>{book.data.title}</a>
-              </h2>
+              <h2 class="book-title">{book.data.title}</h2>
               <p class="book-blurb">{book.data.blurb}</p>
               <div class="book-actions">
                 {book.pdfAvailable ? (
@@ -161,16 +164,34 @@ const booksWithAvailability = await Promise.all(
 
   .book-grid {
     display: grid;
-    gap: 48px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
   }
 
   .book-card {
+    position: relative;
     display: grid;
     grid-template-columns: 200px 1fr;
     gap: 32px;
     background: var(--bg-card);
     border: 1px solid var(--border-light);
     padding: 32px;
+  }
+
+  .book-card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .book-cover,
+  .book-info {
+    position: relative;
+    z-index: 1;
+  }
+
+  .book-cover {
+    pointer-events: none;
   }
 
   .book-cover img {
@@ -196,6 +217,7 @@ const booksWithAvailability = await Promise.all(
   .book-info {
     display: flex;
     flex-direction: column;
+    pointer-events: none;
   }
 
   .book-series {
@@ -212,16 +234,6 @@ const booksWithAvailability = await Promise.all(
     margin-bottom: 12px;
   }
 
-  .book-title a {
-    color: inherit;
-    text-decoration: none;
-    border: none;
-  }
-
-  .book-title a:hover {
-    color: var(--text-muted);
-  }
-
   .book-blurb {
     font-size: var(--text-sm);
     color: var(--text-muted);
@@ -234,6 +246,9 @@ const booksWithAvailability = await Promise.all(
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
   }
 
   .btn {
@@ -274,6 +289,10 @@ const booksWithAvailability = await Promise.all(
   }
 
   @media (max-width: 600px) {
+    .book-grid {
+      grid-template-columns: 1fr;
+    }
+
     .book-card {
       grid-template-columns: 1fr;
     }

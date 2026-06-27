@@ -16,7 +16,8 @@ export const R2_BASE_URL = 'https://files.theforensicbrief.com';
 
 export const BOOK_URLS = {
   'human-in-control': {
-    cover: `${R2_BASE_URL}/books/human-in-control-cover.jpg`,
+    cover: `${R2_BASE_URL}/books/human-in-control-front-cover.jpg`,
+    backCover: `${R2_BASE_URL}/books/human-in-control-back-cover.jpg`,
     pdf: `${R2_BASE_URL}/books/human-in-control.pdf`,
   },
 } as const;

@@ -38,10 +38,12 @@ async function isReachable(url?: string) {
   }
 }
 
-const [coverAvailable, pdfAvailable] = await Promise.all([
+const [coverAvailable, backCoverAvailable, pdfAvailable] = await Promise.all([
   isReachable(book.data.cover),
+  isReachable(book.data.backCover),
   isReachable(book.data.pdfUrl),
 ]);
+const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.backCover);
 ---
 
 <BaseLayout title={book.data.title} description={book.data.summary}>
@@ -72,12 +74,30 @@ const [coverAvailable, pdfAvailable] = await Promise.all([
     <div class="book-header">
       <div class="book-cover-large">
         {coverAvailable ? (
-          <img 
-            src={book.data.cover} 
-            alt={`Cover of ${book.data.title}`}
-            width="400"
-            height="600"
-          />
+          showBackCover ? (
+            <button
+              type="button"
+              class="book-cover-trigger"
+              aria-haspopup="dialog"
+              aria-controls="book-cover-dialog"
+              aria-label={`Open cover preview for ${book.data.title}`}
+              data-cover-preview-trigger
+            >
+              <img 
+                src={book.data.cover} 
+                alt={`Front cover of ${book.data.title}. Activate to view the back cover.`}
+                width="400"
+                height="600"
+              />
+            </button>
+          ) : (
+            <img 
+              src={book.data.cover} 
+              alt={`Cover of ${book.data.title}`}
+              width="400"
+              height="600"
+            />
+          )
         ) : (
           <div class="book-cover-fallback" role="img" aria-label={`Cover unavailable for ${book.data.title}`}>
             <span class="book-cover-fallback-label">Cover unavailable</span>
@@ -138,7 +158,71 @@ const [coverAvailable, pdfAvailable] = await Promise.all([
       <Content />
     </section>
   </article>
+
+  {showBackCover && (
+    <dialog class="book-cover-dialog" id="book-cover-dialog" aria-labelledby="book-cover-dialog-title">
+      <div class="book-cover-dialog-surface">
+        <div class="book-cover-dialog-header">
+          <div>
+            <p class="book-cover-dialog-eyebrow">Book covers</p>
+            <h2 id="book-cover-dialog-title" class="book-cover-dialog-title">{book.data.title}</h2>
+          </div>
+          <button type="button" class="book-cover-dialog-close" data-cover-preview-close aria-label="Close cover preview">
+            Close
+          </button>
+        </div>
+        <p class="book-cover-dialog-note">Front cover and back cover for this book.</p>
+        <div class="book-cover-dialog-grid">
+          <figure>
+            <img src={book.data.cover} alt={`Front cover of ${book.data.title}`} width="400" height="600" />
+            <figcaption>Front cover</figcaption>
+          </figure>
+          <figure>
+            <img src={book.data.backCover} alt={`Back cover of ${book.data.title}`} width="400" height="600" />
+            <figcaption>Back cover</figcaption>
+          </figure>
+        </div>
+      </div>
+    </dialog>
+  )}
 </BaseLayout>
+
+<script is:inline>
+  const dialog = document.getElementById('book-cover-dialog');
+  const openers = document.querySelectorAll('[data-cover-preview-trigger]');
+  const closers = document.querySelectorAll('[data-cover-preview-close]');
+
+  const closeDialog = () => {
+    if (dialog instanceof HTMLDialogElement && dialog.open) {
+      dialog.close();
+    }
+  };
+
+  openers.forEach((opener) => {
+    opener.addEventListener('click', () => {
+      if (dialog instanceof HTMLDialogElement && !dialog.open) {
+        dialog.showModal();
+      }
+    });
+  });
+
+  closers.forEach((closer) => {
+    closer.addEventListener('click', closeDialog);
+  });
+
+  if (dialog instanceof HTMLDialogElement) {
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) {
+        closeDialog();
+      }
+    });
+
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      closeDialog();
+    });
+  }
+</script>
 
 <style>
   .book-page {
@@ -157,6 +241,15 @@ const [coverAvailable, pdfAvailable] = await Promise.all([
     height: auto;
     display: block;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .book-cover-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
   }
 
   .book-cover-fallback {
@@ -292,6 +385,87 @@ const [coverAvailable, pdfAvailable] = await Promise.all([
     margin-top: 48px;
   }
 
+  .book-cover-dialog {
+    border: none;
+    padding: 0;
+    background: transparent;
+    max-width: min(920px, calc(100vw - 2rem));
+    width: 100%;
+  }
+
+  .book-cover-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.68);
+    backdrop-filter: blur(2px);
+  }
+
+  .book-cover-dialog-surface {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+  }
+
+  .book-cover-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .book-cover-dialog-eyebrow {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-light);
+    margin-bottom: 4px;
+  }
+
+  .book-cover-dialog-title {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: var(--text-xl);
+    margin: 0;
+  }
+
+  .book-cover-dialog-note {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin-bottom: 20px;
+  }
+
+  .book-cover-dialog-close {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-primary);
+    padding: 8px 14px;
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .book-cover-dialog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .book-cover-dialog-grid figure {
+    margin: 0;
+  }
+
+  .book-cover-dialog-grid img {
+    width: 100%;
+    height: auto;
+    display: block;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .book-cover-dialog-grid figcaption {
+    margin-top: 8px;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    text-align: center;
+  }
+
   @media (max-width: 600px) {
     .book-header {
       grid-template-columns: 1fr;
@@ -307,6 +481,18 @@ const [coverAvailable, pdfAvailable] = await Promise.all([
 
     .btn {
       text-align: center;
+    }
+
+    .book-cover-dialog {
+      max-width: calc(100vw - 1rem);
+    }
+
+    .book-cover-dialog-surface {
+      padding: 18px;
+    }
+
+    .book-cover-dialog-grid {
+      grid-template-columns: 1fr;
     }
   }
 </style>
