@@ -343,11 +343,16 @@ const booksWithAvailability = await Promise.all(
 
     .book-actions {
       gap: 8px;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
     }
 
     .btn {
-      padding: 10px 14px;
-      font-size: 0.75rem;
+      flex: 1 1 0;
+      padding: 10px 12px;
+      font-size: 0.72rem;
+      text-align: center;
     }
   }
 </style>
