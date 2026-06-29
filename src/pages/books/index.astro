@@ -37,6 +37,11 @@ const booksWithAvailability = await Promise.all(
     pdfAvailable: await isReachable(book.data.pdfUrl),
   }))
 );
+
+const galleryBooks =
+  booksWithAvailability.length > 0
+    ? Array.from({ length: 4 }, (_, index) => booksWithAvailability[index % booksWithAvailability.length])
+    : [];
 ---
 
 <BaseLayout title="Books" description="Free PDF downloads and hardcopy editions of The Forensic Brief series.">
@@ -64,23 +69,22 @@ const booksWithAvailability = await Promise.all(
     </div>
     <hr class="section-rule">
 
-    {booksWithAvailability.length > 0 ? (
-      <div class:list={['book-grid', booksWithAvailability.length === 1 && 'book-grid--single']}>
-        {booksWithAvailability.map((book) => (
-          <article class="book-card">
-            <a 
-              class="book-card-link" 
-              href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`}
-              aria-label={`Open ${book.data.title} book details`}
-            ></a>
+    {galleryBooks.length > 0 ? (
+      <div class="book-grid">
+        {galleryBooks.map((book, index) => (
+          <a
+            class="book-card"
+            href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`}
+            aria-label={`Open ${book.data.title} book details${index > 0 ? `, copy ${index + 1}` : ''}`}
+          >
             <div class="book-cover">
               {book.coverAvailable ? (
-                <img 
-                  src={book.data.cover} 
+                <img
+                  src={book.data.cover}
                   alt={`Cover of ${book.data.title}`}
                   width="300"
                   height="450"
-                  loading="lazy"
+                  loading={index === 0 ? 'eager' : 'lazy'}
                 />
               ) : (
                 <div class="book-cover-fallback" role="img" aria-label={`Cover unavailable for ${book.data.title}`}>
@@ -88,38 +92,8 @@ const booksWithAvailability = await Promise.all(
                 </div>
               )}
             </div>
-            <div class="book-info">
-              <span class="book-series">{book.data.series}</span>
-              <h2 class="book-title">{book.data.title}</h2>
-              <p class="book-blurb">{book.data.blurb}</p>
-              <div class="book-actions">
-                {book.pdfAvailable ? (
-                  <a 
-                    href={book.data.pdfUrl} 
-                    class="btn btn-primary"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Download PDF ({book.data.pdfSizeMB} MB)
-                  </a>
-                ) : (
-                  <span class="btn btn-primary btn-disabled" aria-disabled="true">PDF unavailable</span>
-                )}
-                {book.data.amazonUrl ? (
-                  <a 
-                    href={book.data.amazonUrl} 
-                    class="btn btn-secondary"
-                    target="_blank"
-                    rel="sponsored noopener noreferrer"
-                  >
-                    Buy on Amazon
-                  </a>
-                ) : (
-                  <span class="btn btn-secondary btn-disabled" aria-disabled="true">Amazon link unavailable</span>
-                )}
-              </div>
-            </div>
-          </article>
+            <h2 class="book-title">{book.data.title}</h2>
+          </a>
         ))}
       </div>
     ) : (
@@ -165,46 +139,34 @@ const booksWithAvailability = await Promise.all(
   .book-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 32px;
+    gap: 24px;
     align-items: start;
-  }
-
-  .book-grid--single {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   .book-card {
     position: relative;
-    display: grid;
-    grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    column-gap: 24px;
-    row-gap: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
     background: var(--bg-card);
     border: 1px solid var(--border-light);
-    padding: 28px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .book-card-link {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .book-cover,
-  .book-info {
-    position: relative;
-    z-index: 1;
+  .book-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(31, 41, 51, 0.08);
   }
 
   .book-cover {
-    pointer-events: none;
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    max-width: 180px;
     width: 100%;
-    align-self: start;
-    justify-self: start;
+    max-width: 160px;
+    width: 100%;
+    pointer-events: none;
   }
 
   .book-cover img {
@@ -215,91 +177,22 @@ const booksWithAvailability = await Promise.all(
 
   .book-cover-fallback {
     width: 100%;
-    min-height: 450px;
+    min-height: 240px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 16px;
     text-align: center;
     background: var(--bg);
     border: 1px solid var(--border-light);
     color: var(--text-muted);
-    font-size: var(--text-sm);
-  }
-
-  .book-info {
-    display: flex;
-    flex-direction: column;
-    pointer-events: none;
-    grid-column: 2;
-    grid-row: 1;
-    align-self: start;
-  }
-
-  .book-series {
-    font-size: var(--text-xs);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-light);
-    margin-bottom: 8px;
+    font-size: 0.8rem;
   }
 
   .book-title {
-    font-size: var(--text-xl);
-    margin-bottom: 12px;
-  }
-
-  .book-blurb {
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 24px;
-    flex: 1;
-  }
-
-  .book-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 2;
-    pointer-events: auto;
-    grid-column: 2;
-    grid-row: 2;
-    align-self: start;
-    margin-top: 4px;
-  }
-
-  .btn {
-    display: inline-block;
-    padding: 12px 20px;
-    font-size: var(--text-sm);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    text-decoration: none;
-    transition: opacity 0.2s;
-    border: none;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg);
-  }
-
-  .btn-secondary {
-    background: transparent;
+    font-size: 1rem;
+    text-align: center;
     color: var(--text-primary);
-    border: 1px solid var(--border);
-  }
-
-  .btn:hover {
-    opacity: 0.9;
-  }
-
-  .btn-disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
   }
 
   .empty-state {
@@ -311,63 +204,19 @@ const booksWithAvailability = await Promise.all(
 
   @media (max-width: 600px) {
     .book-grid {
-      grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 16px;
     }
 
     .book-card {
-      grid-template-columns: 88px minmax(0, 1fr);
-      column-gap: 16px;
-      row-gap: 12px;
-      padding: 18px;
+      padding: 14px;
     }
 
     .book-cover {
-      max-width: 88px;
+      max-width: 120px;
     }
 
     .book-cover-fallback {
-      min-height: 132px;
-      padding: 12px;
-      font-size: 0.72rem;
-    }
-
-    .book-series {
-      margin-bottom: 6px;
-    }
-
-    .book-title {
-      font-size: 1.15rem;
-      margin-bottom: 10px;
-    }
-
-    .book-blurb {
-      font-size: 0.82rem;
-      margin-bottom: 14px;
-    }
-
-    .book-actions {
-      gap: 8px;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: stretch;
-    }
-
-    .btn {
-      flex: 1 1 0;
-      padding: 10px 12px;
-      font-size: 0.72rem;
-      text-align: center;
-    }
-  }
-
-  @media (min-width: 601px) {
-    .book-grid--single .book-card {
-      grid-column: 1 / -1;
-    }
-
-    .book-actions {
-      flex-wrap: nowrap;
+      min-height: 180px;
     }
   }
 </style>
