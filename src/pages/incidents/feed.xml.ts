@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
+import { entrySlug } from '../../utils/contentEntries';
 
 export async function GET(context: APIContext) {
   const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
@@ -12,7 +13,7 @@ export async function GET(context: APIContext) {
       title: item.data.title,
       pubDate: item.data.date!,
       description: item.data.summary || '',
-      link: `/incidents/${item.id.replace(/\.(md|mdx)$/, '')}/`,
+      link: `/incidents/${entrySlug(item)}/`,
     }));
 
   return rss({

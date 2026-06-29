@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 import { hasContentFiles } from '../utils/hasContentFiles';
+import { entrySlug } from '../utils/contentEntries';
 
 export async function GET(context: APIContext) {
   let books = [];
@@ -33,7 +34,7 @@ export async function GET(context: APIContext) {
     '/topics/automation-bias/',
     ...collections.flatMap((items, index) => items.map((item) => {
       const names = ['incidents', 'essays', 'observations', 'artifacts', 'books'] as const;
-      return `/${names[index]}/${item.id.replace(/\.(md|mdx)$/, '')}/`;
+      return `/${names[index]}/${entrySlug(item)}/`;
     })),
   ];
 

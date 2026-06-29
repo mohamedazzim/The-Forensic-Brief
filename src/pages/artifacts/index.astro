@@ -4,6 +4,7 @@ import FilterBar from '../../components/FilterBar.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { entrySlug } from '../../utils/contentEntries';
 
 const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
 const sortedArtifacts = artifacts.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
@@ -63,10 +64,10 @@ const currentTopic = Astro.url.searchParams.get('topic') ?? '';
               <span class="artifact-version">v{artifact.data.version}</span>
             </div>
             <h2 class="artifact-title">
-              <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`}>{artifact.data.title}</a>
+              <a href={`/artifacts/${entrySlug(artifact)}/`}>{artifact.data.title}</a>
             </h2>
             {artifact.data.summary && <p class="artifact-summary">{artifact.data.summary}</p>}
-            <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`} class="artifact-link">
+            <a href={`/artifacts/${entrySlug(artifact)}/`} class="artifact-link">
               View artifact ->
             </a>
           </article>

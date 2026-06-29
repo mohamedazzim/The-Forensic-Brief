@@ -1,5 +1,6 @@
 ---
 title: "Decision Envelope"
+slug: "decision-envelope"
 artifactType: "template"
 version: "1.0"
 license: "CC BY 4.0"
@@ -19,4 +20,5 @@ downloads:
     sizeKB: 1.7
 status: draft
 featured: true
+contentFile: "decision-envelope-content.mdx"
 ---

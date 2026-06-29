@@ -5,6 +5,7 @@ import FilterBar from '../../components/FilterBar.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { entrySlug } from '../../utils/contentEntries';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 
@@ -73,7 +74,7 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
             excerpt={incident.data.summary}
             date={formatDate(incident.data.incidentDate, incident.data.incidentDateLabel)}
             category={`${incident.data.severity?.toUpperCase() || 'INCIDENT'}${incident.data.domain ? ` - ${incident.data.domain}` : ''}`}
-            href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
+            href={`/incidents/${entrySlug(incident)}/`}
             linkText="Read report"
             dataSeverity={incident.data.severity || ''}
             dataDomain={incident.data.domain ? incident.data.domain.toLowerCase().replace(/\s+/g, '-') : ''}

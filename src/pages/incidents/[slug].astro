@@ -4,20 +4,28 @@ import RelatedContent from '../../components/RelatedContent.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { entrySlug } from '../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 
 export async function getStaticPaths() {
   const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
   return incidents.map((incident) => ({
-    params: { slug: incident.id.replace(/\.(md|mdx)$/, '') },
+    params: { slug: entrySlug(incident) },
     props: { incident },
   }));
 }
 
 const { incident } = Astro.props;
-const { Content } = await incident.render();
-const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
+const incidentBodyModules = import.meta.glob('../../content/incidents/*-content.mdx');
+const incidentBodyPath = incident.data.contentFile
+  ? `../../content/incidents/${incident.data.contentFile}`
+  : '';
+const incidentBodyModule = incidentBodyPath && incidentBodyModules[incidentBodyPath]
+  ? await incidentBodyModules[incidentBodyPath]()
+  : null;
+const Content = incidentBodyModule?.default;
+const incidentUrl = `/incidents/${entrySlug(incident)}/`;
 const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '');
 ---
 
@@ -141,7 +149,7 @@ const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.in
     </div>
 
     <div class="article-content">
-      <Content />
+      {Content && <Content />}
     </div>
 
     <RelatedContent

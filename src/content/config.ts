@@ -1,4 +1,5 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const sharedPublished = {
   title: z.string(),
@@ -29,11 +30,14 @@ const sharedDraft = {
 };
 
 const incidents = defineCollection({
-  type: 'content',
-  glob: '**/*.{md,mdx}',
+  loader: glob({
+    base: './src/content/incidents',
+    pattern: ['**/*-metadata.md', '**/*-metadata.mdx'],
+  }),
   schema: z.union([
     z.object({
       ...sharedPublished,
+      contentFile: z.string(),
       incidentDate: z.date(),
       incidentDateLabel: z.string().optional(),
       systems: z.array(z.string()),
@@ -56,6 +60,7 @@ const incidents = defineCollection({
     }),
     z.object({
       ...sharedDraft,
+      contentFile: z.string().optional(),
       incidentDate: z.date().optional(),
       incidentDateLabel: z.string().optional(),
       systems: z.array(z.string()).default([]),
@@ -156,11 +161,14 @@ const observations = defineCollection({
 });
 
 const artifacts = defineCollection({
-  type: 'content',
-  glob: '**/*.{md,mdx}',
+  loader: glob({
+    base: './src/content/artifacts',
+    pattern: ['**/*-metadata.md', '**/*-metadata.mdx'],
+  }),
   schema: z.union([
     z.object({
       ...sharedPublished,
+      contentFile: z.string(),
       artifactType: z.enum(['template', 'checklist', 'table', 'framework', 'worksheet', 'audit']),
       version: z.string(),
       relatedEssays: z.array(z.string()).default([]),
@@ -175,6 +183,7 @@ const artifacts = defineCollection({
     }),
     z.object({
       ...sharedDraft,
+      contentFile: z.string().optional(),
       artifactType: z.enum(['template', 'checklist', 'table', 'framework', 'worksheet', 'audit']).optional(),
       version: z.string().optional(),
       relatedEssays: z.array(z.string()).default([]),

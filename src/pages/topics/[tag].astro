@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { entrySlug } from '../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const allContent = [
@@ -45,11 +46,11 @@ function getCollectionType(item: any) {
 }
 
 function getHref(item: any) {
-  const cleanId = item.id.replace(/\.(md|mdx)$/, '');
-  if (item.collection === 'incidents') return `/incidents/${cleanId}/`;
-  if (item.collection === 'essays') return `/essays/${cleanId}/`;
-  if (item.collection === 'observations') return `/observations/${cleanId}/`;
-  if (item.collection === 'artifacts') return `/artifacts/${cleanId}/`;
+  const slug = entrySlug(item);
+  if (item.collection === 'incidents') return `/incidents/${slug}/`;
+  if (item.collection === 'essays') return `/essays/${slug}/`;
+  if (item.collection === 'observations') return `/observations/${slug}/`;
+  if (item.collection === 'artifacts') return `/artifacts/${slug}/`;
   return '#';
 }
 ---

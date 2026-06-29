@@ -25,8 +25,40 @@ function checkTextFile(path) {
   assert(!txt.includes('自动生成'), `${path} contains removed placeholder text`);
 }
 
+function frontmatterValue(frontmatter, key) {
+  const match = frontmatter.match(new RegExp(`^${key}:\\s*["']?([^"'\r\n]+)["']?`, 'm'));
+  return match ? match[1].trim() : '';
+}
+
+function validateMetadataPairs(collectionDir) {
+  const dir = join(src, 'content', collectionDir);
+  const metadataFiles = walk(dir, (file) => file.endsWith('-metadata.md') || file.endsWith('-metadata.mdx'));
+
+  for (const file of metadataFiles) {
+    const raw = readFileSync(file, 'utf8');
+    const frontmatterMatch = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    assert(frontmatterMatch, `${file} is missing frontmatter`);
+
+    const frontmatter = frontmatterMatch[1];
+    const status = frontmatterValue(frontmatter, 'status');
+    const slug = frontmatterValue(frontmatter, 'slug');
+    const contentFile = frontmatterValue(frontmatter, 'contentFile');
+
+    assert(slug, `${file} is missing slug`);
+
+    if (status === 'published') {
+      assert(contentFile, `${file} is missing contentFile`);
+      assert(existsSync(join(dir, contentFile)), `${file} references missing content file: ${contentFile}`);
+    } else if (contentFile) {
+      assert(existsSync(join(dir, contentFile)), `${file} references missing content file: ${contentFile}`);
+    }
+  }
+}
+
 const srcFiles = walk(src, (f) => /\.(mdx?|astro|ts|js|mjs|json)$/.test(f));
 srcFiles.forEach(checkTextFile);
+validateMetadataPairs('incidents');
+validateMetadataPairs('artifacts');
 
 function readHtml(relativePath) {
   const filePath = join(dist, relativePath);
@@ -76,7 +108,11 @@ const requiredFiles = [
 requiredFiles.forEach((path) => assert(existsSync(join(dist, path)), `Missing generated file: ${path}`));
 
 assert(!existsSync(join(dist, 'incidents', 'air-canada-chatbot-refund', 'index.html')), 'Unsupported Air Canada incident route should not be generated');
+assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-metadata', 'index.html')), 'Incident metadata route should not be generated');
+assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-content', 'index.html')), 'Incident content route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope should not be generated');
+assert(!existsSync(join(dist, 'artifacts', 'mris-template-metadata', 'index.html')), 'Artifact metadata route should not be generated');
+assert(!existsSync(join(dist, 'artifacts', 'mris-template-content', 'index.html')), 'Artifact content route should not be generated');
 
 assertJsonLd('index.html', ['"@type":"WebSite"', '"@type":"Organization"']);
 assertJsonLd(join('incidents', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
@@ -101,6 +137,9 @@ assert(!html.includes('Newsletter signup is not configured yet'), 'Generated HTM
 assert(!html.includes('PDF preview coming soon'), 'Generated HTML should not include removed PDF preview placeholder');
 assert(!html.includes('/incidents/air-canada-chatbot-refund/'), 'Generated HTML should not link to unsupported incident content');
 assert(!html.includes('/artifacts/pa-01-six-dimensions-maturity-scorecard.pdf'), 'Generated HTML should not reference local production artifact files');
+assert(!html.includes('-metadata/'), 'Generated HTML should not expose metadata routes');
+assert(!html.includes('-content/'), 'Generated HTML should not expose content routes');
+assert(!html.includes('r2_uploads/'), 'Generated HTML should not expose r2_uploads paths');
 
 const artifactPages = [
   join('artifacts', 'mris-template', 'index.html'),

@@ -6,6 +6,7 @@ import NewsletterCTA from '../components/NewsletterCTA.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../utils/hasContentFiles';
+import { entrySlug } from '../utils/contentEntries';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay');
@@ -65,7 +66,7 @@ const featuredBooks = books.sort(byDateDesc).slice(0, 3);
           excerpt={incident.data.summary}
           date={formatDate(incident.data.incidentDate, incident.data.incidentDateLabel)}
           category="Incident Report"
-          href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
+          href={`/incidents/${entrySlug(incident)}/`}
           linkText="Read report"
         />
       ))}
@@ -126,7 +127,7 @@ const featuredBooks = books.sort(byDateDesc).slice(0, 3);
           excerpt={artifact.data.summary}
           date={formatDate(artifact.data.date, artifact.data.dateLabel)}
           category={artifact.data.artifactType}
-          href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`}
+          href={`/artifacts/${entrySlug(artifact)}/`}
           linkText="Open artifact"
         />
       ))}

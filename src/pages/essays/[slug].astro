@@ -6,6 +6,7 @@ import StructuredData from '../../components/StructuredData.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../../utils/hasContentFiles';
+import { entrySlug } from '../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -45,12 +46,12 @@ const relatedBook = essay.data.book
   : null;
 
 const relatedArtifact = essay.data.artifact
-  ? artifacts.find((artifact) => artifact.id.replace(/\.(md|mdx)$/, '') === essay.data.artifact)
+  ? artifacts.find((artifact) => entrySlug(artifact) === essay.data.artifact)
   : null;
 
 const relatedIncidentItems = essay.data.relatedIncidents
   .map((slug) => {
-    const incident = incidents.find((item) => item.id.replace(/\.(md|mdx)$/, '') === slug);
+    const incident = incidents.find((item) => entrySlug(item) === slug);
     return incident ? {
       title: incident.data.title,
       href: `/incidents/${slug}/`,
@@ -67,7 +68,7 @@ const relatedContentItems = [
   }] : []),
   ...(relatedArtifact ? [{
     title: relatedArtifact.data.title,
-    href: `/artifacts/${relatedArtifact.id.replace(/\.(md|mdx)$/, '')}/`,
+    href: `/artifacts/${entrySlug(relatedArtifact)}/`,
     type: 'Artifact',
   }] : []),
   ...relatedIncidentItems,
@@ -157,7 +158,7 @@ const relatedContentItems = [
         title: relatedBook.data.title,
       } : undefined}
       artifact={relatedArtifact ? {
-        slug: relatedArtifact.id.replace(/\.(md|mdx)$/, ''),
+        slug: entrySlug(relatedArtifact),
         title: relatedArtifact.data.title,
       } : undefined}
       series={essay.data.series}

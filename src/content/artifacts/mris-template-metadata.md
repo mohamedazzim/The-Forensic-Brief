@@ -1,5 +1,6 @@
 ---
 title: "MRIS - Model Residual-Risk Information Sheet (Template)"
+slug: "mris-template"
 date: 2026-09-09
 summary: "A bill-of-lading-style disclosure template for handing off an AI model's residual risks downstream."
 artifactType: "template"
@@ -24,4 +25,5 @@ downloads:
     sizeKB: 1.5
 status: published
 featured: true
+contentFile: "mris-template-content.mdx"
 ---

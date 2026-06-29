@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../../utils/hasContentFiles';
+import { entrySlug } from '../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 let books = [];
@@ -13,17 +14,25 @@ if (hasContentFiles('books')) {
 export async function getStaticPaths() {
   const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
   return artifacts.map((artifact) => ({
-    params: { slug: artifact.id.replace(/\.(md|mdx)$/, '') },
+    params: { slug: entrySlug(artifact) },
     props: { artifact },
   }));
 }
 
 const { artifact } = Astro.props;
-const { Content } = await artifact.render();
+const artifactBodyModules = import.meta.glob('../../content/artifacts/*-content.mdx');
+const artifactBodyPath = artifact.data.contentFile
+  ? `../../content/artifacts/${artifact.data.contentFile}`
+  : '';
+const artifactBodyModule = artifactBodyPath && artifactBodyModules[artifactBodyPath]
+  ? await artifactBodyModules[artifactBodyPath]()
+  : null;
+const Content = artifactBodyModule?.default;
 const artifactDateDisplay = artifact.data.dateLabel || (artifact.data.date ? artifact.data.date.toISOString().split('T')[0] : '');
 const relatedBook = artifact.data.relatedBook
-  ? books.find((b) => b.id.replace(/\.(md|mdx)$/, '') === artifact.data.relatedBook)
+  ? books.find((b) => entrySlug(b) === artifact.data.relatedBook)
   : null;
+const artifactUrl = `/artifacts/${entrySlug(artifact)}/`;
 
 const isRemoteUrl = (value?: string) => /^https?:\/\//i.test(value || '');
 
@@ -62,7 +71,7 @@ const downloadAvailability = await Promise.all(
     data={{
       name: artifact.data.title,
       description: artifact.data.summary,
-      url: `/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`,
+      url: artifactUrl,
       license: artifact.data.license,
     }}
   />
@@ -72,7 +81,7 @@ const downloadAvailability = await Promise.all(
       items: [
         { name: 'Home', url: '/' },
         { name: 'Artifacts', url: '/artifacts/' },
-        { name: artifact.data.title, url: `/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/` },
+        { name: artifact.data.title, url: artifactUrl },
       ],
     }}
   />
@@ -121,7 +130,7 @@ const downloadAvailability = await Promise.all(
     </header>
 
     <div class="artifact-content article-body">
-      <Content />
+      {Content && <Content />}
     </div>
 
     {artifact.data.relatedEssays.length > 0 && (
