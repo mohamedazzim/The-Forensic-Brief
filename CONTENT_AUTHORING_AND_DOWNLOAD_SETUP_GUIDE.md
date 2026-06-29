@@ -1,27 +1,33 @@
 # The Forensic Brief Content Authoring and Download Setup Guide
 
-This document explains, end to end, how to create and publish content for **The Forensic Brief** static Astro site.
+This guide documents the **current repo architecture** for adding and publishing content in **The Forensic Brief**.
 
 It covers:
 
-- how each content type works
-- where each file goes
-- how to write frontmatter
-- how to keep content source-backed
-- how artifacts and books use Cloudflare R2 downloads
+- metadata/content separation for Incidents and Artifacts
+- source-safe publishing rules
+- how clean public routes are generated
+- how to add new Incidents, Artifacts, Essays, Observations, and Books
+- how Cloudflare R2 downloads must be configured
+- how current index-page sorting and filter behavior works
 - how to validate before publishing
-- how to troubleshoot common failures
 
-This guide is written against the **current repo implementation** in:
+This guide is written against the current implementation in:
 
-- [package.json](C:\Azi\Blog_Proj\package.json)
-- [src/content/config.ts](C:\Azi\Blog_Proj\src\content\config.ts)
+- [src/content/config.ts](C:/Azi/Blog_Proj/src/content/config.ts)
+- [src/utils/contentEntries.ts](C:/Azi/Blog_Proj/src/utils/contentEntries.ts)
+- [src/pages/incidents/index.astro](C:/Azi/Blog_Proj/src/pages/incidents/index.astro)
+- [src/pages/incidents/[slug].astro](C:/Azi/Blog_Proj/src/pages/incidents/[slug].astro)
+- [src/pages/artifacts/index.astro](C:/Azi/Blog_Proj/src/pages/artifacts/index.astro)
+- [src/pages/artifacts/[slug].astro](C:/Azi/Blog_Proj/src/pages/artifacts/[slug].astro)
+- [src/pages/books/[slug].astro](C:/Azi/Blog_Proj/src/pages/books/[slug].astro)
+- [src/pages/essays/index.astro](C:/Azi/Blog_Proj/src/pages/essays/index.astro)
+- [scripts/validate-content-links.mjs](C:/Azi/Blog_Proj/scripts/validate-content-links.mjs)
+- [scripts/smoke-check.mjs](C:/Azi/Blog_Proj/scripts/smoke-check.mjs)
 
-## 1. Site Architecture Overview
+## 1. Current Content Architecture
 
-The site is built with **Astro** and stores content as Markdown or MDX files under [src/content](C:\Azi\Blog_Proj\src\content).
-
-Current content collections:
+The site has five content collections:
 
 - `incidents`
 - `essays`
@@ -29,150 +35,172 @@ Current content collections:
 - `artifacts`
 - `books`
 
-Each content file:
+The architecture is **not the same for every collection**.
 
-1. lives in the correct collection folder
-2. contains frontmatter at the top
-3. contains body content below frontmatter
-4. is validated by the schema in [src/content/config.ts](C:\Azi\Blog_Proj\src\content\config.ts)
-5. is published only if `status: published`
+### Essays, Observations, and Books
 
-## 2. High-Level Publishing Workflow
+These remain single-file content entries:
 
-Use this workflow for any new content item.
+- `src/content/essays/<slug>.mdx`
+- `src/content/observations/<slug>.mdx`
+- `src/content/books/<slug>.mdx`
 
-### Step 1: Prepare the source material
+The same file contains:
 
-Before writing anything into the repo, gather the real source material:
+- frontmatter metadata
+- body content
 
-- manuscript or article text
-- dates
-- title
-- summary/dek
-- tags
-- related content links
-- download files if applicable
-- book cover files if applicable
+### Incidents
 
-Do not invent:
+Incidents now use **metadata/content separation**:
 
-- incident facts
-- book blurbs
-- Amazon URLs
-- ISBNs
-- download files
-- file sizes
-- publication dates
-
-If information is missing:
-
-- keep the content as `draft`
-- or leave optional fields blank
-- or hide unavailable actions honestly
-
-### Step 2: Choose the right content type
-
-Pick one of:
-
-- Incident
-- Essay
-- Pattern essay
-- Observation
-- Artifact
-- Book
-
-### Step 3: Create the content file
-
-Create the file in the correct folder:
-
-- Incidents: [src/content/incidents](C:\Azi\Blog_Proj\src\content\incidents)
-- Essays: [src/content/essays](C:\Azi\Blog_Proj\src\content\essays)
-- Observations: [src/content/observations](C:\Azi\Blog_Proj\src\content\observations)
-- Artifacts: [src/content/artifacts](C:\Azi\Blog_Proj\src\content\artifacts)
-- Books: [src/content/books](C:\Azi\Blog_Proj\src\content\books)
-
-Use lowercase, hyphenated file names:
-
-- `samsung-chatgpt-one-way-door.mdx`
-- `whitebox-red-teaming.mdx`
-- `mris-template.mdx`
-
-### Step 4: Add frontmatter
-
-Frontmatter is the metadata block at the top of the file between `---` lines.
+- `src/content/incidents/<slug>-metadata.md`
+- `src/content/incidents/<slug>-content.mdx`
 
 Example:
 
-```md
----
-title: "Example Title"
-date: 2026-06-01
-summary: "Example summary."
-status: draft
----
-```
+- [src/content/incidents/samsung-chatgpt-one-way-door-metadata.md](C:/Azi/Blog_Proj/src/content/incidents/samsung-chatgpt-one-way-door-metadata.md)
+- [src/content/incidents/samsung-chatgpt-one-way-door-content.mdx](C:/Azi/Blog_Proj/src/content/incidents/samsung-chatgpt-one-way-door-content.mdx)
 
-### Step 5: Add body content
+### Artifacts
 
-Write the actual content below the frontmatter.
+Artifacts also use **metadata/content separation**:
 
-Use Markdown or MDX.
+- `src/content/artifacts/<slug>-metadata.md`
+- `src/content/artifacts/<slug>-content.mdx`
 
-### Step 6: Upload download assets if needed
+Example:
 
-Only artifacts and books usually need R2 asset uploads.
+- [src/content/artifacts/mris-template-metadata.md](C:/Azi/Blog_Proj/src/content/artifacts/mris-template-metadata.md)
+- [src/content/artifacts/mris-template-content.mdx](C:/Azi/Blog_Proj/src/content/artifacts/mris-template-content.mdx)
 
-### Step 7: Validate locally
+## 2. What Metadata Files Control
 
-Run:
+For separated collections, the `*-metadata.md` file controls:
 
-```powershell
-npm run build
-npm run validate:content
-npm run test:e2e
-```
+- title
+- slug
+- status
+- date
+- `dateLabel` if used
+- `updated`
+- summary
+- author
+- tags
+- featured state
+- filters/sorting metadata
+- related content metadata
+- downloads for Artifacts
+- the `contentFile` reference
 
-### Step 8: Commit and push
+Metadata files drive:
 
-If all checks pass:
+- index cards
+- collection listings
+- RSS/feed inclusion
+- topic-page inclusion
+- sitemap inclusion
+- search inclusion
+- clean route generation
 
-```powershell
-git add src/content ...
-git commit -m "Add new content"
-git push origin master
-```
+## 3. What Content Files Control
 
-Cloudflare Pages will then rebuild the site.
+For separated collections, the `*-content.mdx` file controls:
 
-## 3. Repo Paths You Need to Know
+- long-form article body
+- full readable detail-page content
+- structured MDX body sections
+- inline artifact preview/body content
 
-### Content source folders
+Content files do **not** control whether a card appears in a listing.  
+That is controlled by the metadata file and its `status`.
 
-- [src/content/incidents](C:\Azi\Blog_Proj\src\content\incidents)
-- [src/content/essays](C:\Azi\Blog_Proj\src\content\essays)
-- [src/content/observations](C:\Azi\Blog_Proj\src\content\observations)
-- [src/content/artifacts](C:\Azi\Blog_Proj\src\content\artifacts)
-- [src/content/books](C:\Azi\Blog_Proj\src\content\books)
+## 4. Clean Public Routes
 
-### Validation and build scripts
+Public routes must always use the **clean slug only**.
 
-- [package.json](C:\Azi\Blog_Proj\package.json)
-- [scripts/validate-content-links.mjs](C:\Azi\Blog_Proj\scripts\validate-content-links.mjs)
-- [scripts/smoke-check.mjs](C:\Azi\Blog_Proj\scripts\smoke-check.mjs)
+### Valid public routes
 
-### Schema definition
+- `/incidents/<slug>/`
+- `/artifacts/<slug>/`
+- `/essays/<slug>/`
+- `/observations/<slug>/`
+- `/books/<slug>/`
 
-- [src/content/config.ts](C:\Azi\Blog_Proj\src\content\config.ts)
+### These routes must never be generated
 
-### Download URL config reference
+- `/incidents/<slug>-metadata/`
+- `/incidents/<slug>-content/`
+- `/artifacts/<slug>-metadata/`
+- `/artifacts/<slug>-content/`
 
-- [src/config/downloads.ts](C:\Azi\Blog_Proj\src\config\downloads.ts)
+The route helper in [src/utils/contentEntries.ts](C:/Azi/Blog_Proj/src/utils/contentEntries.ts) strips `-metadata` and `-content` from clean slugs.
 
-## 4. Shared Frontmatter Rules
+## 5. How Index and Detail Pages Work
 
-All content types are based on shared fields defined in [src/content/config.ts](C:\Azi\Blog_Proj\src\content\config.ts).
+### Incidents
 
-### Shared fields for published items
+- index page reads only metadata entries from [src/content/incidents](C:/Azi/Blog_Proj/src/content/incidents)
+- detail page loads the metadata entry plus its paired `contentFile`
+
+Current implementation:
+
+- [src/pages/incidents/index.astro](C:/Azi/Blog_Proj/src/pages/incidents/index.astro)
+- [src/pages/incidents/[slug].astro](C:/Azi/Blog_Proj/src/pages/incidents/[slug].astro)
+
+### Artifacts
+
+- index page reads only metadata entries from [src/content/artifacts](C:/Azi/Blog_Proj/src/content/artifacts)
+- detail page loads the metadata entry plus its paired `contentFile`
+
+Current implementation:
+
+- [src/pages/artifacts/index.astro](C:/Azi/Blog_Proj/src/pages/artifacts/index.astro)
+- [src/pages/artifacts/[slug].astro](C:/Azi/Blog_Proj/src/pages/artifacts/[slug].astro)
+
+### Draft behavior
+
+Draft items must not appear in:
+
+- index pages
+- sitemap
+- RSS/feed output
+- topic pages
+- search output
+
+## 6. Source-Backed Publishing Rules
+
+Only publish what is source-backed.
+
+Allowed sources:
+
+- TDD-backed information
+- approved sample material
+- mentor-approved values
+- verified R2 URLs
+
+Do not:
+
+- invent metadata
+- infer severity, domain, version, or date
+- guess source URLs
+- use generated placeholder prose
+- publish uncertain metadata
+
+If required metadata is missing:
+
+- keep the item as `draft`
+
+If the body content is missing:
+
+- keep the item as `draft`
+- or only render a safe metadata shell if the architecture explicitly supports it
+
+Never publish guessed values just to satisfy schema requirements.
+
+## 7. Shared Frontmatter Basics
+
+Shared fields in [src/content/config.ts](C:/Azi/Blog_Proj/src/content/config.ts) include:
 
 ```yaml
 title: string
@@ -182,963 +210,175 @@ updated: date (optional)
 summary: string
 author: string
 tags: string[]
-status: published
+status: published | draft
 featured: boolean
 heroImage: string (optional)
 ogImage: string (optional)
 ```
 
-### Shared fields for draft items
+Published items require more fields than drafts.  
+If the entry is incomplete, keep it as `draft`.
 
-Draft entries allow more missing fields.
+## 8. How to Add a New Incident
 
-Important rule:
-
-- if the content is incomplete, use `status: draft`
-- if the content is complete and should go live, use `status: published`
-
-## 5. INCIDENT Content Guide
-
-### Purpose
-
-Use an **incident** for a documented AI failure case.
-
-### Folder
-
-- [src/content/incidents](C:\Azi\Blog_Proj\src\content\incidents)
-
-### URL pattern
-
-File:
-
-- `src/content/incidents/some-incident.mdx`
-
-Route:
-
-- `/incidents/some-incident/`
-
-### Published incident schema
-
-Required fields:
-
-```yaml
-title
-date
-summary
-status: published
-incidentDate
-systems
-domain
-severity
-corroboration
-sources
-timeline
-rootCause
-contributoryFactors
-```
-
-### Incident template
-
-```md
----
-title: "Incident Title"
-date: 2026-06-25
-dateLabel: "25 June 2026"
-summary: "Short factual description of what happened."
-author: "Dr. Anandkumar Prakasam"
-tags: ["provenance"]
-status: published
-featured: true
-
-incidentDate: 2023-04-01
-incidentDateLabel: "April 2023"
-systems: ["Vendor", "Product"]
-domain: "customer service"
-severity: "high"
-corroboration: "A short corroborating signal."
-
-sources:
-  - label: "Primary source"
-    url: "https://example.com"
-
-timeline:
-  - date: 2023-04-01
-    label: "April 2023"
-    event: "The triggering event."
-  - date: 2023-04-05
-    label: "Five days later"
-    event: "The next important event."
-
-rootCause: "One sentence root cause."
-contributoryFactors:
-  - "Factor one"
-  - "Factor two"
-
-relatedPatterns: []
-relatedEssays: []
----
-
-## Summary
-
-Write the incident narrative here.
-
-## Evidence
-
-Document the supporting evidence here.
-
-## Analysis
-
-Explain the failure and governance implications here.
-```
-
-### Notes
-
-- `severity` must be one of:
-  - `low`
-  - `moderate`
-  - `high`
-  - `critical`
-- `systems` is an array
-- `sources` must be structured
-- `timeline` must be structured
-
-### Current example
-
-- [src/content/incidents/samsung-chatgpt-one-way-door.mdx](C:\Azi\Blog_Proj\src\content\incidents\samsung-chatgpt-one-way-door.mdx)
-
-## 6. ESSAY Content Guide
-
-### Purpose
-
-Use an **essay** for long-form analysis.
-
-There are two essay modes:
-
-- standard essay
-- pattern essay
-
-### Folder
-
-- [src/content/essays](C:\Azi\Blog_Proj\src\content\essays)
-
-### URL pattern
-
-File:
-
-- `src/content/essays/example-essay.mdx`
-
-Route:
-
-- `/essays/example-essay/`
-
-### Series values
-
-Allowed `series` values:
-
-- `human-in-control`
-- `out-of-bounds`
-- `accountable-autonomy`
-- `six-dimensions`
-- `the-burden`
-
-### Standard essay template
-
-```md
----
-title: "Essay Title"
-date: 2026-06-01
-dateLabel: "June 2026"
-summary: "Short essay summary."
-author: "Dr. Anandkumar Prakasam"
-tags: ["red-teaming"]
-status: published
-featured: true
-
-category: "essay"
-series: "out-of-bounds"
-seriesNo: 1
-readingTime: 8
-book: "human-in-control"
-artifact: "decision-envelope"
-prev: "previous-slug"
-next: "next-slug"
-linkedinUrl: "https://www.linkedin.com/..."
-mediumUrl: "https://medium.com/..."
-patentSensitive: false
----
-
-Essay body here.
-```
-
-### Pattern essay template
-
-Use this when `category: "pattern"`.
-
-Required extra fields for published patterns:
-
-- `patternId`
-- `signature`
-- `metric`
-
-Template:
-
-```md
----
-title: "Pattern Title"
-date: 2026-05-15
-summary: "Short structured pattern summary."
-author: "Dr. Anandkumar Prakasam"
-tags: ["llm-security"]
-status: published
-featured: false
-
-category: "pattern"
-patternId: "P-ATTENTION-DECAY"
-signature: "The recurring failure."
-metric: "Measured signature."
-relatedIncidents: ["incident-slug"]
----
-
-## Where It Appears
-
-...
-
-## Evidence
-
-...
-
-## What To Measure
-
-...
-```
-
-### Current examples
-
-- Standard essay:
-  - [src/content/essays/whitebox-red-teaming.mdx](C:\Azi\Blog_Proj\src\content\essays\whitebox-red-teaming.mdx)
-- Pattern essay:
-  - [src/content/essays/detection-drop-line-600.mdx](C:\Azi\Blog_Proj\src\content\essays\detection-drop-line-600.mdx)
-
-## 7. OBSERVATION Content Guide
-
-### Purpose
-
-Use an **observation** for shorter field-note-style material.
-
-### Folder
-
-- [src/content/observations](C:\Azi\Blog_Proj\src\content\observations)
-
-### URL pattern
-
-- `/observations/{slug}/`
-
-### Required published field
-
-- `observationStatus`
-
-Allowed values:
-
-- `preliminary`
-- `ongoing`
-- `resolved`
-
-### Observation template
-
-```md
----
-title: "Observation Title"
-date: 2026-06-01
-dateLabel: "June 2026"
-summary: "Short observation summary."
-author: "Dr. Anandkumar Prakasam"
-tags: []
-status: published
-featured: false
-observationStatus: preliminary
----
-
-Observation content here.
-```
-
-### Current example
-
-- [src/content/observations/the-attack-that-left-no-fingerprints.mdx](C:\Azi\Blog_Proj\src\content\observations\the-attack-that-left-no-fingerprints.mdx)
-
-## 8. ARTIFACT Content Guide
-
-### Purpose
-
-Use an **artifact** for downloadable governance tools:
-
-- templates
-- checklists
-- tables
-- frameworks
-- worksheets
-- audits
-
-### Folder
-
-- [src/content/artifacts](C:\Azi\Blog_Proj\src\content\artifacts)
-
-### URL pattern
-
-- `/artifacts/{slug}/`
-
-### Allowed artifact types
-
-- `template`
-- `checklist`
-- `table`
-- `framework`
-- `worksheet`
-- `audit`
-
-### Allowed download formats
-
-- `PDF`
-- `DOCX`
-- `XLSX`
-- `Markdown`
-
-### Required published fields
-
-```yaml
-title
-date
-summary
-status: published
-artifactType
-version
-downloads (minimum 1)
-```
-
-### Artifact template
-
-```md
----
-title: "Artifact Title"
-date: 2026-06-01
-dateLabel: "June 2026"
-summary: "What this artifact does."
-author: "Dr. Anandkumar Prakasam"
-tags: ["ai-governance"]
-status: published
-featured: true
-
-artifactType: worksheet
-version: "1.0"
-relatedEssays: ["essay-slug"]
-relatedBook: "human-in-control"
-inlinePreview: true
-license: "CC BY 4.0"
-
-downloads:
-  - format: "PDF"
-    url: "https://files.theforensicbrief.com/artifacts/example-v1.pdf"
-    sizeKB: 95
-  - format: "DOCX"
-    url: "https://files.theforensicbrief.com/artifacts/example-v1.docx"
-    sizeKB: 36
----
-
-## What it is
-
-...
-
-## When to use it
-
-...
-
-## How to use it
-
-...
-```
-
-### Current examples
-
-- [src/content/artifacts/six-dimensions-maturity-scorecard.mdx](C:\Azi\Blog_Proj\src\content\artifacts\six-dimensions-maturity-scorecard.mdx)
-- [src/content/artifacts/mris-template.mdx](C:\Azi\Blog_Proj\src\content\artifacts\mris-template.mdx)
-
-## 9. BOOK Content Guide
-
-### Purpose
-
-Use a **book** entry for:
-
-- book landing page
-- cover display
-- optional back cover preview
-- PDF action
-- Amazon action
-- table of contents
-
-### Folder
-
-- [src/content/books](C:\Azi\Blog_Proj\src\content\books)
-
-### URL pattern
-
-- `/books/{slug}/`
-
-### Required published fields
-
-```yaml
-title
-date
-summary
-status: published
-cover
-series
-blurb
-toc
-pdfUrl
-pdfSizeMB
-amazonUrl
-```
-
-### Book template
-
-```md
----
-title: "Book Title"
-date: 2026-06-29
-summary: "Short book summary."
-author: "Dr. Anandkumar Prakasam"
-tags: []
-status: published
-featured: true
-
-cover: "https://files.theforensicbrief.com/books/book-front-cover.jpg"
-coverAvailable: true
-backCover: "https://files.theforensicbrief.com/books/book-back-cover.jpg"
-backCoverAvailable: true
-
-series: "human-in-control"
-blurb: "Approved book blurb here."
-toc:
-  - "Chapter One"
-  - "Chapter Two"
-
-pdfUrl: "https://files.theforensicbrief.com/books/book.pdf"
-pdfSizeMB: 2.4
-amazonUrl: "https://www.amazon.com/..."
-isbn: "978-..."
-pages: 180
----
-
-Book body here.
-```
-
-### Current example
-
-- [src/content/books/human-in-control.mdx](C:\Azi\Blog_Proj\src\content\books\human-in-control.mdx)
-
-### Important book rules
-
-- do not invent Amazon URLs
-- do not invent ISBNs
-- do not invent page counts
-- do not publish fake PDFs
-- if the PDF does not exist, keep the state honest
-
-## 10. Utility Pages
-
-Utility pages are not in `src/content`. They are standalone Astro pages:
-
-- [src/pages/about.astro](C:\Azi\Blog_Proj\src\pages\about.astro)
-- [src/pages/methodology.astro](C:\Azi\Blog_Proj\src\pages\methodology.astro)
-- [src/pages/disclaimer.astro](C:\Azi\Blog_Proj\src\pages\disclaimer.astro)
-
-Use these for static informational content that is not part of the content collections.
-
-## 11. How Cloudflare R2 Downloads Work
-
-This is the most important section for downloadable files.
-
-### Core rule
-
-Content pages and downloadable files are different things:
-
-- Markdown/MDX content files live in the repo
-- downloadable binaries or public assets live in R2
-
-You do **not** upload `.md` source files to R2 just to make content render on the site.
-
-You **do** upload files like:
-
-- PDF
-- DOCX
-- XLSX
-- cover JPG/PNG
-- sample PDF
-
-when the site must serve them as downloadable or display assets.
-
-## 12. What Goes to R2 and What Stays in Git
-
-### Stays in git / repo
-
-These are authoring source files:
-
-- incident `.mdx`
-- essay `.mdx`
-- observation `.mdx`
-- artifact `.mdx`
-- book `.mdx`
-- small site code and layouts
-
-### Goes to R2
-
-These are public file assets:
-
-- artifact PDFs
-- artifact DOCX files
-- artifact XLSX files
-- book PDFs
-- book cover images
-- back cover images
-- optional preview/sample files
-
-## 13. R2 Naming Convention
-
-Be consistent with names.
-
-### Artifact naming examples
-
-```text
-artifacts/decision-envelope-v1.pdf
-artifacts/decision-envelope-v1.docx
-artifacts/mris-template-v1.pdf
-artifacts/mris-template-v1.docx
-artifacts/mris-template-v1.xlsx
-artifacts/six-dimensions-maturity-scorecard-v1.pdf
-```
-
-### Book naming examples
-
-```text
-books/human-in-control-front-cover.jpg
-books/human-in-control-back-cover.jpg
-books/human-in-control.pdf
-```
-
-### Public URL pattern
-
-The repo currently uses:
-
-```text
-https://files.theforensicbrief.com
-```
-
-So:
-
-```text
-artifacts/six-dimensions-maturity-scorecard-v1.pdf
-```
-
-becomes:
-
-```text
-https://files.theforensicbrief.com/artifacts/six-dimensions-maturity-scorecard-v1.pdf
-```
-
-## 14. End-to-End Artifact Download Setup
-
-This is the full artifact-download workflow.
-
-### Step 1: Prepare the artifact content file
+### Step 1: Create the metadata file
 
 Create:
 
-- [src/content/artifacts/your-artifact.mdx](C:\Azi\Blog_Proj\src\content\artifacts)
+- `src/content/incidents/<slug>-metadata.md`
 
-Example frontmatter:
+### Step 2: Create the content file
+
+Create:
+
+- `src/content/incidents/<slug>-content.mdx`
+
+### Step 3: Add metadata frontmatter
+
+Use this pattern:
 
 ```yaml
-downloads:
-  - format: "PDF"
-    url: "https://files.theforensicbrief.com/artifacts/your-artifact-v1.pdf"
-    sizeKB: 95
+---
+title: "Approved incident title"
+slug: "approved-incident-slug"
+status: "draft"
+date: 2026-06-01
+dateLabel: "Source-backed human-readable date"
+summary: "Exact approved card summary or excerpt"
+author: "Dr. Anandkumar Prakasam"
+tags: []
+featured: false
+contentFile: "approved-incident-slug-content.mdx"
+systems: []
+---
 ```
 
-### Step 2: Upload the real file to R2
+### Step 4: Add optional fields only when source-backed
 
-Upload the real file to your R2 bucket using the exact object path:
+Examples:
 
-```text
-artifacts/your-artifact-v1.pdf
+```yaml
+severity: "high"
+domain: "semiconductor engineering"
+incidentDate: 2023-04-01
+incidentDateLabel: "April 2023"
+sources:
+  - label: "Source label"
+    url: "https://..."
+timeline:
+  - date: 2023-04-01
+    event: "Exact/source-backed event"
+rootCause: "Exact/source-backed root cause"
+contributoryFactors:
+  - "Exact/source-backed factor"
+relatedPatterns: []
+relatedEssays: []
+corroboration: "Exact/source-backed corroboration"
 ```
 
-### Step 3: Verify the file is reachable
+### Step 5: Add the long-form body
 
-Run:
+Write the readable detail-page body in:
 
-```powershell
-curl.exe -I https://files.theforensicbrief.com/artifacts/your-artifact-v1.pdf
-```
+- `src/content/incidents/<slug>-content.mdx`
 
-Expected:
-
-```text
-HTTP/1.1 200 OK
-```
-
-If you get:
-
-- `404 Not Found`
-- `403 Forbidden`
-
-do not publish that URL yet.
-
-### Step 4: Put the verified URL into frontmatter
-
-Update the artifact file so the URL matches the real upload exactly.
-
-### Step 5: Rebuild the site
-
-Run:
-
-```powershell
-npm run build
-```
+### Step 6: Keep it draft until fully source-backed
 
 Important:
 
-The artifact page checks file availability during build.
+- keep `status: draft` until all required published metadata is source-backed
+- do not publish guessed severity/domain/date/source URLs
+- use `dateLabel` or `incidentDateLabel` only when that text is source-backed
 
-That means:
+## 9. How to Add a New Artifact
 
-- if you upload the R2 file after the last deploy, the live page will still show the old state
-- you must trigger a new build and deploy
-
-### Step 6: Run repo checks
-
-```powershell
-npm run validate:content
-npm run test:e2e
-```
-
-### Step 7: Commit and push
-
-```powershell
-git add src/content/artifacts/your-artifact.mdx
-git commit -m "Enable artifact download"
-git push origin master
-```
-
-### Step 8: Wait for Cloudflare Pages to deploy
-
-After deployment, open the artifact route and confirm the button appears.
-
-## 15. End-to-End Book Download and Cover Setup
-
-### Step 1: Prepare book content file
+### Step 1: Create the metadata file
 
 Create:
 
-- [src/content/books/your-book.mdx](C:\Azi\Blog_Proj\src\content\books)
+- `src/content/artifacts/<slug>-metadata.md`
 
-### Step 2: Upload front cover
+### Step 2: Create the content file
 
-Example object key:
+Create:
 
-```text
-books/your-book-front-cover.jpg
-```
+- `src/content/artifacts/<slug>-content.mdx`
 
-### Step 3: Upload back cover
+### Step 3: Add metadata frontmatter
 
-Example object key:
-
-```text
-books/your-book-back-cover.jpg
-```
-
-### Step 4: Upload PDF if available
-
-Example object key:
-
-```text
-books/your-book.pdf
-```
-
-### Step 5: Verify each uploaded file
-
-```powershell
-curl.exe -I https://files.theforensicbrief.com/books/your-book-front-cover.jpg
-curl.exe -I https://files.theforensicbrief.com/books/your-book-back-cover.jpg
-curl.exe -I https://files.theforensicbrief.com/books/your-book.pdf
-```
-
-### Step 6: Add exact URLs to frontmatter
+Use this pattern:
 
 ```yaml
-cover: "https://files.theforensicbrief.com/books/your-book-front-cover.jpg"
-backCover: "https://files.theforensicbrief.com/books/your-book-back-cover.jpg"
-pdfUrl: "https://files.theforensicbrief.com/books/your-book.pdf"
+---
+title: "Approved artifact title"
+slug: "approved-artifact-slug"
+status: "draft"
+date: 2026-06-01
+summary: "Approved source-backed summary"
+author: "Dr. Anandkumar Prakasam"
+tags: []
+featured: false
+artifactType: "template"
+license: "CC BY 4.0"
+relatedEssays: []
+relatedBook: ""
+inlinePreview: true
+contentFile: "approved-artifact-slug-content.mdx"
+downloads: []
+---
 ```
 
-### Step 7: Keep unavailable states honest
-
-If the PDF is not real yet:
-
-- do not fake it
-- do not put a made-up URL
-- keep the book draft
-- or keep the action unavailable
-
-### Step 8: Build, validate, test, push
-
-```powershell
-npm run build
-npm run validate:content
-npm run test:e2e
-git add src/content/books/your-book.mdx
-git commit -m "Add book entry"
-git push origin master
-```
-
-## 16. How Pages Are Linked to Uploaded Files
-
-Uploaded files are linked through **frontmatter URLs**, not automatically by folder name.
+### Step 4: Add optional fields only when source-backed
 
 Example:
 
-- content file:
-  - [src/content/artifacts/six-dimensions-maturity-scorecard.mdx](C:\Azi\Blog_Proj\src\content\artifacts\six-dimensions-maturity-scorecard.mdx)
-- download URL in frontmatter:
-  - `https://files.theforensicbrief.com/artifacts/six-dimensions-maturity-scorecard-v1.pdf`
-- live page:
-  - `/artifacts/six-dimensions-maturity-scorecard/`
-
-The page becomes downloadable because the content file explicitly includes that URL.
-
-## 17. How to Read and Reuse Existing Content Files
-
-Before creating new content, inspect current examples.
-
-Recommended references:
-
-### Incident example
-
-- [src/content/incidents/samsung-chatgpt-one-way-door.mdx](C:\Azi\Blog_Proj\src\content\incidents\samsung-chatgpt-one-way-door.mdx)
-
-### Essay examples
-
-- [src/content/essays/whitebox-red-teaming.mdx](C:\Azi\Blog_Proj\src\content\essays\whitebox-red-teaming.mdx)
-- [src/content/essays/detection-drop-line-600.mdx](C:\Azi\Blog_Proj\src\content\essays\detection-drop-line-600.mdx)
-
-### Observation example
-
-- [src/content/observations/the-attack-that-left-no-fingerprints.mdx](C:\Azi\Blog_Proj\src\content\observations\the-attack-that-left-no-fingerprints.mdx)
-
-### Artifact examples
-
-- [src/content/artifacts/six-dimensions-maturity-scorecard.mdx](C:\Azi\Blog_Proj\src\content\artifacts\six-dimensions-maturity-scorecard.mdx)
-- [src/content/artifacts/mris-template.mdx](C:\Azi\Blog_Proj\src\content\artifacts\mris-template.mdx)
-
-### Book example
-
-- [src/content/books/human-in-control.mdx](C:\Azi\Blog_Proj\src\content\books\human-in-control.mdx)
-
-## 18. Validation Commands
-
-The project currently uses these scripts:
-
-### Build
-
-```powershell
-npm run build
+```yaml
+version: "1.0"
 ```
 
-What it does:
+### Step 5: Add downloads only when R2-backed and verified
 
-- builds Astro static output
-- generates `dist`
-- runs Pagefind search indexing
+Example:
 
-### Content validation
-
-```powershell
-npm run validate:content
+```yaml
+downloads:
+  - format: "PDF"
+    url: "https://files.theforensicbrief.com/artifacts/example-v1.pdf"
+    sizeKB: 120
 ```
 
-What it checks:
+### Step 6: Write the body content
 
-- required generated routes
-- placeholder/fake text removal
-- expected HTML output
-- active download links for certain artifact pages
+Place the full readable body in:
 
-### Smoke / e2e check
+- `src/content/artifacts/<slug>-content.mdx`
 
-```powershell
-npm run test:e2e
-```
+### Step 7: Follow the production download rules
 
-What it checks:
+- never use `/public/artifacts/...` for production downloads
+- never use `r2_uploads/...` in published metadata
+- only use `https://files.theforensicbrief.com/...` after the file returns `200 OK`
+- draft artifacts may keep empty `downloads: []`
 
-- route presence
-- search page
-- books and artifacts routes
-- pattern page
-- newsletter leak regression
-- other basic production expectations
+## 10. How to Add a New Essay
 
-## 19. Common Failure Cases
+Essays remain single-file entries:
 
-### Problem: page does not appear
+- `src/content/essays/<slug>.mdx`
 
-Possible causes:
+Current essay behavior:
 
-- file is in wrong folder
-- frontmatter is invalid
-- `status: draft`
-- filename does not match expected slug
+- `/essays/` has **no category filter**
+- `/essays/` uses a **Series dropdown**
+- `/essays/patterns/` remains a separate route
 
-### Problem: build fails with schema error
+### Standard essay example
 
-Possible causes:
-
-- missing required published fields
-- invalid enum value
-- malformed YAML frontmatter
-
-Fix:
-
-- compare with [src/content/config.ts](C:\Azi\Blog_Proj\src\content\config.ts)
-- set `status: draft` until required fields are complete
-
-### Problem: download button does not show
-
-Possible causes:
-
-- file uploaded to R2 after last deploy
-- wrong R2 file path
-- URL in frontmatter does not exactly match upload
-- file returns `404`
-
-Fix:
-
-1. verify with `curl.exe -I`
-2. update frontmatter if needed
-3. rebuild and redeploy
-
-### Problem: download exists in R2 but live page still says unavailable
-
-Cause:
-
-- the site is static
-- availability was checked during an earlier build
-
-Fix:
-
-1. confirm `200 OK`
-2. make a repo change if needed
-3. rebuild
-4. push
-5. wait for Pages deploy
-
-### Problem: book cover image broken
-
-Possible causes:
-
-- wrong R2 key
-- wrong frontmatter URL
-- file not public
-
-Fix:
-
-```powershell
-curl.exe -I https://files.theforensicbrief.com/books/your-book-front-cover.jpg
-```
-
-### Problem: Markdown source file was uploaded to R2 but page still missing
-
-Cause:
-
-- content source files do not render from R2
-- the site reads content from `src/content`, not from the R2 bucket
-
-Fix:
-
-- keep the `.md` or `.mdx` file in the repo
-- only upload binary/download assets to R2
-
-## 20. Recommended Content Creation Checklist
-
-For any new item:
-
-### Editorial checklist
-
-- content is source-backed
-- title is final
-- date is real
-- summary is concise and factual
-- no fake placeholders
-- no invented metadata
-
-### Technical checklist
-
-- file is in correct collection folder
-- frontmatter matches schema
-- `status` is correct
-- routes and related slugs are correct
-- download URLs match real uploaded files
-
-### Validation checklist
-
-```powershell
-curl.exe -I <each R2 asset URL>
-npm run build
-npm run validate:content
-npm run test:e2e
-git status --short
-```
-
-## 21. Quick Starter Templates
-
-### Incident starter
-
-```md
+```yaml
 ---
-title: "..."
+title: "Approved essay title"
 date: 2026-06-01
-summary: "..."
-author: "Dr. Anandkumar Prakasam"
-tags: []
-status: draft
-featured: false
-incidentDate: 2026-06-01
-systems: []
-domain: "..."
-severity: "moderate"
-corroboration: "..."
-sources:
-  - label: "..."
-    url: "https://..."
-timeline:
-  - date: 2026-06-01
-    event: "..."
-rootCause: "..."
-contributoryFactors:
-  - "..."
-relatedPatterns: []
-relatedEssays: []
----
-
-...
-```
-
-### Essay starter
-
-```md
----
-title: "..."
-date: 2026-06-01
-summary: "..."
+summary: "Approved source-backed summary"
 author: "Dr. Anandkumar Prakasam"
 tags: []
 status: draft
@@ -1147,77 +387,68 @@ category: "essay"
 series: "out-of-bounds"
 seriesNo: 1
 ---
-
-...
 ```
 
-### Pattern starter
+### Pattern essay example
 
-```md
+```yaml
 ---
-title: "..."
+title: "Approved pattern title"
 date: 2026-06-01
-summary: "..."
+summary: "Approved source-backed pattern summary"
 author: "Dr. Anandkumar Prakasam"
 tags: []
 status: draft
 featured: false
 category: "pattern"
-patternId: "P-..."
-signature: "..."
-metric: "..."
+patternId: "P-EXAMPLE"
+signature: "Exact/source-backed signature"
+metric: "Exact/source-backed metric"
 relatedIncidents: []
 ---
-
-...
 ```
 
-### Observation starter
+## 11. How to Add a New Observation
 
-```md
+Observations remain single-file entries:
+
+- `src/content/observations/<slug>.mdx`
+
+Example:
+
+```yaml
 ---
-title: "..."
+title: "Approved observation title"
 date: 2026-06-01
-summary: "..."
+summary: "Approved source-backed summary"
 author: "Dr. Anandkumar Prakasam"
 tags: []
 status: draft
 featured: false
 observationStatus: preliminary
 ---
-
-...
 ```
 
-### Artifact starter
+## 12. How to Add a New Book
 
-```md
+Books remain single-file entries:
+
+- `src/content/books/<slug>.mdx`
+
+Important current book behavior:
+
+- book pages **do not render Table of Contents**
+- book pages render **Description** only when source-backed `description` or `blurb` exists
+- if `description` and `blurb` are missing, the section is skipped
+- PDF, sample, and Amazon actions remain unavailable until verified inputs exist
+
+Example:
+
+```yaml
 ---
-title: "..."
+title: "Approved book title"
 date: 2026-06-01
-summary: "..."
-author: "Dr. Anandkumar Prakasam"
-tags: []
-status: draft
-featured: false
-artifactType: template
-version: "1.0"
-relatedEssays: []
-inlinePreview: true
-license: "CC BY 4.0"
-downloads: []
----
-
-...
-```
-
-### Book starter
-
-```md
----
-title: "..."
-date: 2026-06-01
-summary: "..."
+summary: "Approved source-backed summary"
 author: "Dr. Anandkumar Prakasam"
 tags: []
 status: draft
@@ -1225,23 +456,263 @@ featured: false
 cover: "https://files.theforensicbrief.com/books/example-front-cover.jpg"
 backCover: "https://files.theforensicbrief.com/books/example-back-cover.jpg"
 series: "human-in-control"
-blurb: "..."
-toc:
-  - "..."
+blurb: "Approved source-backed blurb"
+description: "Approved source-backed description"
 pdfUrl: "https://files.theforensicbrief.com/books/example.pdf"
 pdfSizeMB: 0
 amazonUrl: ""
 ---
-
-...
 ```
 
-## 22. Final Practical Rule
+Do not:
 
-If you remember only one thing, remember this:
+- invent book description text
+- invent blurb text
+- invent Amazon URLs
+- invent ISBNs
+- invent page counts
+- invent book PDFs
 
-- **content text lives in `src/content`**
-- **downloadable files and large public assets live in R2**
-- **the page links work only when the content frontmatter points to a real uploaded R2 file**
-- **after uploading to R2, you still need a new build/deploy if the site checked availability during the old build**
+## 13. R2 Download Setup
 
+Published downloadable assets must be R2-backed.
+
+Current public domain:
+
+- `https://files.theforensicbrief.com`
+
+### Correct process
+
+1. Generate or receive the approved asset.
+2. Upload it to Cloudflare R2.
+3. Verify the public URL:
+
+```powershell
+curl.exe -I https://files.theforensicbrief.com/artifacts/<file-name>
+```
+
+4. Only after `200 OK`, add that URL to metadata.
+5. Run validation/build/tests.
+
+### Production metadata must never use
+
+- `/public/artifacts/...`
+- `r2_uploads/...`
+- `localhost`
+- `file://`
+- `C:\`
+
+### Artifact download example
+
+```yaml
+downloads:
+  - format: "PDF"
+    url: "https://files.theforensicbrief.com/artifacts/example-v1.pdf"
+    sizeKB: 120
+```
+
+### Book asset examples
+
+```yaml
+cover: "https://files.theforensicbrief.com/books/example-front-cover.jpg"
+backCover: "https://files.theforensicbrief.com/books/example-back-cover.jpg"
+pdfUrl: "https://files.theforensicbrief.com/books/example.pdf"
+```
+
+## 14. How Uploaded Files Link to Pages
+
+Uploaded files are not discovered automatically.  
+They are linked through metadata fields.
+
+For example:
+
+- Artifact download buttons come from `downloads[]` in the artifact metadata file
+- Book cover images come from `cover` and `backCover`
+- Book PDF actions come from `pdfUrl`
+
+If the URL is wrong or unreachable, the live page will show an unavailable state or no active link.
+
+## 15. Current Index Sorting and Filter Behavior
+
+Current UI and sorting rules:
+
+- Incidents page has **no filters**
+- Artifacts page has **no filters**
+- Essays page has **no category filter**
+- Essays page uses a **Series dropdown**
+- `/essays/patterns/` still exists
+- index pages sort **newest first**
+
+Current shared sort helper:
+
+- [src/utils/contentEntries.ts](C:/Azi/Blog_Proj/src/utils/contentEntries.ts)
+
+Sort priority:
+
+1. `date`, newest first
+2. fallback to `updated`, newest first
+3. stable title sort if no valid date exists
+
+This rule is used for:
+
+- `/incidents/`
+- `/artifacts/`
+- `/essays/`
+- `/observations/`
+- `/books/`
+- `/topics/[tag]/`
+- home page recent/featured sections
+- date-sorted feeds
+
+Series pages still use `seriesNo` because that ordering is sequence-based, not recency-based.
+
+## 16. Validation Commands
+
+Run all required checks before publishing:
+
+```powershell
+npm run build
+npm run validate:content
+npm run test:e2e
+```
+
+Also use these verification commands:
+
+```powershell
+Select-String -Path .\dist\**\*.html -Pattern "-metadata","-content","r2_uploads","public/artifacts","Ã¢â‚¬â€" -SimpleMatch
+```
+
+Expected:
+
+- no public `-metadata` routes
+- no public `-content` routes
+- no `r2_uploads`
+- no `public/artifacts` production downloads
+- no encoding issue `Ã¢â‚¬â€`
+
+## 17. Validation Rules Already Enforced in Repo
+
+Current validation scripts check for:
+
+- no public metadata/content routes
+- no `r2_uploads` leakage
+- no local `/public/artifacts` production download links
+- no placeholder book prose
+- no removed Table of Contents on book pages
+- no old essays category filter
+- no incident/artifact filter rows on index pages
+- active R2 artifact downloads for currently published artifact pages
+
+See:
+
+- [scripts/validate-content-links.mjs](C:/Azi/Blog_Proj/scripts/validate-content-links.mjs)
+- [scripts/smoke-check.mjs](C:/Azi/Blog_Proj/scripts/smoke-check.mjs)
+
+## 18. Practical Publishing Workflow
+
+Use this sequence for new work:
+
+1. Gather source-backed material.
+2. Choose the correct collection.
+3. Create metadata/content split files for Incidents or Artifacts.
+4. Create single-file entries for Essays, Observations, or Books.
+5. Keep the item `draft` until all required published fields are source-backed.
+6. Upload approved public assets to R2 if needed.
+7. Verify R2 URLs with `curl.exe -I`.
+8. Run:
+
+```powershell
+npm run build
+npm run validate:content
+npm run test:e2e
+```
+
+9. Check:
+
+```powershell
+git status --short
+```
+
+10. Commit only intended files.
+
+## 19. Common Failure Cases
+
+### Problem: metadata route appears publicly
+
+Cause:
+
+- incorrect route logic or content file naming
+
+Check:
+
+- clean slug generation in [src/utils/contentEntries.ts](C:/Azi/Blog_Proj/src/utils/contentEntries.ts)
+- validation output from [scripts/validate-content-links.mjs](C:/Azi/Blog_Proj/scripts/validate-content-links.mjs)
+
+### Problem: detail page shows no long-form body
+
+Cause:
+
+- `contentFile` is missing
+- `contentFile` name does not match the real file
+- content body file does not exist
+
+### Problem: artifact download does not appear
+
+Cause:
+
+- download URL is not R2-backed
+- file is not public
+- file does not return `200 OK`
+- metadata was updated before the asset was reachable
+
+### Problem: book description does not render
+
+Cause:
+
+- `description` is missing
+- `blurb` is missing
+- values were intentionally left empty because no source-backed copy exists
+
+### Problem: draft item does not show in search or sitemap
+
+Cause:
+
+- this is correct behavior
+
+## 20. Current Examples to Reuse Carefully
+
+Incident metadata/content pair:
+
+- [src/content/incidents/samsung-chatgpt-one-way-door-metadata.md](C:/Azi/Blog_Proj/src/content/incidents/samsung-chatgpt-one-way-door-metadata.md)
+- [src/content/incidents/samsung-chatgpt-one-way-door-content.mdx](C:/Azi/Blog_Proj/src/content/incidents/samsung-chatgpt-one-way-door-content.mdx)
+
+Artifact metadata/content pair:
+
+- [src/content/artifacts/mris-template-metadata.md](C:/Azi/Blog_Proj/src/content/artifacts/mris-template-metadata.md)
+- [src/content/artifacts/mris-template-content.mdx](C:/Azi/Blog_Proj/src/content/artifacts/mris-template-content.mdx)
+
+Essay example:
+
+- [src/content/essays/whitebox-red-teaming.mdx](C:/Azi/Blog_Proj/src/content/essays/whitebox-red-teaming.mdx)
+
+Pattern example:
+
+- [src/content/essays/detection-drop-line-600.mdx](C:/Azi/Blog_Proj/src/content/essays/detection-drop-line-600.mdx)
+
+Observation example:
+
+- [src/content/observations/the-attack-that-left-no-fingerprints.mdx](C:/Azi/Blog_Proj/src/content/observations/the-attack-that-left-no-fingerprints.mdx)
+
+Book example:
+
+- [src/content/books/human-in-control.mdx](C:/Azi/Blog_Proj/src/content/books/human-in-control.mdx)
+
+## 21. Final Rule
+
+If you remember only one operational rule, use this:
+
+- metadata controls whether an Incident or Artifact is published, listed, searchable, and routable
+- content files control the long-form body for Incidents and Artifacts
+- public pages must use clean slugs only
+- downloadable files must be verified R2 URLs
+- missing or uncertain metadata means the item stays `draft`
