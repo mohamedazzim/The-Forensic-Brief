@@ -1,16 +1,18 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
+import { sortNewestFirst } from '../../utils/contentEntries';
 
 export async function GET(context: APIContext) {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 
-  const items = essays
-    .filter((item) => item.data.date)
-    .sort((a, b) => b.data.date!.valueOf() - a.data.date!.valueOf())
+  const items = sortNewestFirst(
+    essays
+      .filter((item) => item.data.date || item.data.updated)
+  )
     .map((item) => ({
       title: item.data.title,
-      pubDate: item.data.date!,
+      pubDate: item.data.date ?? item.data.updated!,
       description: item.data.summary || '',
       link: `/essays/${item.id.replace(/\.(md|mdx)$/, '')}/`,
     }));

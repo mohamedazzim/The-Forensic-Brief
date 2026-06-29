@@ -87,12 +87,20 @@ const incidentsIndex = readFileSync(join(dist, 'incidents/index.html'), 'utf8');
 assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Incidents index should not link to draft Samsung incident route');
 assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door-metadata/'), 'Incidents index should not expose metadata routes');
 assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door-content/'), 'Incidents index should not expose content routes');
+assert(!incidentsIndex.includes('Severity:'), 'Incidents index should not render the removed severity filter row');
+assert(!incidentsIndex.includes('Domain:'), 'Incidents index should not render the removed domain filter row');
+assert(!incidentsIndex.includes('Vendor:'), 'Incidents index should not render the removed vendor filter row');
+assert(incidentsIndex.includes('Incidents'), 'Incidents index should still render the page title');
 
 const artifactsIndex = readFileSync(join(dist, 'artifacts/index.html'), 'utf8');
 assert(artifactsIndex.includes('/artifacts/mris-template/'), 'Artifacts index should link to the clean MRIS route');
 assert(!artifactsIndex.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Artifacts index should not link to draft Six Dimensions route');
 assert(!artifactsIndex.includes('/artifacts/mris-template-metadata/'), 'Artifacts index should not expose metadata routes');
 assert(!artifactsIndex.includes('/artifacts/mris-template-content/'), 'Artifacts index should not expose content routes');
+assert(!artifactsIndex.includes('Type:'), 'Artifacts index should not render the removed type filter row');
+assert(!artifactsIndex.includes('Topic:'), 'Artifacts index should not render the removed topic filter row');
+assert(!artifactsIndex.includes('Format:'), 'Artifacts index should not render the removed format filter row');
+assert(artifactsIndex.includes('Artifacts'), 'Artifacts index should still render the page title');
 
 const patternPage = readFileSync(join(dist, 'essays/detection-drop-line-600/index.html'), 'utf8');
 assert(patternPage.includes('P-ATTENTION-DECAY'), 'Pattern page missing pattern identifier');

@@ -6,7 +6,7 @@ import NewsletterCTA from '../components/NewsletterCTA.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../utils/hasContentFiles';
-import { entrySlug } from '../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../utils/contentEntries';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay');
@@ -17,14 +17,13 @@ if (hasContentFiles('books')) {
   books = await getCollection('books', ({ data }) => data.status === 'published');
 }
 
-const byDateDesc = (a: { data: { date?: Date } }, b: { data: { date?: Date } }) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0);
 const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 
-const featuredIncidents = incidents.sort(byDateDesc).slice(0, 3);
-const featuredEssays = essays.sort(byDateDesc).slice(0, 3);
-const featuredArtifacts = artifacts.sort(byDateDesc).slice(0, 3);
-const recentObservations = observations.sort(byDateDesc).slice(0, 3);
-const featuredBooks = books.sort(byDateDesc).slice(0, 3);
+const featuredIncidents = sortNewestFirst(incidents).slice(0, 3);
+const featuredEssays = sortNewestFirst(essays).slice(0, 3);
+const featuredArtifacts = sortNewestFirst(artifacts).slice(0, 3);
+const recentObservations = sortNewestFirst(observations).slice(0, 3);
+const featuredBooks = sortNewestFirst(books).slice(0, 3);
 ---
 
 <BaseLayout title="Home">

@@ -1,41 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
-import FilterBar from '../../components/FilterBar.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
-
-const severityOptions = [
-  { id: 'critical', label: 'Critical' },
-  { id: 'high', label: 'High' },
-  { id: 'moderate', label: 'Moderate' },
-  { id: 'low', label: 'Low' },
-];
-
-const allDomains = incidents.map((incident) => incident.data.domain).filter(Boolean);
-const uniqueDomains = [...new Set(allDomains)];
-const domainOptions = uniqueDomains.map((domain) => ({
-  id: domain!.toLowerCase().replace(/\s+/g, '-'),
-  label: domain!,
-}));
-
-const allVendors = incidents.flatMap((incident) => incident.data.systems);
-const uniqueVendors = [...new Set(allVendors)];
-const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const vendorOptions = uniqueVendors.map((vendor) => ({
-  id: slugify(vendor),
-  label: vendor,
-}));
-
-const currentSeverity = Astro.url.searchParams.get('severity') ?? '';
-const currentDomain = Astro.url.searchParams.get('domain') ?? '';
-const currentVendor = Astro.url.searchParams.get('vendor') ?? '';
-
-const sortedIncidents = incidents.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const sortedIncidents = sortNewestFirst(incidents);
 const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 ---
 
@@ -62,10 +34,6 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
     </div>
     <hr class="section-rule">
 
-    <FilterBar label="Severity" options={severityOptions} baseUrl="/incidents/" activeId={currentSeverity} />
-    <FilterBar label="Domain" options={domainOptions} baseUrl="/incidents/" activeId={currentDomain} />
-    <FilterBar label="Vendor" options={vendorOptions} baseUrl="/incidents/" activeId={currentVendor} />
-
     {sortedIncidents.length > 0 ? (
       <div class="card-grid">
         {sortedIncidents.map((incident) => (
@@ -76,9 +44,6 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
             category={`${incident.data.severity?.toUpperCase() || 'INCIDENT'}${incident.data.domain ? ` - ${incident.data.domain}` : ''}`}
             href={`/incidents/${entrySlug(incident)}/`}
             linkText="Read report"
-            dataSeverity={incident.data.severity || ''}
-            dataDomain={incident.data.domain ? incident.data.domain.toLowerCase().replace(/\s+/g, '-') : ''}
-            dataVendor={incident.data.systems.map(slugify).join(' ')}
           />
         ))}
       </div>
@@ -89,21 +54,6 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
 
   <NewsletterCTA />
 </BaseLayout>
-
-<script is:inline>
-  const params = new URLSearchParams(window.location.search);
-  const filters = { severity: params.get('severity'), domain: params.get('domain'), vendor: params.get('vendor') };
-  let shown = 0;
-  document.querySelectorAll('.article-card').forEach((card) => {
-    const match = (!filters.severity || card.getAttribute('data-severity') === filters.severity)
-      && (!filters.domain || card.getAttribute('data-domain') === filters.domain)
-      && (!filters.vendor || (card.getAttribute('data-vendor') || '').includes(filters.vendor));
-    card.hidden = !match;
-    if (match) shown += 1;
-  });
-  const empty = document.querySelector('.empty-state');
-  if (empty) empty.hidden = shown > 0;
-</script>
 
 <style>
   .content-section {

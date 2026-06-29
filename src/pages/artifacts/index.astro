@@ -1,32 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import FilterBar from '../../components/FilterBar.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
-const sortedArtifacts = artifacts.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
-
-const typeOptions = [
-  { id: 'template', label: 'Templates' },
-  { id: 'checklist', label: 'Checklists' },
-  { id: 'table', label: 'Tables' },
-  { id: 'framework', label: 'Frameworks' },
-  { id: 'worksheet', label: 'Worksheets' },
-  { id: 'audit', label: 'Audits' },
-];
-
-const allTopics = artifacts.flatMap((artifact) => artifact.data.tags);
-const uniqueTopics = [...new Set(allTopics)];
-const topicOptions = uniqueTopics.map((topic) => ({
-  id: topic,
-  label: topic.charAt(0).toUpperCase() + topic.slice(1).replace(/-/g, ' '),
-}));
-
-const currentType = Astro.url.searchParams.get('type') ?? '';
-const currentTopic = Astro.url.searchParams.get('topic') ?? '';
+const sortedArtifacts = sortNewestFirst(artifacts);
 ---
 
 <BaseLayout title="Artifacts">
@@ -52,13 +32,10 @@ const currentTopic = Astro.url.searchParams.get('topic') ?? '';
     </div>
     <hr class="section-rule">
 
-    <FilterBar label="Type" options={typeOptions} baseUrl="/artifacts/" activeId={currentType} />
-    <FilterBar label="Topic" options={topicOptions} baseUrl="/artifacts/" activeId={currentTopic} />
-
     {sortedArtifacts.length > 0 ? (
       <div class="artifact-grid">
         {sortedArtifacts.map((artifact) => (
-          <article class="artifact-card" data-type={artifact.data.artifactType} data-topics={artifact.data.tags.join(' ')}>
+          <article class="artifact-card">
             <div class="artifact-header">
               <span class="artifact-type">{artifact.data.artifactType}</span>
               <span class="artifact-version">v{artifact.data.version}</span>
@@ -80,20 +57,6 @@ const currentTopic = Astro.url.searchParams.get('topic') ?? '';
 
   <NewsletterCTA />
 </BaseLayout>
-
-<script is:inline>
-  const params = new URLSearchParams(window.location.search);
-  const type = params.get('type');
-  const topic = params.get('topic');
-  let shown = 0;
-  document.querySelectorAll('.artifact-card').forEach((card) => {
-    const match = (!type || card.getAttribute('data-type') === type) && (!topic || (card.getAttribute('data-topics') || '').includes(topic));
-    card.hidden = !match;
-    if (match) shown += 1;
-  });
-  const empty = document.querySelector('.empty-state');
-  if (empty) empty.hidden = shown > 0;
-</script>
 
 <style>
   .content-section {

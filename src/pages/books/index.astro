@@ -4,13 +4,14 @@ import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../../utils/hasContentFiles';
+import { sortNewestFirst } from '../../utils/contentEntries';
 
 let books = [];
 if (hasContentFiles('books')) {
   books = await getCollection('books', ({ data }) => data.status === 'published');
 }
 
-const sortedBooks = books.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const sortedBooks = sortNewestFirst(books);
 
 const isRemoteUrl = (value?: string) => /^https?:\/\//i.test(value || '');
 

@@ -1,17 +1,17 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 export async function GET(context: APIContext) {
   const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 
-  const items = incidents
-    .filter((item) => item.data.date)
-    .sort((a, b) => b.data.date!.valueOf() - a.data.date!.valueOf())
+  const items = sortNewestFirst(
+    incidents.filter((item) => item.data.date || item.data.updated)
+  )
     .map((item) => ({
       title: item.data.title,
-      pubDate: item.data.date!,
+      pubDate: item.data.date ?? item.data.updated!,
       description: item.data.summary || '',
       link: `/incidents/${entrySlug(item)}/`,
     }));

@@ -153,6 +153,18 @@ assert(essaysIndexHtml.includes('Out of Bounds'), 'Essays index should include t
 assert(essaysIndexHtml.includes('Patterns'), 'Essays index should preserve the Patterns section heading');
 assert(!essaysIndexHtml.includes('Category:'), 'Essays index should not render the removed category filter row');
 
+const incidentsIndexHtml = readHtml(join('incidents', 'index.html'));
+assert(incidentsIndexHtml.includes('Incidents'), 'Incidents index should still render');
+assert(!incidentsIndexHtml.includes('Severity:'), 'Incidents index should not render the removed severity filter row');
+assert(!incidentsIndexHtml.includes('Domain:'), 'Incidents index should not render the removed domain filter row');
+assert(!incidentsIndexHtml.includes('Vendor:'), 'Incidents index should not render the removed vendor filter row');
+
+const artifactsIndexHtml = readHtml(join('artifacts', 'index.html'));
+assert(artifactsIndexHtml.includes('Artifacts'), 'Artifacts index should still render');
+assert(!artifactsIndexHtml.includes('Type:'), 'Artifacts index should not render the removed type filter row');
+assert(!artifactsIndexHtml.includes('Topic:'), 'Artifacts index should not render the removed topic filter row');
+assert(!artifactsIndexHtml.includes('Format:'), 'Artifacts index should not render the removed format filter row');
+
 const bookPageHtml = readHtml(join('books', 'human-in-control', 'index.html'));
 assert(!bookPageHtml.includes('Table of Contents'), 'Book detail page should not render a Table of Contents section');
 assert(!bookPageHtml.includes('Placeholder'), 'Book detail page should not render placeholder book prose');

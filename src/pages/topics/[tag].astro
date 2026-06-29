@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const allContent = [
@@ -31,7 +31,7 @@ export async function getStaticPaths() {
 }
 
 const { tag, items } = Astro.props;
-const sortedItems = items.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const sortedItems = sortNewestFirst(items);
 const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 
 function getCollectionType(item: any) {

@@ -3,9 +3,10 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Card from '../../../components/Card.astro';
 import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { sortNewestFirst } from '../../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'pattern');
-const sortedEssays = essays.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const sortedEssays = sortNewestFirst(essays);
 const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 ---
 

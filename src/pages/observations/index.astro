@@ -4,9 +4,10 @@ import Card from '../../components/Card.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { sortNewestFirst } from '../../utils/contentEntries';
 
 const observations = await getCollection('observations', ({ data }) => data.status === 'published');
-const sortedObservations = observations.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const sortedObservations = sortNewestFirst(observations);
 const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 ---
 
