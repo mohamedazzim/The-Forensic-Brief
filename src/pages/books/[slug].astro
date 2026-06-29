@@ -446,14 +446,22 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
+    justify-items: center;
+    align-items: start;
   }
 
   .book-cover-dialog-grid figure {
     margin: 0;
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .book-cover-dialog-grid img {
     width: 100%;
+    max-width: 100%;
     height: auto;
     display: block;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -464,6 +472,7 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
     font-size: var(--text-sm);
     color: var(--text-muted);
     text-align: center;
+    width: 100%;
   }
 
   @media (max-width: 600px) {
@@ -493,6 +502,10 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
 
     .book-cover-dialog-grid {
       grid-template-columns: 1fr;
+    }
+
+    .book-cover-dialog-grid figure {
+      max-width: 320px;
     }
   }
 </style>
