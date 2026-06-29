@@ -19,6 +19,8 @@ export async function getStaticPaths() {
 const { book } = Astro.props;
 const { Content } = await book.render();
 const bookUrl = `/books/${book.id.replace(/\.(md|mdx)$/, '')}/`;
+const bookDescription = (book.data.description || book.data.blurb || '').trim();
+const hasBookContent = (book.body || '').trim().length > 0;
 
 const isRemoteUrl = (value?: string) => /^https?:\/\//i.test(value || '');
 
@@ -51,12 +53,12 @@ const [coverAvailable, backCoverAvailable, pdfAvailable] = await Promise.all([
 const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.backCover);
 ---
 
-<BaseLayout title={book.data.title} description={book.data.summary}>
+<BaseLayout title={book.data.title} description={book.data.summary || undefined}>
   <StructuredData
     type="book"
     data={{
       title: book.data.title,
-      summary: book.data.summary,
+      summary: book.data.summary || undefined,
       author: book.data.author,
       url: bookUrl,
       cover: coverAvailable ? book.data.cover : undefined,
@@ -114,7 +116,6 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
         <span class="eyebrow">Book</span>
         <h1 class="book-title">{book.data.title}</h1>
         <p class="book-series">Part of the <a href={`/essays/${book.data.series}/`}>{book.data.series}</a> series</p>
-        <p class="book-blurb">{book.data.blurb}</p>
 
         <div class="book-actions">
           {pdfAvailable ? (
@@ -150,18 +151,18 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
       </div>
     </div>
 
-    <section class="book-toc">
-      <h2>Table of Contents</h2>
-      <ol class="toc-list">
-        {book.data.toc.map((chapter) => (
-          <li>{chapter}</li>
-        ))}
-      </ol>
-    </section>
+    {bookDescription && (
+      <section class="book-description">
+        <h2>Description</h2>
+        <p>{bookDescription}</p>
+      </section>
+    )}
 
-    <section class="book-content article-body">
-      <Content />
-    </section>
+    {hasBookContent && (
+      <section class="book-content article-body">
+        <Content />
+      </section>
+    )}
   </article>
 
   {showBackCover && (
@@ -305,14 +306,6 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
     text-decoration: underline;
   }
 
-  .book-blurb {
-    font-size: var(--text-base);
-    color: var(--text-muted);
-    line-height: 1.7;
-    margin-bottom: 24px;
-    flex: 1;
-  }
-
   .book-actions {
     display: flex;
     gap: 12px;
@@ -364,26 +357,23 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
     margin-bottom: 4px;
   }
 
-  .book-toc {
+  .book-description {
     margin-bottom: 48px;
     padding: 24px;
     background: var(--bg-card);
     border: 1px solid var(--border-light);
   }
 
-  .book-toc h2 {
+  .book-description h2 {
     font-size: var(--text-lg);
     margin-bottom: 16px;
   }
 
-  .toc-list {
-    padding-left: 24px;
-  }
-
-  .toc-list li {
-    margin-bottom: 8px;
+  .book-description p {
     color: var(--text-muted);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
+    line-height: 1.7;
+    margin: 0;
   }
 
   .book-content {

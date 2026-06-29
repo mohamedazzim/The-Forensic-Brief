@@ -101,5 +101,10 @@ assert(countMatches(patternPage, /<h1\b/g) === 1, 'Pattern page should expose ex
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
 assert(bookPage.includes('human-in-control-front-cover.jpg'), 'Book detail page should expose the front cover image');
 assert(bookPage.includes('human-in-control-back-cover.jpg'), 'Book detail page should expose the back cover image');
+assert(!bookPage.includes('Table of Contents'), 'Book detail page should not render the removed Table of Contents section');
+assert(!bookPage.includes('<h2>Description</h2>'), 'Book detail page should skip Description when no source-backed description exists');
+assert(bookPage.includes('PDF unavailable'), 'Book detail page should preserve the safe PDF unavailable state');
+assert(bookPage.includes('Amazon link unavailable'), 'Book detail page should preserve the safe Amazon unavailable state');
+assert(!bookPage.includes('Placeholder'), 'Book detail page should not render placeholder book prose');
 
 console.log('smoke-check passed');

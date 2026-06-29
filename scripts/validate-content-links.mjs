@@ -140,6 +140,16 @@ assert(!html.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Generat
 assert(!html.includes('-metadata/'), 'Generated HTML should not expose metadata routes');
 assert(!html.includes('-content/'), 'Generated HTML should not expose content routes');
 assert(!html.includes('r2_uploads/'), 'Generated HTML should not expose r2_uploads paths');
+assert(!html.includes('Table of Contents'), 'Generated HTML should not expose the removed book table of contents block');
+assert(!html.includes('Placeholder: approved descriptive copy for this book has not been supplied yet.'), 'Generated HTML should not expose placeholder book copy');
+assert(!html.includes('Placeholder book record using the approved front and back cover images while the manuscript package is still being prepared.'), 'Generated HTML should not expose placeholder book summary copy');
+
+const bookPageHtml = readHtml(join('books', 'human-in-control', 'index.html'));
+assert(!bookPageHtml.includes('Table of Contents'), 'Book detail page should not render a Table of Contents section');
+assert(!bookPageHtml.includes('Placeholder'), 'Book detail page should not render placeholder book prose');
+assert(bookPageHtml.includes('PDF unavailable'), 'Book detail page should keep the safe PDF unavailable state');
+assert(bookPageHtml.includes('Amazon link unavailable'), 'Book detail page should keep the safe Amazon unavailable state');
+assert(!bookPageHtml.includes('<h2>Description</h2>'), 'Book detail page should skip Description when no source-backed description exists');
 
 const artifactPages = [
   join('artifacts', 'mris-template', 'index.html'),
