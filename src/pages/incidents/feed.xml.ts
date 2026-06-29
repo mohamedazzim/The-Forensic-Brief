@@ -6,11 +6,12 @@ export async function GET(context: APIContext) {
   const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 
   const items = incidents
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+    .filter((item) => item.data.date)
+    .sort((a, b) => b.data.date!.valueOf() - a.data.date!.valueOf())
     .map((item) => ({
       title: item.data.title,
-      pubDate: item.data.date,
-      description: item.data.summary,
+      pubDate: item.data.date!,
+      description: item.data.summary || '',
       link: `/incidents/${item.id.replace(/\.(md|mdx)$/, '')}/`,
     }));
 

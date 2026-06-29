@@ -1,8 +1,8 @@
 ---
 interface Props {
   title: string;
-  excerpt: string;
-  date: string;
+  excerpt?: string;
+  date?: string;
   category: string;
   href: string;
   linkText?: string;
@@ -23,10 +23,10 @@ const { title, excerpt, date, category, href, linkText = 'Read report', dataSeri
   <h3 class="card-title">
     <a href={href}>{title}</a>
   </h3>
-  <p class="card-excerpt">{excerpt}</p>
+  {excerpt && <p class="card-excerpt">{excerpt}</p>}
   <div class="card-meta">
-    <time datetime={date}>{date}</time>
-    <a href={href} class="card-read-more">{linkText} →</a>
+    {date ? <time datetime={date}>{date}</time> : <span></span>}
+    <a href={href} class="card-read-more">{linkText} -></a>
   </div>
 </article>
 

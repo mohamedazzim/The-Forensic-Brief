@@ -6,11 +6,12 @@ export async function GET(context: APIContext) {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 
   const items = essays
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+    .filter((item) => item.data.date)
+    .sort((a, b) => b.data.date!.valueOf() - a.data.date!.valueOf())
     .map((item) => ({
       title: item.data.title,
-      pubDate: item.data.date,
-      description: item.data.summary,
+      pubDate: item.data.date!,
+      description: item.data.summary || '',
       link: `/essays/${item.id.replace(/\.(md|mdx)$/, '')}/`,
     }));
 

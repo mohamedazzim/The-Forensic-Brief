@@ -3,9 +3,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { hasContentFiles } from '../../utils/hasContentFiles';
 
-const books = await getCollection('books', ({ data }) => data.status === 'published');
-const sortedBooks = books.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+let books = [];
+if (hasContentFiles('books')) {
+  books = await getCollection('books', ({ data }) => data.status === 'published');
+}
+
+const sortedBooks = books.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
 
 const isRemoteUrl = (value?: string) => /^https?:\/\//i.test(value || '');
 
@@ -44,12 +49,11 @@ const galleryBooks =
     : [];
 ---
 
-<BaseLayout title="Books" description="Free PDF downloads and hardcopy editions of The Forensic Brief series.">
+<BaseLayout title="Books">
   <StructuredData
     type="collection"
     data={{
       name: 'Books',
-      description: 'Free PDF downloads and hardcopy editions of The Forensic Brief series.',
       url: 'https://theforensicbrief.com/books/',
     }}
   />
@@ -65,11 +69,10 @@ const galleryBooks =
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Books</h1>
-      <p class="section-description">Free PDF downloads and hardcopy editions of The Forensic Brief series.</p>
     </div>
     <hr class="section-rule">
 
-    {galleryBooks.length > 0 ? (
+    {galleryBooks.length > 0 && (
       <div class="book-grid">
         {galleryBooks.map((book, index) => (
           <a
@@ -96,8 +99,6 @@ const galleryBooks =
           </a>
         ))}
       </div>
-    ) : (
-      <p class="empty-state">Books coming soon.</p>
     )}
   </section>
 
@@ -165,7 +166,6 @@ const galleryBooks =
   .book-cover {
     width: 100%;
     max-width: 160px;
-    width: 100%;
     pointer-events: none;
   }
 
@@ -193,13 +193,6 @@ const galleryBooks =
     font-size: 1rem;
     text-align: center;
     color: var(--text-primary);
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 0;
-    color: var(--text-muted);
-    font-style: italic;
   }
 
   @media (max-width: 600px) {

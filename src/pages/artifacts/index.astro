@@ -6,7 +6,7 @@ import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
-const sortedArtifacts = artifacts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const sortedArtifacts = artifacts.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
 
 const typeOptions = [
   { id: 'template', label: 'Templates' },
@@ -28,12 +28,11 @@ const currentType = Astro.url.searchParams.get('type') ?? '';
 const currentTopic = Astro.url.searchParams.get('topic') ?? '';
 ---
 
-<BaseLayout title="Artifacts" description="Reusable templates and tools for AI governance — free to download and adapt.">
+<BaseLayout title="Artifacts">
   <StructuredData
     type="collection"
     data={{
       name: 'Artifacts',
-      description: 'Reusable templates and tools for AI governance.',
       url: 'https://theforensicbrief.com/artifacts/',
     }}
   />
@@ -49,23 +48,11 @@ const currentTopic = Astro.url.searchParams.get('topic') ?? '';
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Artifacts</h1>
-      <p class="section-description">Reusable templates and tools for AI governance — free to download and adapt.</p>
     </div>
     <hr class="section-rule">
 
-    <FilterBar 
-      label="Type" 
-      options={typeOptions}
-      baseUrl="/artifacts/"
-      activeId={currentType}
-    />
-
-    <FilterBar 
-      label="Topic" 
-      options={topicOptions}
-      baseUrl="/artifacts/"
-      activeId={currentTopic}
-    />
+    <FilterBar label="Type" options={typeOptions} baseUrl="/artifacts/" activeId={currentType} />
+    <FilterBar label="Topic" options={topicOptions} baseUrl="/artifacts/" activeId={currentTopic} />
 
     {sortedArtifacts.length > 0 ? (
       <div class="artifact-grid">
@@ -78,9 +65,9 @@ const currentTopic = Astro.url.searchParams.get('topic') ?? '';
             <h2 class="artifact-title">
               <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`}>{artifact.data.title}</a>
             </h2>
-            <p class="artifact-summary">{artifact.data.summary}</p>
+            {artifact.data.summary && <p class="artifact-summary">{artifact.data.summary}</p>}
             <a href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`} class="artifact-link">
-              View artifact →
+              View artifact ->
             </a>
           </article>
         ))}

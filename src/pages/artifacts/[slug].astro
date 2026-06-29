@@ -2,12 +2,16 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { hasContentFiles } from '../../utils/hasContentFiles';
 
-const essays = await getCollection('essays');
-const books = await getCollection('books');
+const essays = await getCollection('essays', ({ data }) => data.status === 'published');
+let books = [];
+if (hasContentFiles('books')) {
+  books = await getCollection('books');
+}
 
 export async function getStaticPaths() {
-  const artifacts = await getCollection('artifacts');
+  const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
   return artifacts.map((artifact) => ({
     params: { slug: artifact.id.replace(/\.(md|mdx)$/, '') },
     props: { artifact },
@@ -16,6 +20,7 @@ export async function getStaticPaths() {
 
 const { artifact } = Astro.props;
 const { Content } = await artifact.render();
+const artifactDateDisplay = artifact.data.dateLabel || (artifact.data.date ? artifact.data.date.toISOString().split('T')[0] : '');
 const relatedBook = artifact.data.relatedBook
   ? books.find((b) => b.id.replace(/\.(md|mdx)$/, '') === artifact.data.relatedBook)
   : null;
@@ -78,7 +83,10 @@ const downloadAvailability = await Promise.all(
         <span class="artifact-version">Version {artifact.data.version}</span>
       </div>
       <h1 class="artifact-title">{artifact.data.title}</h1>
-      <p class="artifact-summary">{artifact.data.summary}</p>
+      {artifact.data.summary && <p class="artifact-summary">{artifact.data.summary}</p>}
+      {artifactDateDisplay && (
+        <p class="artifact-updated">Published {artifactDateDisplay}</p>
+      )}
       {artifact.data.updated && (
         <p class="artifact-updated">Last updated {artifact.data.updated.toISOString().split('T')[0]}</p>
       )}
@@ -88,8 +96,8 @@ const downloadAvailability = await Promise.all(
         {downloadAvailability.some((download) => download.available) ? (
           downloadAvailability.map((download) => (
             download.available ? (
-              <a 
-                href={download.url} 
+              <a
+                href={download.url}
                 class="download-btn"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -121,10 +129,10 @@ const downloadAvailability = await Promise.all(
         <h2>Related Essays</h2>
         <ul>
           {artifact.data.relatedEssays.map((slug) => {
-            const essay = essays.find(e => e.id.replace(/\.(md|mdx)$/, '') === slug);
-            return (
-              <li><a href={`/essays/${slug}/`}>{essay ? essay.data.title : slug}</a></li>
-            );
+            const essay = essays.find((e) => e.id.replace(/\.(md|mdx)$/, '') === slug);
+            return essay ? (
+              <li><a href={`/essays/${slug}/`}>{essay.data.title}</a></li>
+            ) : null;
           })}
         </ul>
       </section>

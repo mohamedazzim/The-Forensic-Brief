@@ -5,10 +5,10 @@ import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
-const essays = await getCollection('essays');
+const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 
 export async function getStaticPaths() {
-  const incidents = await getCollection('incidents');
+  const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
   return incidents.map((incident) => ({
     params: { slug: incident.id.replace(/\.(md|mdx)$/, '') },
     props: { incident },
@@ -18,11 +18,12 @@ export async function getStaticPaths() {
 const { incident } = Astro.props;
 const { Content } = await incident.render();
 const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
+const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '');
 ---
 
 <BaseLayout title={incident.data.title} description={incident.data.summary}>
-  <StructuredData 
-    type="article" 
+  <StructuredData
+    type="article"
     data={{
       title: incident.data.title,
       summary: incident.data.summary,
@@ -31,7 +32,7 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
       author: incident.data.author,
       url: incidentUrl,
       image: incident.data.ogImage,
-    }} 
+    }}
   />
   <StructuredData
     type="breadcrumb"
@@ -48,85 +49,106 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
     <header class="article-header">
       <span class="eyebrow">Incident Report</span>
       <h1 class="article-title">{incident.data.title}</h1>
-      <p class="article-dek">{incident.data.summary}</p>
+      {incident.data.summary && <p class="article-dek">{incident.data.summary}</p>}
       <div class="article-meta">
-        <time datetime={incident.data.incidentDate.toISOString()}>
-          {incident.data.incidentDate.toISOString().split('T')[0]}
-        </time>
-        <span class="meta-separator">·</span>
-        <span>{incident.data.systems.join(', ')}</span>
-        <span class="meta-separator">·</span>
-        <span class={`severity severity--${incident.data.severity}`}>
-          {incident.data.severity}
-        </span>
+        {incidentDateDisplay && (
+          <time datetime={incident.data.incidentDate ? incident.data.incidentDate.toISOString() : incidentDateDisplay}>
+            {incidentDateDisplay}
+          </time>
+        )}
+        {incident.data.systems.length > 0 && (
+          <>
+            <span class="meta-separator">-</span>
+            <span>{incident.data.systems.join(', ')}</span>
+          </>
+        )}
+        {incident.data.severity && (
+          <>
+            <span class="meta-separator">-</span>
+            <span class={`severity severity--${incident.data.severity}`}>
+              {incident.data.severity}
+            </span>
+          </>
+        )}
       </div>
     </header>
 
-    <section class="methodology-snippet">
-      <h2>Methodology</h2>
-      <p>
-        This report follows the site methodology: use public sources, corroborate claims where possible, and separate documented facts from interpretation. See the full <a href="/methodology/">Methodology</a> page for the sourcing and editorial rules used across the publication.
-      </p>
-    </section>
-
     <div class="incident-structure">
-      <section class="incident-section">
-        <h2>Summary</h2>
-        <p>{incident.data.summary}</p>
-      </section>
+      {incident.data.summary && (
+        <section class="incident-section">
+          <h2>Summary</h2>
+          <p>{incident.data.summary}</p>
+        </section>
+      )}
 
-      <section class="incident-section">
-        <h2>Timeline</h2>
-        <div class="timeline">
-          {incident.data.timeline.map((event) => (
-            <div class="timeline-item">
-              <time datetime={event.date.toISOString()}>
-                {event.date.toISOString().split('T')[0]}
-              </time>
-              <p>{event.event}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {incident.data.timeline.length > 0 && (
+        <section class="incident-section">
+          <h2>Timeline</h2>
+          <div class="timeline">
+            {incident.data.timeline.map((event) => (
+              <div class="timeline-item">
+                {(event.label || event.date) && (
+                  <time datetime={event.date ? event.date.toISOString() : event.label}>
+                    {event.label || event.date?.toISOString().split('T')[0]}
+                  </time>
+                )}
+                <p>{event.event}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section class="incident-section">
-        <h2>Root Cause</h2>
-        <p>{incident.data.rootCause}</p>
-      </section>
+      {incident.data.rootCause && (
+        <section class="incident-section">
+          <h2>Root Cause</h2>
+          <p>{incident.data.rootCause}</p>
+        </section>
+      )}
 
-      <section class="incident-section">
-        <h2>Contributory Factors</h2>
-        <ul>
-          {incident.data.contributoryFactors.map((factor) => (
-            <li>{factor}</li>
-          ))}
-        </ul>
-      </section>
+      {incident.data.contributoryFactors.length > 0 && (
+        <section class="incident-section">
+          <h2>Contributory Factors</h2>
+          <ul>
+            {incident.data.contributoryFactors.map((factor) => (
+              <li>{factor}</li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-      <section class="incident-section">
-        <h2>Evidence / Sources</h2>
-        <p class="corroboration">{incident.data.corroboration}</p>
-        <ul class="sources-list">
-          {incident.data.sources.map((source) => (
-            <li>
-              <a href={source.url} target="_blank" rel="noopener noreferrer">
-                {source.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {(incident.data.corroboration || incident.data.sources.length > 0) && (
+        <section class="incident-section">
+          <h2>Evidence / Sources</h2>
+          {incident.data.corroboration && <p class="corroboration">{incident.data.corroboration}</p>}
+          {incident.data.sources.length > 0 && (
+            <ul class="sources-list">
+              {incident.data.sources.map((source) => (
+                <li>
+                  {source.url ? (
+                    <a href={source.url} target="_blank" rel="noopener noreferrer">
+                      {source.label}
+                    </a>
+                  ) : (
+                    <span>{source.label}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
 
     <div class="article-content">
       <Content />
     </div>
 
-    <RelatedContent 
+    <RelatedContent
       title="Related Content"
       items={[
         ...incident.data.relatedEssays.map((slug) => {
-          const essay = essays.find(e => e.id.replace(/\.(md|mdx)$/, '') === slug);
+          const essay = essays.find((e) => e.id.replace(/\.(md|mdx)$/, '') === slug);
           return essay ? {
             title: essay.data.title,
             href: `/essays/${slug}/`,
@@ -134,7 +156,7 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
           } : null;
         }),
         ...incident.data.relatedPatterns.map((slug) => {
-          const essay = essays.find(e => e.id.replace(/\.(md|mdx)$/, '') === slug);
+          const essay = essays.find((e) => e.id.replace(/\.(md|mdx)$/, '') === slug);
           return essay ? {
             title: essay.data.title,
             href: `/essays/${slug}/`,
@@ -193,25 +215,6 @@ const incidentUrl = `/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`;
 
   .incident-structure {
     margin-bottom: 48px;
-  }
-
-  .methodology-snippet {
-    max-width: var(--measure);
-    margin-bottom: 32px;
-    padding: 20px 24px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-  }
-
-  .methodology-snippet h2 {
-    font-size: var(--text-lg);
-    margin-bottom: 8px;
-  }
-
-  .methodology-snippet p {
-    font-size: var(--text-sm);
-    line-height: 1.7;
-    color: var(--text-muted);
   }
 
   .incident-section {

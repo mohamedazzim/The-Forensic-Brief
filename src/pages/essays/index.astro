@@ -7,7 +7,8 @@ import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
-const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const sortedEssays = essays.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 
 const seriesOptions = [
   { id: 'human-in-control', label: 'Human in Control' },
@@ -25,16 +26,15 @@ const categoryOptions = [
 const currentSeries = Astro.url.searchParams.get('series') ?? '';
 const currentCategory = Astro.url.searchParams.get('category') ?? '';
 
-const filteredEssays = sortedEssays.filter(e => e.data.category === 'essay');
-const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern');
+const filteredEssays = sortedEssays.filter((e) => e.data.category === 'essay');
+const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern');
 ---
 
-<BaseLayout title="Essays" description="Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.">
+<BaseLayout title="Essays">
   <StructuredData
     type="collection"
     data={{
       name: 'Essays',
-      description: 'Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.',
       url: 'https://theforensicbrief.com/essays/',
     }}
   />
@@ -50,23 +50,11 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Essays</h1>
-      <p class="section-description">Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.</p>
     </div>
     <hr class="section-rule">
 
-    <FilterBar 
-      label="Series" 
-      options={seriesOptions}
-      baseUrl="/essays/"
-      activeId={currentSeries}
-    />
-
-    <FilterBar 
-      label="Category" 
-      options={categoryOptions}
-      baseUrl="/essays/"
-      activeId={currentCategory}
-    />
+    <FilterBar label="Series" options={seriesOptions} baseUrl="/essays/" activeId={currentSeries} />
+    <FilterBar label="Category" options={categoryOptions} baseUrl="/essays/" activeId={currentCategory} />
 
     {filteredEssays.length > 0 ? (
       <div class="card-grid">
@@ -74,7 +62,7 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
           <Card
             title={essay.data.title}
             excerpt={essay.data.summary}
-            date={essay.data.date.toISOString().split('T')[0]}
+            date={formatDate(essay.data.date, essay.data.dateLabel)}
             category={essay.data.series || 'Essay'}
             href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="Read essay"
@@ -92,7 +80,6 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
     <section class="content-section">
       <div class="section-header">
         <h2 class="section-title">Patterns</h2>
-        <p class="section-description">Structured failure-signature analyses extracted from incident data.</p>
       </div>
       <hr class="section-rule">
 
@@ -101,7 +88,7 @@ const filteredPatterns = sortedEssays.filter(e => e.data.category === 'pattern')
           <Card
             title={pattern.data.title}
             excerpt={pattern.data.summary}
-            date={pattern.data.date.toISOString().split('T')[0]}
+            date={formatDate(pattern.data.date, pattern.data.dateLabel)}
             category={pattern.data.patternId || 'Pattern'}
             href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="View pattern"

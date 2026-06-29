@@ -2,50 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Disclaimer" description="Legal disclaimer and terms of use for The Forensic Brief.">
+<BaseLayout title="Disclaimer">
   <article class="article-body prose-section">
     <header class="article-header">
       <span class="eyebrow">Legal</span>
       <h1 class="article-title">Disclaimer</h1>
     </header>
-
-    <div class="prose-body">
-      <h2>General Information</h2>
-
-      <p>
-        The content published on The Forensic Brief is provided for informational and educational purposes only. It represents independent research and analysis of publicly available information about AI system failures.
-      </p>
-
-      <h2>Not Professional Advice</h2>
-
-      <p>
-        The analysis and recommendations on this site do not constitute legal, technical, or professional advice. Organizations should consult qualified professionals for guidance specific to their circumstances.
-      </p>
-
-      <h2>Accuracy</h2>
-
-      <p>
-        Every effort is made to ensure the accuracy of incident reports and analyses. However, the author makes no representations or warranties about the completeness, reliability, or accuracy of the information provided.
-      </p>
-
-      <h2>External Links</h2>
-
-      <p>
-        This site contains links to external sources for reference purposes. The author is not responsible for the content or privacy practices of external sites.
-      </p>
-
-      <h2>AI-Generated Content</h2>
-
-      <p>
-        This publication analyzes AI-generated content and AI system behavior. The analysis itself is produced by human researchers. Any AI tools used in the research process are disclosed in the Methodology section.
-      </p>
-
-      <h2>Newsletter and Analytics</h2>
-
-      <p>
-        Newsletter subscriptions, when offered, send readers to the external Substack page linked from the site. The site only renders analytics when a configured token is present, and it does not expose setup instructions or token values in the page content.
-      </p>
-    </div>
   </article>
 </BaseLayout>
 
@@ -57,21 +19,5 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .article-title {
     font-size: var(--text-3xl);
     margin: 12px 0 16px;
-  }
-
-  .prose-body {
-    max-width: 620px;
-    font-size: 0.92rem;
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-
-  .prose-body p + p {
-    margin-top: 16px;
-  }
-
-  .prose-body h2 {
-    margin-top: 32px;
-    margin-bottom: 12px;
   }
 </style>

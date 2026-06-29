@@ -2,55 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Methodology" description="Research methodology and standards for The Forensic Brief.">
+<BaseLayout title="Methodology">
   <article class="article-body prose-section">
     <header class="article-header">
       <span class="eyebrow">Methodology</span>
       <h1 class="article-title">Research Methodology</h1>
     </header>
-
-    <div class="prose-body">
-      <h2>Incident Analysis Framework</h2>
-
-      <p>
-        The Forensic Brief applies a structured incident analysis framework adapted from established practices in aviation safety investigation and medical device post-market surveillance. Each incident report follows a consistent structure:
-      </p>
-
-      <ul>
-        <li><strong>Timeline:</strong> A chronological sequence of events leading to, during, and after the failure.</li>
-        <li><strong>Root Cause:</strong> The primary failure condition that directly produced the observed outcome.</li>
-        <li><strong>Contributory Factors:</strong> Conditions that increased the likelihood or severity of the failure, but were not individually sufficient to cause it.</li>
-        <li><strong>Evidence:</strong> Documentary sources, court records, technical reports, and other verifiable references.</li>
-      </ul>
-
-      <h2>Source Standards</h2>
-
-      <p>
-        Incident reports are based on publicly available, verifiable sources. Primary sources include court decisions, regulatory filings, technical post-mortems published by affected organizations, and peer-reviewed research. Secondary sources (news reports, industry commentary) are used only when they provide verifiable factual information not available elsewhere.
-      </p>
-
-      <p>
-        Each source is evaluated for reliability and corroboration. Incidents without at least two independent corroborating sources are not published.
-      </p>
-
-      <h2>Pattern Identification</h2>
-
-      <p>
-        Patterns are derived from analysis of multiple incidents sharing common failure signatures. A pattern is identified when:
-      </p>
-
-      <ul>
-        <li>Three or more independent incidents exhibit the same failure mechanism</li>
-        <li>The failure can be expressed as a measurable signature (e.g., "detection accuracy drops to zero past line 600")</li>
-        <li>The pattern is reproducible across different systems and deployment contexts</li>
-      </ul>
-
-      <h2>AI Tools</h2>
-
-      <p>
-        Research and writing for The Forensic Brief is conducted by human researchers. AI tools may be used for research assistance (literature search, text formatting) but are not used for analysis, conclusions, or final editorial judgment. Any significant use of AI tools in the research process is disclosed in the relevant publication.
-      </p>
-    </div>
   </article>
 </BaseLayout>
 
@@ -62,30 +19,5 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .article-title {
     font-size: var(--text-3xl);
     margin: 12px 0 16px;
-  }
-
-  .prose-body {
-    max-width: 620px;
-    font-size: 0.92rem;
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-
-  .prose-body p + p {
-    margin-top: 16px;
-  }
-
-  .prose-body h2 {
-    margin-top: 32px;
-    margin-bottom: 12px;
-  }
-
-  .prose-body ul {
-    margin: 16px 0;
-    padding-left: 24px;
-  }
-
-  .prose-body li {
-    margin-bottom: 8px;
   }
 </style>

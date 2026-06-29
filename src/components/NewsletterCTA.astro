@@ -4,35 +4,25 @@ interface Props {
   description?: string;
 }
 
-const { 
-  title = 'Stay Informed', 
-  description = 'Get notified when new incidents, essays, and artifacts are published.' 
+const {
+  title = 'Stay Informed',
+  description = 'Get notified when new incidents, essays, and artifacts are published.',
 } = Astro.props;
-const configuredNewsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() || '';
-const defaultNewsletterUrl = import.meta.env.DEV ? '' : 'https://theforensicbriefazzim.substack.com/';
-const newsletterUrl = configuredNewsletterUrl || defaultNewsletterUrl;
+const newsletterUrl = import.meta.env.PUBLIC_NEWSLETTER_URL?.trim() || '';
 ---
 
-<section class="newsletter-cta">
-  <h2 class="newsletter-title">{title}</h2>
-  <p class="newsletter-description">{description}</p>
-  
-  {newsletterUrl ? (
-  <div class="newsletter-action">
-    <a class="newsletter-button" href={newsletterUrl} target="_blank" rel="noopener noreferrer">Subscribe on Substack</a>
-    <p class="newsletter-action-note">You will subscribe on Substack in a new tab.</p>
-  </div>
-  ) : (
-  <div class="newsletter-disabled" role="status" aria-live="polite">
-    <p>Newsletter signup is not configured yet.</p>
-    <button type="button" disabled>Subscribe</button>
-  </div>
-  )}
-  
-  <p class="newsletter-privacy">
-    No spam. Unsubscribe anytime. View our <a href="/disclaimer/">privacy policy</a>.
-  </p>
-</section>
+{newsletterUrl ? (
+  <section class="newsletter-cta">
+    <h2 class="newsletter-title">{title}</h2>
+    <p class="newsletter-description">{description}</p>
+    <div class="newsletter-action">
+      <a class="newsletter-button" href={newsletterUrl} target="_blank" rel="noopener noreferrer">Subscribe</a>
+    </div>
+    <p class="newsletter-privacy">
+      No spam. Unsubscribe anytime. View our <a href="/disclaimer/">privacy policy</a>.
+    </p>
+  </section>
+) : null}
 
 <style>
   .newsletter-cta {
@@ -79,28 +69,6 @@ const newsletterUrl = configuredNewsletterUrl || defaultNewsletterUrl;
     opacity: 0.9;
   }
 
-  .newsletter-action-note {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--text-xs);
-  }
-
-  .newsletter-disabled {
-    display: grid;
-    gap: 12px;
-    justify-items: center;
-  }
-
-  .newsletter-disabled p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-
-  .newsletter-disabled button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
   .newsletter-privacy {
     margin-top: 16px;
     font-size: var(--text-xs);
@@ -110,11 +78,5 @@ const newsletterUrl = configuredNewsletterUrl || defaultNewsletterUrl;
   .newsletter-privacy a {
     color: var(--text-light);
     text-decoration: underline;
-  }
-
-  @media (max-width: 600px) {
-    .newsletter-action {
-      justify-items: stretch;
-    }
   }
 </style>

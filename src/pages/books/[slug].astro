@@ -2,9 +2,14 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { hasContentFiles } from '../../utils/hasContentFiles';
 
 export async function getStaticPaths() {
-  const books = await getCollection('books');
+  let books = [];
+  if (hasContentFiles('books')) {
+    books = await getCollection('books');
+  }
+
   return books.map((book) => ({
     params: { slug: book.id.replace(/\.(md|mdx)$/, '') },
     props: { book },
@@ -47,8 +52,8 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
 ---
 
 <BaseLayout title={book.data.title} description={book.data.summary}>
-  <StructuredData 
-    type="book" 
+  <StructuredData
+    type="book"
     data={{
       title: book.data.title,
       summary: book.data.summary,
@@ -57,7 +62,7 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
       cover: coverAvailable ? book.data.cover : undefined,
       isbn: book.data.isbn,
       pages: book.data.pages,
-    }} 
+    }}
   />
   <StructuredData
     type="breadcrumb"
@@ -83,16 +88,16 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
               aria-label={`Open cover preview for ${book.data.title}`}
               data-cover-preview-trigger
             >
-              <img 
-                src={book.data.cover} 
+              <img
+                src={book.data.cover}
                 alt={`Front cover of ${book.data.title}. Activate to view the back cover.`}
                 width="400"
                 height="600"
               />
             </button>
           ) : (
-            <img 
-              src={book.data.cover} 
+            <img
+              src={book.data.cover}
               alt={`Cover of ${book.data.title}`}
               width="400"
               height="600"
@@ -113,8 +118,8 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
 
         <div class="book-actions">
           {pdfAvailable ? (
-            <a 
-              href={book.data.pdfUrl} 
+            <a
+              href={book.data.pdfUrl}
               class="btn btn-primary btn-large"
               target="_blank"
               rel="noopener noreferrer"
@@ -125,8 +130,8 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
             <span class="btn btn-primary btn-large btn-disabled" aria-disabled="true">PDF unavailable</span>
           )}
           {book.data.amazonUrl ? (
-            <a 
-              href={book.data.amazonUrl} 
+            <a
+              href={book.data.amazonUrl}
               class="btn btn-secondary btn-large"
               target="_blank"
               rel="sponsored noopener noreferrer"

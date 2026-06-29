@@ -6,15 +6,15 @@ import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const observations = await getCollection('observations', ({ data }) => data.status === 'published');
-const sortedObservations = observations.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const sortedObservations = observations.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 ---
 
-<BaseLayout title="Observations" description="Preliminary field notes and lab notebook entries on AI system behavior.">
+<BaseLayout title="Observations">
   <StructuredData
     type="collection"
     data={{
       name: 'Observations',
-      description: 'Preliminary field notes and lab notebook entries on AI system behavior.',
       url: 'https://theforensicbrief.com/observations/',
     }}
   />
@@ -30,7 +30,6 @@ const sortedObservations = observations.sort((a, b) => b.data.date.valueOf() - a
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Observations</h1>
-      <p class="section-description">Preliminary field notes and lab notebook entries on AI system behavior.</p>
     </div>
     <hr class="section-rule">
 
@@ -40,8 +39,8 @@ const sortedObservations = observations.sort((a, b) => b.data.date.valueOf() - a
           <Card
             title={observation.data.title}
             excerpt={observation.data.summary}
-            date={observation.data.date.toISOString().split('T')[0]}
-            category={observation.data.observationStatus}
+            date={formatDate(observation.data.date, observation.data.dateLabel)}
+            category={observation.data.observationStatus || 'Observation'}
             href={`/observations/${observation.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="Read observation"
           />

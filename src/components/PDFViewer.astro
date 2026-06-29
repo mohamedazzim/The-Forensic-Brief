@@ -18,15 +18,14 @@ const { title, pdfUrl } = Astro.props;
     </svg>
   </div>
   <p class="pdf-viewer-title">{title}</p>
-  <p class="pdf-viewer-note">PDF preview coming soon</p>
   {pdfUrl && (
-    <a 
-      href={pdfUrl} 
+    <a
+      href={pdfUrl}
       class="pdf-viewer-download"
       target="_blank"
       rel="noopener noreferrer"
     >
-      Open full PDF →
+      Open full PDF ->
     </a>
   )}
 </div>
@@ -48,13 +47,6 @@ const { title, pdfUrl } = Astro.props;
   .pdf-viewer-title {
     font-size: var(--text-base);
     color: var(--text-primary);
-    margin-bottom: 8px;
-  }
-
-  .pdf-viewer-note {
-    font-size: var(--text-sm);
-    color: var(--text-light);
-    font-style: italic;
     margin-bottom: 16px;
   }
 

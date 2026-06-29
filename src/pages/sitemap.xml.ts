@@ -1,13 +1,19 @@
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
+import { hasContentFiles } from '../utils/hasContentFiles';
 
 export async function GET(context: APIContext) {
+  let books = [];
+  if (hasContentFiles('books')) {
+    books = await getCollection('books', ({ data }) => data.status === 'published');
+  }
+
   const collections = await Promise.all([
     getCollection('incidents', ({ data }) => data.status === 'published'),
     getCollection('essays', ({ data }) => data.status === 'published'),
     getCollection('observations', ({ data }) => data.status === 'published'),
     getCollection('artifacts', ({ data }) => data.status === 'published'),
-    getCollection('books', ({ data }) => data.status === 'published'),
+    Promise.resolve(books),
   ]);
 
   const urls = [

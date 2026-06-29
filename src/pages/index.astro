@@ -5,32 +5,25 @@ import SearchBox from '../components/SearchBox.astro';
 import NewsletterCTA from '../components/NewsletterCTA.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { hasContentFiles } from '../utils/hasContentFiles';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay');
 const artifacts = await getCollection('artifacts', ({ data }) => data.status === 'published');
 const observations = await getCollection('observations', ({ data }) => data.status === 'published');
-const books = await getCollection('books', ({ data }) => data.status === 'published');
+let books = [];
+if (hasContentFiles('books')) {
+  books = await getCollection('books', ({ data }) => data.status === 'published');
+}
 
-const featuredIncidents = incidents
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
+const byDateDesc = (a: { data: { date?: Date } }, b: { data: { date?: Date } }) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0);
+const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 
-const featuredEssays = essays
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
-
-const featuredArtifacts = artifacts
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
-
-const recentObservations = observations
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
-
-const featuredBooks = books
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
+const featuredIncidents = incidents.sort(byDateDesc).slice(0, 3);
+const featuredEssays = essays.sort(byDateDesc).slice(0, 3);
+const featuredArtifacts = artifacts.sort(byDateDesc).slice(0, 3);
+const recentObservations = observations.sort(byDateDesc).slice(0, 3);
+const featuredBooks = books.sort(byDateDesc).slice(0, 3);
 ---
 
 <BaseLayout title="Home">
@@ -53,7 +46,6 @@ const featuredBooks = books
     type="collection"
     data={{
       name: 'The Forensic Brief',
-      description: 'Post-Incident Analysis of AI Failure',
       url: 'https://theforensicbrief.com/',
     }}
   />
@@ -64,7 +56,6 @@ const featuredBooks = books
   <section class="content-section">
     <div class="section-header">
       <h2 class="section-title">Incidents</h2>
-      <p class="section-description">Documented AI failure events with evidence-based post-mortems and structured timelines.</p>
     </div>
     <hr class="section-rule">
     <div class="card-grid">
@@ -72,7 +63,7 @@ const featuredBooks = books
         <Card
           title={incident.data.title}
           excerpt={incident.data.summary}
-          date={incident.data.incidentDate.toISOString().split('T')[0]}
+          date={formatDate(incident.data.incidentDate, incident.data.incidentDateLabel)}
           category="Incident Report"
           href={`/incidents/${incident.id.replace(/\.(md|mdx)$/, '')}/`}
           linkText="Read report"
@@ -84,7 +75,6 @@ const featuredBooks = books
   <section class="content-section">
     <div class="section-header">
       <h2 class="section-title">Essays</h2>
-      <p class="section-description">Long-form analysis of AI failure patterns, governance frameworks, and accountability structures.</p>
     </div>
     <hr class="section-rule">
     <div class="card-grid">
@@ -92,7 +82,7 @@ const featuredBooks = books
         <Card
           title={essay.data.title}
           excerpt={essay.data.summary}
-          date={essay.data.date.toISOString().split('T')[0]}
+          date={formatDate(essay.data.date, essay.data.dateLabel)}
           category={essay.data.series || 'Essay'}
           href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
           linkText="Read essay"
@@ -101,32 +91,32 @@ const featuredBooks = books
     </div>
   </section>
 
-  <section class="content-section">
-    <div class="section-header">
-      <h2 class="section-title">Books</h2>
-      <p class="section-description">Free PDF downloads and hardcopy editions.</p>
-    </div>
-    <hr class="section-rule">
-    <div class="books-strip">
-      {featuredBooks.map((book) => (
-        <a href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`} class="book-item">
-          <img 
-            src={book.data.cover} 
-            alt={`Cover of ${book.data.title}`}
-            width="120"
-            height="180"
-            loading="lazy"
-          />
-          <span class="book-title">{book.data.title}</span>
-        </a>
-      ))}
-    </div>
-  </section>
+  {featuredBooks.length > 0 && (
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">Books</h2>
+      </div>
+      <hr class="section-rule">
+      <div class="books-strip">
+        {featuredBooks.map((book) => (
+          <a href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`} class="book-item">
+            <img
+              src={book.data.cover}
+              alt={`Cover of ${book.data.title}`}
+              width="120"
+              height="180"
+              loading="lazy"
+            />
+            <span class="book-title">{book.data.title}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
 
   <section class="content-section">
     <div class="section-header">
       <h2 class="section-title">Artifacts</h2>
-      <p class="section-description">Reusable templates and tools for AI governance — free to download and adapt.</p>
     </div>
     <hr class="section-rule">
     <div class="card-grid">
@@ -134,7 +124,7 @@ const featuredBooks = books
         <Card
           title={artifact.data.title}
           excerpt={artifact.data.summary}
-          date={artifact.data.date.toISOString().split('T')[0]}
+          date={formatDate(artifact.data.date, artifact.data.dateLabel)}
           category={artifact.data.artifactType}
           href={`/artifacts/${artifact.id.replace(/\.(md|mdx)$/, '')}/`}
           linkText="Open artifact"
@@ -146,7 +136,6 @@ const featuredBooks = books
   <section class="content-section">
     <div class="section-header">
       <h2 class="section-title">Observations</h2>
-      <p class="section-description">Preliminary field notes and research observations.</p>
     </div>
     <hr class="section-rule">
     <div class="card-grid">
@@ -154,7 +143,7 @@ const featuredBooks = books
         <Card
           title={observation.data.title}
           excerpt={observation.data.summary}
-          date={observation.data.date.toISOString().split('T')[0]}
+          date={formatDate(observation.data.date, observation.data.dateLabel)}
           category={observation.data.observationStatus}
           href={`/observations/${observation.id.replace(/\.(md|mdx)$/, '')}/`}
           linkText="Read observation"

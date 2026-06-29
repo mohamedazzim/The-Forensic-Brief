@@ -5,7 +5,8 @@ import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'pattern');
-const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const sortedEssays = essays.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 ---
 
 <BaseLayout title="Patterns" description="Structured failure-signature analyses extracted from incident data.">
@@ -30,7 +31,6 @@ const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.v
   <section class="content-section">
     <div class="section-header">
       <h1 class="section-title">Patterns</h1>
-      <p class="section-description">Structured failure-signature analyses extracted from incident data.</p>
     </div>
     <hr class="section-rule">
 
@@ -40,7 +40,7 @@ const sortedEssays = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.v
           <Card
             title={pattern.data.title}
             excerpt={pattern.data.summary}
-            date={pattern.data.date.toISOString().split('T')[0]}
+            date={formatDate(pattern.data.date, pattern.data.dateLabel)}
             category={pattern.data.patternId || 'Pattern'}
             href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
             linkText="View pattern"

@@ -5,7 +5,7 @@ import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-  const essays = await getCollection('essays');
+  const essays = await getCollection('essays', ({ data }) => data.status === 'published');
   const seriesNames = ['human-in-control', 'out-of-bounds', 'accountable-autonomy', 'six-dimensions', 'the-burden'];
 
   return seriesNames.map((series) => {
@@ -18,7 +18,8 @@ export async function getStaticPaths() {
 }
 
 const { series, items } = Astro.props;
-const sortedItems = items.sort((a, b) => a.data.seriesNo - b.data.seriesNo);
+const sortedItems = items.sort((a, b) => (a.data.seriesNo ?? 0) - (b.data.seriesNo ?? 0));
+const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 ---
 
 <BaseLayout title={`Series: ${series}`} description={`Essays in the ${series} series.`}>
@@ -49,18 +50,18 @@ const sortedItems = items.sort((a, b) => a.data.seriesNo - b.data.seriesNo);
     <hr class="section-rule">
 
     {sortedItems.length > 0 ? (
-    <div class="card-grid">
-      {sortedItems.map((essay) => (
-        <Card
-          title={essay.data.title}
-          excerpt={essay.data.summary}
-          date={essay.data.date.toISOString().split('T')[0]}
-          category={essay.data.category === 'pattern' ? 'Pattern' : 'Essay'}
-          href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
-          linkText="Read more"
-        />
-      ))}
-    </div>
+      <div class="card-grid">
+        {sortedItems.map((essay) => (
+          <Card
+            title={essay.data.title}
+            excerpt={essay.data.summary}
+            date={formatDate(essay.data.date, essay.data.dateLabel)}
+            category={essay.data.category === 'pattern' ? 'Pattern' : 'Essay'}
+            href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
+            linkText="Read more"
+          />
+        ))}
+      </div>
     ) : (
       <p class="empty-state">No published essays in this series yet.</p>
     )}

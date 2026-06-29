@@ -6,10 +6,10 @@ import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
   const allContent = [
-    ...(await getCollection('incidents')),
-    ...(await getCollection('essays')),
-    ...(await getCollection('observations')),
-    ...(await getCollection('artifacts')),
+    ...(await getCollection('incidents', ({ data }) => data.status === 'published')),
+    ...(await getCollection('essays', ({ data }) => data.status === 'published')),
+    ...(await getCollection('observations', ({ data }) => data.status === 'published')),
+    ...(await getCollection('artifacts', ({ data }) => data.status === 'published')),
   ];
 
   const tagMap: Record<string, typeof allContent> = {};
@@ -30,7 +30,8 @@ export async function getStaticPaths() {
 }
 
 const { tag, items } = Astro.props;
-const sortedItems = items.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const sortedItems = items.sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0));
+const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 
 function getCollectionType(item: any) {
   if (item.collection === 'incidents') return 'Incident';
@@ -81,18 +82,18 @@ function getHref(item: any) {
     <hr class="section-rule">
 
     {sortedItems.length > 0 ? (
-    <div class="card-grid">
-      {sortedItems.map((item) => (
-        <Card
-          title={item.data.title}
-          excerpt={item.data.summary}
-          date={item.data.date.toISOString().split('T')[0]}
-          category={getCollectionType(item)}
-          href={getHref(item)}
-          linkText="Read more"
-        />
-      ))}
-    </div>
+      <div class="card-grid">
+        {sortedItems.map((item) => (
+          <Card
+            title={item.data.title}
+            excerpt={item.data.summary}
+            date={formatDate(item.data.date, item.data.dateLabel)}
+            category={getCollectionType(item)}
+            href={getHref(item)}
+            linkText="Read more"
+          />
+        ))}
+      </div>
     ) : (
       <p class="empty-state">No published content is tagged with this topic yet.</p>
     )}
