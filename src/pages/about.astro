@@ -8,6 +8,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <span class="eyebrow">About</span>
       <h1 class="article-title">About The Forensic Brief</h1>
     </header>
+
+    <div class="article-content">
+      <p>
+        The Forensic Brief is a structured, multi-section publication about AI failure, governance, and accountability.
+        The technical design document defines it as the canonical home for the publication's original writing, with
+        LinkedIn and Medium intended to point back here so that search authority and the email list accrue on the site
+        itself.
+      </p>
+
+      <p>
+        The publication is organized around five primary content types: incidents, essays, books, observations, and
+        artifacts. Incidents are evidence-based post-mortems of documented AI failures. Essays are long-form writing,
+        including pattern-style analyses within the essays collection. Books gather the related long-form series.
+        Observations act as preliminary field notes. Artifacts collect reusable AI-governance templates and tools.
+      </p>
+
+      <p>
+        The site is designed to stay fast, low-maintenance, and Markdown-driven. The TDD specifies Astro static output,
+        Cloudflare Pages hosting, Cloudflare R2 for larger downloadable files, Pagefind for search, and structured
+        content collections with validation so published material can be maintained without a database-backed CMS.
+      </p>
+    </div>
   </article>
 </BaseLayout>
 
@@ -19,5 +41,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .article-title {
     font-size: var(--text-3xl);
     margin: 12px 0 16px;
+  }
+
+  .article-content {
+    max-width: var(--measure);
   }
 </style>

@@ -8,6 +8,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <span class="eyebrow">Legal</span>
       <h1 class="article-title">Disclaimer</h1>
     </header>
+
+    <div class="article-content">
+      <p>
+        The TDD treats this page as part of the site's utility navigation alongside About and Methodology. It also
+        identifies several disclosure and privacy responsibilities that belong here when they apply in production.
+      </p>
+
+      <p>
+        Hardcopy book purchases are handled externally through Amazon. The design document states that if Amazon
+        Associates is used later, the required affiliate disclosure should be added on this page. At present, books and
+        artifacts are free resources on the site, with larger downloadable files intended to be served from Cloudflare
+        R2.
+      </p>
+
+      <p>
+        On privacy and analytics, the TDD specifies cookieless Cloudflare Web Analytics and a newsletter provider that
+        handles consent within its own workflow. The document also says that data handling for newsletter signup should
+        be documented on the Disclaimer or Privacy page. Comments are intentionally off at launch because some content
+        may be sensitive and unmoderated discussion would create avoidable liability.
+      </p>
+    </div>
   </article>
 </BaseLayout>
 
@@ -19,5 +40,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .article-title {
     font-size: var(--text-3xl);
     margin: 12px 0 16px;
+  }
+
+  .article-content {
+    max-width: var(--measure);
   }
 </style>

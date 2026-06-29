@@ -8,6 +8,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <span class="eyebrow">Methodology</span>
       <h1 class="article-title">Research Methodology</h1>
     </header>
+
+    <div class="article-content">
+      <p>
+        The TDD separates methodology from the About page because it is meant to be substantive and citable. Within the
+        publication structure, incident pages are designed to follow a forensic format built around evidence, timeline,
+        root cause, contributory factors, and source listing rather than loose commentary.
+      </p>
+
+      <p>
+        Incidents are specified as evidence-based post-mortems of documented AI failures. The required incident model in
+        the TDD includes incident date, systems involved, domain, severity, corroboration, sources, timeline, root
+        cause, contributory factors, and links to related patterns or essays. That structure is intended to keep case
+        analysis grounded in traceable signals rather than impressionistic summaries.
+      </p>
+
+      <p>
+        The broader site also distinguishes between narrative essays, pattern-category essays, observations, books, and
+        artifacts so that each format can present evidence and interpretation in the right form. Patterns are meant to
+        surface measurable recurring failure signatures, while artifacts are intended to package reusable governance
+        tools that link back to the essays that explain them.
+      </p>
+    </div>
   </article>
 </BaseLayout>
 
@@ -19,5 +41,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .article-title {
     font-size: var(--text-3xl);
     margin: 12px 0 16px;
+  }
+
+  .article-content {
+    max-width: var(--measure);
   }
 </style>
