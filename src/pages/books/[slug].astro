@@ -443,16 +443,16 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
   }
 
   .book-cover-dialog-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    justify-content: center;
     gap: 20px;
-    justify-items: center;
     align-items: start;
+    flex-wrap: wrap;
   }
 
   .book-cover-dialog-grid figure {
     margin: 0;
-    width: 100%;
+    flex: 1 1 320px;
     max-width: 380px;
     display: flex;
     flex-direction: column;
@@ -501,7 +501,8 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
     }
 
     .book-cover-dialog-grid {
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: center;
     }
 
     .book-cover-dialog-grid figure {
