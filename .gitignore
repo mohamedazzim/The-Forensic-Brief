@@ -36,3 +36,11 @@ build-font-check.log
 
 r2_uploads/
 
+# Local audit / planning files
+Audit_Report.md
+Bug_Report.md
+Bugs.md
+Missing_Features.md
+Priority_Fix_List.md
+samplematerialfortesting/
+
