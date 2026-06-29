@@ -143,6 +143,15 @@ assert(!html.includes('r2_uploads/'), 'Generated HTML should not expose r2_uploa
 assert(!html.includes('Table of Contents'), 'Generated HTML should not expose the removed book table of contents block');
 assert(!html.includes('Placeholder: approved descriptive copy for this book has not been supplied yet.'), 'Generated HTML should not expose placeholder book copy');
 assert(!html.includes('Placeholder book record using the approved front and back cover images while the manuscript package is still being prepared.'), 'Generated HTML should not expose placeholder book summary copy');
+assert(!html.includes('Category:'), 'Generated HTML should not expose the removed essays category filter row');
+
+const essaysIndexHtml = readHtml(join('essays', 'index.html'));
+assert(essaysIndexHtml.includes('id="series-filter"'), 'Essays index should render the series dropdown');
+assert(essaysIndexHtml.includes('<label for="series-filter"'), 'Essays index should render an accessible series filter label');
+assert(essaysIndexHtml.includes('Human in Control'), 'Essays index should include the Human in Control series option');
+assert(essaysIndexHtml.includes('Out of Bounds'), 'Essays index should include the Out of Bounds series option');
+assert(essaysIndexHtml.includes('Patterns'), 'Essays index should preserve the Patterns section heading');
+assert(!essaysIndexHtml.includes('Category:'), 'Essays index should not render the removed category filter row');
 
 const bookPageHtml = readHtml(join('books', 'human-in-control', 'index.html'));
 assert(!bookPageHtml.includes('Table of Contents'), 'Book detail page should not render a Table of Contents section');

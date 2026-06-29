@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
-import FilterBar from '../../components/FilterBar.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
@@ -18,13 +17,7 @@ const seriesOptions = [
   { id: 'the-burden', label: 'The Burden' },
 ];
 
-const categoryOptions = [
-  { id: 'essay', label: 'Essays' },
-  { id: 'pattern', label: 'Patterns' },
-];
-
 const currentSeries = Astro.url.searchParams.get('series') ?? '';
-const currentCategory = Astro.url.searchParams.get('category') ?? '';
 
 const filteredEssays = sortedEssays.filter((e) => e.data.category === 'essay');
 const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern');
@@ -53,11 +46,18 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
     </div>
     <hr class="section-rule">
 
-    <FilterBar label="Series" options={seriesOptions} baseUrl="/essays/" activeId={currentSeries} />
-    <FilterBar label="Category" options={categoryOptions} baseUrl="/essays/" activeId={currentCategory} />
+    <div class="series-filter">
+      <label for="series-filter" class="series-filter-label">Series</label>
+      <select id="series-filter" name="series" class="series-filter-select">
+        <option value="" selected={!currentSeries}>All</option>
+        {seriesOptions.map((option) => (
+          <option value={option.id} selected={currentSeries === option.id}>{option.label}</option>
+        ))}
+      </select>
+    </div>
 
     {filteredEssays.length > 0 ? (
-      <div class="card-grid">
+      <div class="card-grid" data-essay-grid>
         {filteredEssays.map((essay) => (
           <Card
             title={essay.data.title}
@@ -77,13 +77,13 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
   </section>
 
   {filteredPatterns.length > 0 && (
-    <section class="content-section">
+    <section class="content-section" data-pattern-section>
       <div class="section-header">
         <h2 class="section-title">Patterns</h2>
       </div>
       <hr class="section-rule">
 
-      <div class="card-grid">
+      <div class="card-grid" data-pattern-grid>
         {filteredPatterns.map((pattern) => (
           <Card
             title={pattern.data.title}
@@ -106,17 +106,42 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
 </BaseLayout>
 
 <script is:inline>
-  const params = new URLSearchParams(window.location.search);
-  const series = params.get('series');
-  const category = params.get('category');
-  let shown = 0;
-  document.querySelectorAll('.article-card').forEach((card) => {
-    const match = (!series || card.getAttribute('data-series') === series) && (!category || card.getAttribute('data-category') === category);
-    card.hidden = !match;
-    if (match) shown += 1;
-  });
+  const select = document.getElementById('series-filter');
+  const cards = [...document.querySelectorAll('.article-card')];
   const empty = document.querySelector('.empty-state');
-  if (empty) empty.hidden = shown > 0;
+  const patternSection = document.querySelector('[data-pattern-section]');
+
+  const applySeriesFilter = (series) => {
+    let shown = 0;
+    let shownPatterns = 0;
+
+    cards.forEach((card) => {
+      const isMatch = !series || card.getAttribute('data-series') === series;
+      card.hidden = !isMatch;
+
+      if (isMatch) {
+        shown += 1;
+        if (card.getAttribute('data-category') === 'pattern') shownPatterns += 1;
+      }
+    });
+
+    if (empty) empty.hidden = shown > 0;
+    if (patternSection) patternSection.hidden = shownPatterns === 0;
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const currentSeries = params.get('series') || '';
+  if (select instanceof HTMLSelectElement) {
+    select.value = currentSeries;
+    select.addEventListener('change', () => {
+      const nextUrl = new URL(window.location.href);
+      if (select.value) nextUrl.searchParams.set('series', select.value);
+      else nextUrl.searchParams.delete('series');
+      window.location.assign(nextUrl.toString());
+    });
+  }
+
+  applySeriesFilter(currentSeries);
 </script>
 
 <style>
@@ -151,6 +176,31 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
     margin: 20px 0 28px;
   }
 
+  .series-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .series-filter-label {
+    font-size: var(--text-sm);
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .series-filter-select {
+    min-width: 240px;
+    max-width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
   .card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -162,5 +212,12 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
     font-style: italic;
     text-align: center;
     padding: 40px 0;
+  }
+
+  @media (max-width: 600px) {
+    .series-filter-select {
+      width: 100%;
+      min-width: 0;
+    }
   }
 </style>

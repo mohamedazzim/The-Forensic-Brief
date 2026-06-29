@@ -98,6 +98,15 @@ const patternPage = readFileSync(join(dist, 'essays/detection-drop-line-600/inde
 assert(patternPage.includes('P-ATTENTION-DECAY'), 'Pattern page missing pattern identifier');
 assert(countMatches(patternPage, /<h1\b/g) === 1, 'Pattern page should expose exactly one H1');
 
+const essaysIndex = readFileSync(join(dist, 'essays/index.html'), 'utf8');
+assert(essaysIndex.includes('id="series-filter"'), 'Essays index should expose the series dropdown');
+assert(essaysIndex.includes('<label for="series-filter"'), 'Essays index should expose an accessible series filter label');
+assert(!essaysIndex.includes('Category:'), 'Essays index should not render the removed category filter row');
+assert(essaysIndex.includes('Human in Control'), 'Essays index should include series options');
+assert(essaysIndex.includes('Out of Bounds'), 'Essays index should include series options');
+assert(essaysIndex.includes('/essays/whitebox-red-teaming/'), 'Essays index should still render essay cards');
+assert(essaysIndex.includes('/essays/detection-drop-line-600/'), 'Essays index should still render pattern cards');
+
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
 assert(bookPage.includes('human-in-control-front-cover.jpg'), 'Book detail page should expose the front cover image');
 assert(bookPage.includes('human-in-control-back-cover.jpg'), 'Book detail page should expose the back cover image');
