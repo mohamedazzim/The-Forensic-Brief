@@ -13,7 +13,6 @@ const routes = [
   'search/index.html',
   'incidents/index.html',
   'incidents/feed.xml',
-  'incidents/samsung-chatgpt-one-way-door/index.html',
   'essays/index.html',
   'essays/feed.xml',
   'essays/patterns/index.html',
@@ -24,7 +23,6 @@ const routes = [
   'books/human-in-control/index.html',
   'artifacts/index.html',
   'artifacts/mris-template/index.html',
-  'artifacts/six-dimensions-maturity-scorecard/index.html',
   'observations/index.html',
   'observations/the-attack-that-left-no-fingerprints/index.html',
   'topics/red-teaming/index.html',
@@ -37,9 +35,11 @@ const routes = [
 routes.forEach((route) => assert(existsSync(join(dist, route)), `Missing route: ${route}`));
 
 assert(!existsSync(join(dist, 'incidents', 'air-canada-chatbot-refund', 'index.html')), 'Unsupported Air Canada route should not exist');
+assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html')), 'Draft Samsung incident route should not exist');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-metadata', 'index.html')), 'Incident metadata route should not exist');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-content', 'index.html')), 'Incident content route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope route should not exist');
+assert(!existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Draft Six Dimensions route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-metadata', 'index.html')), 'Artifact metadata route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-content', 'index.html')), 'Artifact content route should not exist');
 
@@ -84,12 +84,13 @@ const booksIndex = readFileSync(join(dist, 'books/index.html'), 'utf8');
 assert(booksIndex.includes('href="/books/human-in-control/"'), 'Books index should link to the Human in Control detail page');
 
 const incidentsIndex = readFileSync(join(dist, 'incidents/index.html'), 'utf8');
-assert(incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Incidents index should link to the clean Samsung incident route');
+assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Incidents index should not link to draft Samsung incident route');
 assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door-metadata/'), 'Incidents index should not expose metadata routes');
 assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door-content/'), 'Incidents index should not expose content routes');
 
 const artifactsIndex = readFileSync(join(dist, 'artifacts/index.html'), 'utf8');
 assert(artifactsIndex.includes('/artifacts/mris-template/'), 'Artifacts index should link to the clean MRIS route');
+assert(!artifactsIndex.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Artifacts index should not link to draft Six Dimensions route');
 assert(!artifactsIndex.includes('/artifacts/mris-template-metadata/'), 'Artifacts index should not expose metadata routes');
 assert(!artifactsIndex.includes('/artifacts/mris-template-content/'), 'Artifacts index should not expose content routes');
 

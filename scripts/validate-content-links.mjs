@@ -91,7 +91,6 @@ const requiredFiles = [
   'robots.txt',
   'search/index.html',
   'incidents/index.html',
-  'incidents/samsung-chatgpt-one-way-door/index.html',
   'essays/index.html',
   'essays/hitl-is-not-oversight/index.html',
   'essays/detection-drop-line-600/index.html',
@@ -100,7 +99,6 @@ const requiredFiles = [
   'observations/the-attack-that-left-no-fingerprints/index.html',
   'artifacts/index.html',
   'artifacts/mris-template/index.html',
-  'artifacts/six-dimensions-maturity-scorecard/index.html',
   'books/index.html',
   'books/human-in-control/index.html',
 ];
@@ -108,9 +106,11 @@ const requiredFiles = [
 requiredFiles.forEach((path) => assert(existsSync(join(dist, path)), `Missing generated file: ${path}`));
 
 assert(!existsSync(join(dist, 'incidents', 'air-canada-chatbot-refund', 'index.html')), 'Unsupported Air Canada incident route should not be generated');
+assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html')), 'Draft Samsung incident route should not be generated');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-metadata', 'index.html')), 'Incident metadata route should not be generated');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-content', 'index.html')), 'Incident content route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope should not be generated');
+assert(!existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Draft Six Dimensions route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-metadata', 'index.html')), 'Artifact metadata route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-content', 'index.html')), 'Artifact content route should not be generated');
 
@@ -122,10 +122,8 @@ assertJsonLd(join('artifacts', 'index.html'), ['"@type":"CollectionPage"', '"@ty
 assertJsonLd(join('topics', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('essays', 'hitl-is-not-oversight', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('essays', 'whitebox-red-teaming', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
-assertJsonLd(join('incidents', 'samsung-chatgpt-one-way-door', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('observations', 'the-attack-that-left-no-fingerprints', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('artifacts', 'mris-template', 'index.html'), ['"@type":"CreativeWork"', '"@type":"BreadcrumbList"']);
-assertJsonLd(join('artifacts', 'six-dimensions-maturity-scorecard', 'index.html'), ['"@type":"CreativeWork"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('books', 'human-in-control', 'index.html'), ['"@type":"Book"', '"@type":"BreadcrumbList"']);
 
 const htmlFiles = walk(dist, (f) => f.endsWith('.html'));
@@ -136,14 +134,15 @@ assert(!html.includes('Subscribe on Substack'), 'Generated HTML should not inclu
 assert(!html.includes('Newsletter signup is not configured yet'), 'Generated HTML should not include disabled newsletter filler');
 assert(!html.includes('PDF preview coming soon'), 'Generated HTML should not include removed PDF preview placeholder');
 assert(!html.includes('/incidents/air-canada-chatbot-refund/'), 'Generated HTML should not link to unsupported incident content');
+assert(!html.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Generated HTML should not link to draft Samsung incident content');
 assert(!html.includes('/artifacts/pa-01-six-dimensions-maturity-scorecard.pdf'), 'Generated HTML should not reference local production artifact files');
+assert(!html.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Generated HTML should not link to draft Six Dimensions artifact content');
 assert(!html.includes('-metadata/'), 'Generated HTML should not expose metadata routes');
 assert(!html.includes('-content/'), 'Generated HTML should not expose content routes');
 assert(!html.includes('r2_uploads/'), 'Generated HTML should not expose r2_uploads paths');
 
 const artifactPages = [
   join('artifacts', 'mris-template', 'index.html'),
-  join('artifacts', 'six-dimensions-maturity-scorecard', 'index.html'),
 ];
 
 for (const route of artifactPages) {
