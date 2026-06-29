@@ -1,29 +1,155 @@
 ---
+
 title: "The One-Way Door: How Samsung Lost Its Source Code to a Machine That Cannot Forget"
 date: 2026-06-25
-summary: "This is the forensic anatomy of a governance failure whose defining feature is that, by the time anyone noticed, every remedy except prohibition was already too late."
-incidentDateLabel: "April 2023 (company-wide ban in early May 2023)"
+dateLabel: "25 June 2026"
+summary: "Within weeks of allowing ChatGPT at work, Samsung leaked crown-jewel source code and meeting content into an external system it could not recall from."
+incidentDate: 2023-04-01
+incidentDateLabel: "April 2023 (company-wide ban, early May 2023)"
+author: "Dr. Anandkumar Prakasam"
+tags: ["provenance"]
+status: published
+featured: true
 systems: ["Samsung", "ChatGPT"]
-corroboration: "Samsung responded by restricting upload size and then, in early May 2023, banning generative-AI tools on company devices and internal networks, and committing to build an internal alternative."
+domain: "semiconductor engineering"
+severity: "high"
+corroboration: "Samsung responded by restricting upload size and then banning generative-AI tools on company devices and internal networks while it pursued an internal alternative."
 sources:
   - label: "Sample material"
+    url: ""
 timeline:
-  - label: "April 2023"
+  - date: 2023-04-01
+    label: "April 2023"
     event: "Samsung's semiconductor division allowed staff to use ChatGPT for work."
-  - label: "Within about three weeks"
+  - date: 2023-04-21
+    label: "Within about three weeks"
     event: "Three separate disclosures of confidential material occurred."
-  - label: "Early May 2023"
+  - date: 2023-05-01
+    label: "Early May 2023"
     event: "Samsung banned generative-AI tools on company devices and internal networks."
 rootCause: "Delegated disclosure across an irreversible boundary into an external learning system."
 contributoryFactors:
   - "No egress constraint on the AI channel"
   - "No classification of the action as one-way"
   - "No checkpoint before disclosure"
-status: draft
-featured: true
-tags: []
+relatedPatterns: []
+relatedEssays: []
 ---
 
-## Executive Brief
+## Why this incident, and why this chapter
 
-In April 2023, Samsung's semiconductor division lifted its internal restriction and allowed staff to use ChatGPT for work. Within about three weeks, three separate disclosures of confidential material occurred.
+*Provenance* opens its fourth chapter with Samsung, and for good reason. Every other kind of data loss assumes the data is still a **thing**, an object that persists somewhere and can, in principle, be found and destroyed. Stolen files can be traced and seized. Leaked documents can be injuncted. Breached databases can be rebuilt and their copies hunted down. Samsung's engineers understood, faster than most legal departments have, that this assumption had just quietly died. The code had not gone *somewhere*. It had gone *into* something. It was no longer an object in a place. It was, potentially, a faint adjustment in a vast web of numbers, present the way an ingredient is present in a finished cake.
+
+That is the **Influence dimension**, the axis along which data has consequences that survive its deletion. The Forensic Brief template exists to show that AI incidents are governance failures with multiple exit ramps, not single points of blame. Samsung is the cleanest case in the book where those two ideas meet, a preventable, multi-layer control failure whose downstream property, irreversibility, is exactly what makes the governance design matter. Analyse it properly and you are simultaneously reading Chapter Four and a procurement memo.
+
+---
+
+## Section 1 - Executive Brief (The Verdict)
+
+**The Incident.** In April 2023, Samsung's semiconductor division lifted its internal restriction and allowed staff to use ChatGPT for work. Within about three weeks, three separate disclosures of confidential material occurred. An engineer pasted proprietary semiconductor source code into the chatbot to fix a bug. Another pasted code to optimise it. A third fed in a recording of an internal meeting to generate minutes. Each act was natural, well-intentioned, and exactly what the tool exists for. Samsung responded by restricting upload size and then, in early May 2023, banning generative-AI tools on company devices and internal networks, and committing to build an internal alternative.
+
+**What Failed (Plain Language).** Not "employees were careless." **Irreversible authority was delegated to individuals to export crown-jewel IP across an organisational boundary into a learning system, with no egress constraint, no classification of the action as one-way, and no checkpoint before disclosure.** The control surface a board imagines, "we have a policy, people are trained," never touched the actual failure point, which was a text box on an external endpoint.
+
+**Material Impact.** No fine, no breach notification, no public dollar figure, and that absence is itself the lesson. The harm is not a quantifiable loss event but an **unquantifiable, unrecoverable exposure**. Process IP from one of the most closely guarded research programmes in global industry may have entered an external model's training surface, with no mechanism to confirm, contain, or reverse it. The secondary, very real cost was strategic: the company withdrew a major productivity tool from its entire workforce, the blunt-instrument remedy you reach for only when no finer one exists.
+
+**Core Governance Failure.** Delegated disclosure across an irreversible boundary. In the book's language, the organisation walked its most valuable data through **the one-way door** and discovered, on the other side, that influence cannot be recalled. Prohibition-in-advance was the only tool left because everything after the paste was already too late.
+
+---
+
+## Section 2 - Layered Failure Timeline (Swiss-Cheese Analysis)
+
+The point of this section is that the incident was preventable at three independent layers. Any one of them, designed correctly, stops it.
+
+**Design Layer (Structural) - the boundary that should have existed but didn't.**
+There was no architectural distinction between *reversible* data movement, a copy you can later find and delete, and *irreversible* disclosure, data entering a system that learns. The network handling semiconductor IP could reach a consumer-grade external model endpoint with no egress gateway, no data-loss-prevention (DLP) inspection on that channel, and no classification that marked source code as non-exportable. The structural assumption baked in was that "a chatbot is a tool like web search," a reversible lookup, when it is in fact a learning system with the manners of a teacher, not a filing cabinet.
+
+**Test Layer (Operational) - the scenario that should have been stress-tested.**
+"An engineer pastes proprietary code to get a fix" is not an exotic edge case. It is the single most predictable use of the tool by the exact population given access. It was never modelled. A monitored pilot, a narrow group with full egress logging and DLP in observe-mode, would have surfaced the behaviour in days. It took the real world only twenty, and converted a company-wide incident into a contained finding. The misuse path was foreseeable, fast, and untested.
+
+**Oversight Layer (Control) - the escalation/rollback that failed to trigger.**
+Three incidents occurred before the tool was pulled. That number is the indictment of the control layer. Nothing detected the *first* egress of classified IP and halted the channel. No real-time signal escalated. No automatic downgrade, "suspend external-AI access pending review," fired. The organisation learned about the failures after the fact and in aggregate, which is precisely the mode the book calls *amnesia by architecture* applied to oversight. The system kept no live account of what was leaving it.
+
+Three layers, three slices, every hole aligned. The Swiss cheese did exactly what unmanaged Swiss cheese does.
+
+---
+
+## Section 3 - Technical Autopsy (The Missing Pattern)
+
+**Missing / Broken Patterns.** Three governance patterns were absent, and only these three need to be named.
+
+1. **Egress Constraint / Boundary Envelope.** No control governed data *leaving* the trusted environment into an external model. The default-allow posture meant the most capable tool was also the least supervised path out of the building.
+2. **Irreversibility Classification.** No action in the system was tagged as recoverable versus one-way. Without that tag, every control downstream treats a paste into a learning model identically to a paste into an internal scratchpad. The property that matters most to this dimension was invisible to the architecture.
+3. **Pre-Disclosure Gate.** Nothing sat between the engineer's clipboard and the external endpoint. No block, no quarantine, no prompt redirecting source code to the sanctioned internal model instead.
+
+**What the System Did Instead (the default that filled the vacuum).** With no envelope, no classification, and no gate, the default behaviour was *trust the user at the point of irreversible action*, and the path of least resistance, pasting into the best available tool, carried the data out. The provider's own default completed the failure. Consumer-grade usage at the time carried the prospect that inputs could be retained and used to improve models. The vacuum was filled by the two least governable forces in any system, human convenience and a vendor default.
+
+**Correct Governance Logic (conceptual, not code).** Classify actions by reversibility and make irreversibility a first-class property of the architecture. Default-deny external model endpoints from IP-bearing networks. Route any egress of classified material through a gateway that inspects, blocks, or quarantines. Crucially, *satisfy the underlying need rather than only forbidding it*. Stand up a sanctioned internal or enterprise endpoint with contractual no-training guarantees, so the engineer who needs a bug fixed has a door that is **not** one-way. Governance that only says *no* invites the shadow workarounds that produced this incident in the first place.
+
+---
+
+## Section 4 - Assumptions and Signals That Failed
+
+**Key assumptions the system relied on:**
+
+- *"ChatGPT is essentially smarter search / autocomplete."* **Misapplied across contexts.** A reversible-tool mental model was transplanted onto an irreversible-disclosure tool. The single most consequential error in the incident is this category mistake.
+- *"Consumer terms are adequate for enterprise use."* **Outdated/implicit.** The data-handling posture of a free consumer product was silently accepted as the control environment for crown-jewel IP.
+- *"Employees will recognise and withhold sensitive material."* **Implicit and unfounded.** Discretion at the point of egress was treated as a control. It is the vulnerability.
+
+**Signals that existed and didn't force a stop.** By early 2023 it was already widely reported, and stated in the provider's own terms, that ChatGPT inputs could be used to improve models, and several major institutions, large banks among them, had already restricted or banned the tool. The signal was public and loud. It failed to halt anything because **no one owned the question** "evaluate irreversible-disclosure risk *before* enabling this." Enablement was treated as an IT convenience decision, not a governance decision, so the risk signal had no addressee.
+
+This is the silent layer where the incident actually originated, not in the paste, but in the unexamined assumption weeks earlier that the tool was safe to switch on.
+
+---
+
+## Section 5 - Governance and Liability Exposure
+
+**Why "human-in-the-loop" did not help.** There were humans in the loop, the engineers themselves. That is exactly why it failed. Human discretion *at the moment of irreversible egress* is not oversight. It is the attack surface. HITL is a control only when the human sits *above* the irreversible action with the power and information to stop it, not when the human is the one performing it under deadline.
+
+**What evidence would be demanded after the incident.** Which records left, at what time, through which account. What the provider retained. Whether any of it entered a training run. And proof of deletion if requested. Samsung could obtain satisfying answers to almost none of these, and this is Chapter Four's hard centre. *You cannot subpoena a tilt, you cannot redline a weighting, there is no forensic team that can search a model's mind.* The evidence the situation demands is, by the nature of the dimension, largely unproducible.
+
+**Where the burden of proof realistically shifts.** Onto the discloser, with no way to discharge it. Samsung cannot prove the code was *not* absorbed, and the provider cannot credibly prove erasure from every downstream artefact. As the machine-unlearning literature honestly documents, suppression is achievable, but guaranteed removal short of full retraining is not. A burden you cannot satisfy is, functionally, strict exposure.
+
+**How this reads.** Not a defensible one-off error. The pattern, broad enablement with no egress control, no classification, and no halt-on-first-signal, reads as a **governance omission shading toward systemic**, the absence of any architecture for AI egress, discovered only because the harm announced itself three times in three weeks.
+
+---
+
+## Section 6 - Counterfactual Governance (The Preventable Path)
+
+Credibility here comes from restraint: the fix is *not* "ban all AI." It is two patterns, precisely placed.
+
+1. **Egress Constraint and sanctioned internal endpoint (Design layer).** Default-deny external model endpoints from IP-bearing networks and route the genuine productivity need to an enterprise or internal model with contractual no-training terms. Intervening here **prevents the incident entirely**. The engineer still gets the bug fixed, through a door that closes behind the data instead of swallowing it.
+
+2. **Halt-on-first-signal egress monitoring (Oversight layer).** DLP inspection on the AI channel that detects classified material leaving and suspends access on the first event. Intervening here does not prevent leak #1 but **converts three irreversible disclosures into one** and turns a strategic exposure into a contained, learnable incident.
+
+The first pattern is the better investment because, in the Influence dimension, *reduce-harm* is a weak consolation. The only fully effective control is the one applied **before** the paste. That is the whole argument of the chapter, expressed as an architecture decision rather than a philosophical one. And it is why Samsung, lacking the door, was left with the wall.
+
+---
+
+## Section 7 - Stakeholder Takeaways
+
+**Architect - what should never have been delegated.** An external learning endpoint should never have been reachable from a network handling crown-jewel IP without an egress gateway. Irreversibility must be a first-class design property. Actions that cannot be undone require controls that do not depend on the user choosing well under pressure.
+
+**Red Team - what scenario should have been tested.** "Engineer pastes proprietary source code into the assistant." It is the most obvious abuse case for the most obvious user population, and it should have been run in a monitored pilot *before* general rollout, not discovered in production three times.
+
+**Governance - what evidence was missing.** There was no egress log to answer "what left, when, and through whom," and no provider data-handling attestation to answer "what was retained and whether it trained anything." Build the evidence trail *at the boundary*, at write-time. In this dimension, evidence reconstructed after the dispute begins is exactly the evidence that does not exist.
+
+**Executive - what risk should have been challenged earlier.** The trade itself. Enabling a consumer-grade *learning* tool on IP-bearing systems to capture a reversible productivity gain while accepting an irreversible downside. Stated that plainly in a risk-acceptance meeting, the trade fails on sight. The job was to make someone state it plainly *before* April, not after.
+
+---
+
+## The thread back to *Provenance*
+
+Samsung is the chapter's thesis enacted in three weeks. Confronted with a new species of loss, the most capable company on the planet found it possessed exactly one tool, the word *no* applied in advance, because everything after the paste was already too late. The remedy of last resort became the remedy of only resort, for the same reason regulators reaching for **algorithmic disgorgement**, destroy the model not just the data, concede the dimension's core truth. Influence cannot be located, cannot be extracted, cannot be unlearned with assurance. A governance programme that learns Samsung's lesson stops treating AI egress as an IT setting and starts treating it as a boundary with a calendar of no return. The door only opens one way. Govern it before, or not at all.
+
+---
+
+### Suggested tags (LinkedIn)
+
+`#AIGovernance` · `#DataGovernance` · `#ShadowAI` · `#EnterpriseAI` · `#InformationSecurity` · `#LLM` · `#DLP` · `#AIRisk` · `#Privacy` · `#MachineUnlearning` · `#AICompliance` · `#Provenance` · `#TheForensicBrief`
+
+*Primary three for the post header:* **#AIGovernance #ShadowAI #EnterpriseAI**
+
+---
+
+*This Forensic Brief accompanies* Provenance: How the Six Dimensions of Data Will Rewrite Privacy, Power, and Accountability *by Dr. Anandkumar Prakasam. Incident facts are drawn from contemporaneous reporting (Bloomberg, TechCrunch, May 2023) and verified June 2026.*
+

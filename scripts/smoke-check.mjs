@@ -13,15 +13,20 @@ const routes = [
   'search/index.html',
   'incidents/index.html',
   'incidents/feed.xml',
+  'incidents/samsung-chatgpt-one-way-door/index.html',
   'essays/index.html',
   'essays/feed.xml',
   'essays/patterns/index.html',
   'essays/detection-drop-line-600/index.html',
   'essays/human-in-control/feed.xml',
+  'essays/whitebox-red-teaming/index.html',
   'books/index.html',
+  'books/human-in-control/index.html',
   'artifacts/index.html',
   'artifacts/mris-template/index.html',
+  'artifacts/six-dimensions-maturity-scorecard/index.html',
   'observations/index.html',
+  'observations/the-attack-that-left-no-fingerprints/index.html',
   'topics/red-teaming/index.html',
   'sitemap.xml',
   'feed.xml',
@@ -31,13 +36,8 @@ const routes = [
 
 routes.forEach((route) => assert(existsSync(join(dist, route)), `Missing route: ${route}`));
 
-assert(!existsSync(join(dist, 'books', 'human-in-control', 'index.html')), 'Unsupported book detail route should not exist');
 assert(!existsSync(join(dist, 'incidents', 'air-canada-chatbot-refund', 'index.html')), 'Unsupported Air Canada route should not exist');
-assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html')), 'Draft Samsung route should not exist');
-assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html')), 'Draft Whitebox route should not exist');
-assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html')), 'Draft observation route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope route should not exist');
-assert(!existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Draft Six Dimensions route should not exist');
 
 const searchHtml = readFileSync(join(dist, 'search/index.html'), 'utf8');
 assert(searchHtml.includes('Search'), 'Search page missing title');
@@ -77,10 +77,14 @@ assert(page404.includes('/search/'), '404 page missing explicit search link');
 assert(page404.includes('Return to Home'), '404 page missing home link');
 
 const booksIndex = readFileSync(join(dist, 'books/index.html'), 'utf8');
-assert(!booksIndex.includes('href="/books/human-in-control/"'), 'Books index should not link to unsupported book detail content');
+assert(booksIndex.includes('href="/books/human-in-control/"'), 'Books index should link to the Human in Control detail page');
 
 const patternPage = readFileSync(join(dist, 'essays/detection-drop-line-600/index.html'), 'utf8');
 assert(patternPage.includes('P-ATTENTION-DECAY'), 'Pattern page missing pattern identifier');
 assert(countMatches(patternPage, /<h1\b/g) === 1, 'Pattern page should expose exactly one H1');
+
+const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
+assert(bookPage.includes('human-in-control-front-cover.jpg'), 'Book detail page should expose the front cover image');
+assert(bookPage.includes('human-in-control-back-cover.jpg'), 'Book detail page should expose the back cover image');
 
 console.log('smoke-check passed');
