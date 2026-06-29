@@ -389,8 +389,8 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
     border: none;
     padding: 0;
     background: transparent;
-    max-width: min(920px, calc(100vw - 2rem));
-    width: 100%;
+    width: min(920px, calc(100vw - 2rem));
+    margin: auto;
   }
 
   .book-cover-dialog::backdrop {
@@ -399,6 +399,7 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
   }
 
   .book-cover-dialog-surface {
+    width: 100%;
     background: var(--bg-card);
     border: 1px solid var(--border-light);
     padding: 24px;
