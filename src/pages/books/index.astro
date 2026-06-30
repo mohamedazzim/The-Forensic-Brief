@@ -43,11 +43,6 @@ const booksWithAvailability = await Promise.all(
     pdfAvailable: await isReachable(book.data.pdfUrl),
   }))
 );
-
-const galleryBooks =
-  booksWithAvailability.length > 0
-    ? Array.from({ length: 4 }, (_, index) => booksWithAvailability[index % booksWithAvailability.length])
-    : [];
 ---
 
 <BaseLayout title="Books">
@@ -73,13 +68,13 @@ const galleryBooks =
     </div>
     <hr class="section-rule">
 
-    {galleryBooks.length > 0 && (
+    {booksWithAvailability.length > 0 && (
       <div class="book-grid">
-        {galleryBooks.map((book, index) => (
+        {booksWithAvailability.map((book, index) => (
           <a
             class="book-card"
             href={`/books/${book.id.replace(/\.(md|mdx)$/, '')}/`}
-            aria-label={`Open ${book.data.title} book details${index > 0 ? `, copy ${index + 1}` : ''}`}
+            aria-label={`Open ${book.data.title} book details`}
           >
             <div class="book-cover">
               {book.coverAvailable ? (

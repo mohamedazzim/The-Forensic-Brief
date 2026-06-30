@@ -23,7 +23,8 @@ export async function getStaticPaths() {
     }
   });
 
-  const tags = ['red-teaming', 'human-oversight', 'eu-ai-act', 'automation-bias', 'dpdp', 'provenance', 'agentic-ai', 'audit-trail', 'llm-security', 'ai-governance', 'mris', 'risk-disclosure', 'checklist', 'deployment', 'governance', 'customer-service', 'liability', 'chatbot', 'attention-mechanisms', 'prompt-injection', 'decision-making', 'audit', 'topic-slug'];
+  const tags = Object.keys(tagMap).sort((a, b) => a.localeCompare(b));
+
   return tags.map((tag) => ({
     params: { tag },
     props: { tag, items: tagMap[tag] || [] },

@@ -7,7 +7,11 @@ import { entrySlug } from '../../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
-  const seriesNames = ['human-in-control', 'out-of-bounds', 'accountable-autonomy', 'six-dimensions', 'the-burden'];
+  const seriesNames = [...new Set(
+    essays
+      .filter((essay) => essay.data.category === 'essay' && essay.data.series)
+      .map((essay) => essay.data.series)
+  )].sort((a, b) => a.localeCompare(b));
 
   return seriesNames.map((series) => {
     const items = essays.filter((essay) => essay.data.series === series);

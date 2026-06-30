@@ -3,9 +3,10 @@ import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 import { entrySlug } from '../../../utils/contentEntries';
 
-const seriesNames = ['human-in-control', 'out-of-bounds', 'accountable-autonomy', 'six-dimensions', 'the-burden'] as const;
-
 export async function getStaticPaths() {
+  const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay' && data.series);
+  const seriesNames = [...new Set(essays.map((essay) => essay.data.series!))].sort((a, b) => a.localeCompare(b));
+
   return seriesNames.map((series) => ({
     params: { series },
     props: { series },
@@ -13,7 +14,11 @@ export async function getStaticPaths() {
 }
 
 export async function GET(context: APIContext) {
-  const series = context.params.series as (typeof seriesNames)[number];
+  const series = context.params.series;
+  if (!series) {
+    throw new Error('Missing essay series route parameter.');
+  }
+
   const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay' && data.series === series);
 
   const items = essays
