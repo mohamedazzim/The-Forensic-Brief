@@ -171,6 +171,10 @@ assert(!bookPageHtml.includes('Placeholder'), 'Book detail page should not rende
 assert(bookPageHtml.includes('PDF unavailable'), 'Book detail page should keep the safe PDF unavailable state');
 assert(bookPageHtml.includes('Amazon link unavailable'), 'Book detail page should keep the safe Amazon unavailable state');
 assert(!bookPageHtml.includes('<h2>Description</h2>'), 'Book detail page should skip Description when no source-backed description exists');
+assert(bookPageHtml.includes('Front cover'), 'Book detail page should expose the front cover inline');
+assert(bookPageHtml.includes('Back cover'), 'Book detail page should expose the back cover inline');
+assert(!bookPageHtml.includes('book-cover-dialog'), 'Book detail page should not expose the cover modal');
+assert(!bookPageHtml.includes('Close cover preview'), 'Book detail page should not expose the modal close button');
 
 const artifactPages = [
   join('artifacts', 'mris-template', 'index.html'),

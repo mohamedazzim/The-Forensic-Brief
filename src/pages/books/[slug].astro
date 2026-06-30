@@ -50,7 +50,22 @@ const [coverAvailable, backCoverAvailable, pdfAvailable] = await Promise.all([
   isReachable(book.data.backCover),
   isReachable(book.data.pdfUrl),
 ]);
-const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.backCover);
+const coverCards = [
+  book.data.cover && coverAvailable
+    ? {
+        src: book.data.cover,
+        alt: `Front cover of ${book.data.title}`,
+        label: 'Front cover',
+      }
+    : null,
+  book.data.backCover && backCoverAvailable
+    ? {
+        src: book.data.backCover,
+        alt: `Back cover of ${book.data.title}`,
+        label: 'Back cover',
+      }
+    : null,
+].filter(Boolean) as { src: string; alt: string; label: string }[];
 ---
 
 <BaseLayout title={book.data.title} description={book.data.summary || undefined}>
@@ -78,85 +93,71 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
   />
 
   <article class="book-page">
-    <div class="book-header">
-      <div class="book-cover-large">
-        {coverAvailable ? (
-          showBackCover ? (
-            <button
-              type="button"
-              class="book-cover-trigger"
-              aria-haspopup="dialog"
-              aria-controls="book-cover-dialog"
-              aria-label={`Open cover preview for ${book.data.title}`}
-              data-cover-preview-trigger
-            >
-              <img
-                src={book.data.cover}
-                alt={`Front cover of ${book.data.title}. Activate to view the back cover.`}
-                width="400"
-                height="600"
-              />
-            </button>
-          ) : (
-            <img
-              src={book.data.cover}
-              alt={`Cover of ${book.data.title}`}
-              width="400"
-              height="600"
-            />
-          )
-        ) : (
-          <div class="book-cover-fallback" role="img" aria-label={`Cover unavailable for ${book.data.title}`}>
-            <span class="book-cover-fallback-label">Cover unavailable</span>
-            <span class="book-cover-fallback-title">{book.data.title}</span>
-          </div>
-        )}
-      </div>
-      <div class="book-details">
-        <span class="eyebrow">Book</span>
-        <h1 class="book-title">{book.data.title}</h1>
-        <p class="book-series">Part of the <a href={`/essays/${book.data.series}/`}>{book.data.series}</a> series</p>
+    <header class="book-header">
+      <span class="eyebrow">Book</span>
+      <h1 class="book-title">{book.data.title}</h1>
+    </header>
 
-        <div class="book-actions">
-          {pdfAvailable ? (
-            <a
-              href={book.data.pdfUrl}
-              class="btn btn-primary btn-large"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Download PDF ({book.data.pdfSizeMB} MB)
-            </a>
-          ) : (
-            <span class="btn btn-primary btn-large btn-disabled" aria-disabled="true">PDF unavailable</span>
-          )}
-          {book.data.amazonUrl ? (
-            <a
-              href={book.data.amazonUrl}
-              class="btn btn-secondary btn-large"
-              target="_blank"
-              rel="sponsored noopener noreferrer"
-            >
-              Buy on Amazon
-            </a>
-          ) : (
-            <span class="btn btn-secondary btn-large btn-disabled" aria-disabled="true">Amazon link unavailable</span>
-          )}
+    {coverCards.length > 0 ? (
+      <section class="book-cover-row" aria-label={`Cover images for ${book.data.title}`}>
+        {coverCards.map((cover) => (
+          <figure class="book-cover-figure">
+            <img src={cover.src} alt={cover.alt} width="400" height="600" />
+            <figcaption>{cover.label}</figcaption>
+          </figure>
+        ))}
+      </section>
+    ) : (
+      <section class="book-cover-row">
+        <div class="book-cover-fallback" role="img" aria-label={`Cover unavailable for ${book.data.title}`}>
+          <span class="book-cover-fallback-label">Cover unavailable</span>
+          <span class="book-cover-fallback-title">{book.data.title}</span>
         </div>
-
-        <div class="book-meta">
-          {book.data.isbn && <p>ISBN: {book.data.isbn}</p>}
-          {book.data.pages && <p>{book.data.pages} pages</p>}
-        </div>
-      </div>
-    </div>
-
-    {bookDescription && (
-      <section class="book-description">
-        <h2>Description</h2>
-        <p>{bookDescription}</p>
       </section>
     )}
+
+    <section class="book-details">
+      <p class="book-series">Part of the <a href={`/essays/${book.data.series}/`}>{book.data.series}</a> series</p>
+
+      <div class="book-actions">
+        {pdfAvailable ? (
+          <a
+            href={book.data.pdfUrl}
+            class="btn btn-primary btn-large"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Download PDF ({book.data.pdfSizeMB} MB)
+          </a>
+        ) : (
+          <span class="btn btn-primary btn-large btn-disabled" aria-disabled="true">PDF unavailable</span>
+        )}
+        {book.data.amazonUrl ? (
+          <a
+            href={book.data.amazonUrl}
+            class="btn btn-secondary btn-large"
+            target="_blank"
+            rel="sponsored noopener noreferrer"
+          >
+            Buy on Amazon
+          </a>
+        ) : (
+          <span class="btn btn-secondary btn-large btn-disabled" aria-disabled="true">Amazon link unavailable</span>
+        )}
+      </div>
+
+      <div class="book-meta">
+        {book.data.isbn && <p>ISBN: {book.data.isbn}</p>}
+        {book.data.pages && <p>{book.data.pages} pages</p>}
+      </div>
+
+      {bookDescription && (
+        <section class="book-description">
+          <h2>Description</h2>
+          <p>{bookDescription}</p>
+        </section>
+      )}
+    </section>
 
     {hasBookContent && (
       <section class="book-content article-body">
@@ -164,71 +165,7 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
       </section>
     )}
   </article>
-
-  {showBackCover && (
-    <dialog class="book-cover-dialog" id="book-cover-dialog" aria-labelledby="book-cover-dialog-title">
-      <div class="book-cover-dialog-surface">
-        <div class="book-cover-dialog-header">
-          <div>
-            <p class="book-cover-dialog-eyebrow">Book covers</p>
-            <h2 id="book-cover-dialog-title" class="book-cover-dialog-title">{book.data.title}</h2>
-          </div>
-          <button type="button" class="book-cover-dialog-close" data-cover-preview-close aria-label="Close cover preview">
-            Close
-          </button>
-        </div>
-        <p class="book-cover-dialog-note">Front cover and back cover for this book.</p>
-        <div class="book-cover-dialog-grid">
-          <figure>
-            <img src={book.data.cover} alt={`Front cover of ${book.data.title}`} width="400" height="600" />
-            <figcaption>Front cover</figcaption>
-          </figure>
-          <figure>
-            <img src={book.data.backCover} alt={`Back cover of ${book.data.title}`} width="400" height="600" />
-            <figcaption>Back cover</figcaption>
-          </figure>
-        </div>
-      </div>
-    </dialog>
-  )}
 </BaseLayout>
-
-<script is:inline>
-  const dialog = document.getElementById('book-cover-dialog');
-  const openers = document.querySelectorAll('[data-cover-preview-trigger]');
-  const closers = document.querySelectorAll('[data-cover-preview-close]');
-
-  const closeDialog = () => {
-    if (dialog instanceof HTMLDialogElement && dialog.open) {
-      dialog.close();
-    }
-  };
-
-  openers.forEach((opener) => {
-    opener.addEventListener('click', () => {
-      if (dialog instanceof HTMLDialogElement && !dialog.open) {
-        dialog.showModal();
-      }
-    });
-  });
-
-  closers.forEach((closer) => {
-    closer.addEventListener('click', closeDialog);
-  });
-
-  if (dialog instanceof HTMLDialogElement) {
-    dialog.addEventListener('click', (event) => {
-      if (event.target === dialog) {
-        closeDialog();
-      }
-    });
-
-    dialog.addEventListener('cancel', (event) => {
-      event.preventDefault();
-      closeDialog();
-    });
-  }
-</script>
 
 <style>
   .book-page {
@@ -236,30 +173,46 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
   }
 
   .book-header {
+    margin-bottom: 24px;
+  }
+
+  .book-title {
+    font-size: var(--text-3xl);
+    margin: 12px 0 0;
+  }
+
+  .book-cover-row {
     display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 40px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
     margin-bottom: 48px;
   }
 
-  .book-cover-large img {
+  .book-cover-figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .book-cover-figure img {
     width: 100%;
     height: auto;
     display: block;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
-  .book-cover-trigger {
-    display: block;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
+  .book-cover-figure figcaption {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    text-align: center;
   }
 
   .book-cover-fallback {
-    min-height: 600px;
+    width: 100%;
+    min-height: 540px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -288,11 +241,6 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
   .book-details {
     display: flex;
     flex-direction: column;
-  }
-
-  .book-title {
-    font-size: var(--text-3xl);
-    margin: 12px 0 16px;
   }
 
   .book-series {
@@ -358,7 +306,7 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
   }
 
   .book-description {
-    margin-bottom: 48px;
+    margin-top: 24px;
     padding: 24px;
     background: var(--bg-card);
     border: 1px solid var(--border-light);
@@ -380,106 +328,9 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
     margin-top: 48px;
   }
 
-  .book-cover-dialog {
-    border: none;
-    padding: 0;
-    background: transparent;
-    width: min(920px, calc(100vw - 2rem));
-    margin: auto;
-  }
-
-  .book-cover-dialog::backdrop {
-    background: rgba(15, 23, 42, 0.68);
-    backdrop-filter: blur(2px);
-  }
-
-  .book-cover-dialog-surface {
-    width: 100%;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    padding: 24px;
-    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
-  }
-
-  .book-cover-dialog-header {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: flex-start;
-    margin-bottom: 12px;
-  }
-
-  .book-cover-dialog-eyebrow {
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-light);
-    margin-bottom: 4px;
-  }
-
-  .book-cover-dialog-title {
-    font-family: 'Libre Baskerville', Georgia, serif;
-    font-size: var(--text-xl);
-    margin: 0;
-  }
-
-  .book-cover-dialog-note {
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    margin-bottom: 20px;
-  }
-
-  .book-cover-dialog-close {
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-primary);
-    padding: 8px 14px;
-    font-size: var(--text-sm);
-    cursor: pointer;
-  }
-
-  .book-cover-dialog-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    width: min(100%, 780px);
-    margin: 0 auto;
-    justify-items: center;
-    align-items: start;
-  }
-
-  .book-cover-dialog-grid figure {
-    margin: 0;
-    width: 100%;
-    max-width: 380px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .book-cover-dialog-grid img {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    display: block;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  .book-cover-dialog-grid figcaption {
-    margin-top: 8px;
-    font-size: var(--text-sm);
-    color: var(--text-muted);
-    text-align: center;
-    width: 100%;
-  }
-
   @media (max-width: 600px) {
-    .book-header {
+    .book-cover-row {
       grid-template-columns: 1fr;
-    }
-
-    .book-cover-large {
-      max-width: 200px;
     }
 
     .book-actions {
@@ -488,23 +339,6 @@ const showBackCover = coverAvailable && backCoverAvailable && Boolean(book.data.
 
     .btn {
       text-align: center;
-    }
-
-    .book-cover-dialog {
-      max-width: calc(100vw - 1rem);
-    }
-
-    .book-cover-dialog-surface {
-      padding: 18px;
-    }
-
-    .book-cover-dialog-grid {
-      grid-template-columns: 1fr;
-      width: min(100%, 320px);
-    }
-
-    .book-cover-dialog-grid figure {
-      max-width: 320px;
     }
   }
 </style>
