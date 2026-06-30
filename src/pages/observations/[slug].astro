@@ -3,17 +3,25 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { entrySlug } from '../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const observations = await getCollection('observations', ({ data }) => data.status === 'published');
   return observations.map((observation) => ({
-    params: { slug: observation.id.replace(/\.(md|mdx)$/, '') },
+    params: { slug: entrySlug(observation) },
     props: { observation },
   }));
 }
 
 const { observation } = Astro.props;
-const { Content } = await observation.render();
+const observationBodyModules = import.meta.glob('../../content/observations/*-content.mdx');
+const observationBodyPath = observation.data.contentFile
+  ? `../../content/observations/${observation.data.contentFile}`
+  : '';
+const observationBodyModule = observationBodyPath && observationBodyModules[observationBodyPath]
+  ? await observationBodyModules[observationBodyPath]()
+  : null;
+const Content = observationBodyModule?.default;
 const observationDateDisplay = observation.data.dateLabel || (observation.data.date ? observation.data.date.toISOString().split('T')[0] : '');
 
 const statusColors: Record<string, string> = {
@@ -32,7 +40,7 @@ const statusColors: Record<string, string> = {
       date: observation.data.date,
       updated: observation.data.updated,
       author: observation.data.author,
-      url: `/observations/${observation.id.replace(/\.(md|mdx)$/, '')}/`,
+      url: `/observations/${entrySlug(observation)}/`,
       image: observation.data.ogImage,
     }}
   />
@@ -42,7 +50,7 @@ const statusColors: Record<string, string> = {
       items: [
         { name: 'Home', url: '/' },
         { name: 'Observations', url: '/observations/' },
-        { name: observation.data.title, url: `/observations/${observation.id.replace(/\.(md|mdx)$/, '')}/` },
+        { name: observation.data.title, url: `/observations/${entrySlug(observation)}/` },
       ],
     }}
   />
@@ -69,7 +77,7 @@ const statusColors: Record<string, string> = {
     </header>
 
     <div class="article-content">
-      <Content />
+      {Content && <Content />}
     </div>
 
     {observation.data.tags.length > 0 && (

@@ -1,7 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
-import { sortNewestFirst } from '../../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 export async function GET(context: APIContext) {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -14,7 +14,7 @@ export async function GET(context: APIContext) {
       title: item.data.title,
       pubDate: item.data.date ?? item.data.updated!,
       description: item.data.summary || '',
-      link: `/essays/${item.id.replace(/\.(md|mdx)$/, '')}/`,
+      link: `/essays/${entrySlug(item)}/`,
     }));
 
   return rss({

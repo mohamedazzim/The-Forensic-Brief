@@ -4,7 +4,7 @@ import Card from '../../components/Card.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { sortNewestFirst } from '../../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 const sortedEssays = sortNewestFirst(essays);
@@ -62,10 +62,10 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
         {filteredEssays.map((essay) => (
           <Card
             title={essay.data.title}
-            excerpt={essay.data.summary}
+            excerpt={essay.data.excerpt || essay.data.summary}
             date={formatDate(essay.data.date, essay.data.dateLabel)}
             category={essay.data.series || 'Essay'}
-            href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
+            href={`/essays/${entrySlug(essay)}/`}
             linkText="Read essay"
             dataSeries={essay.data.series || ''}
             dataCategory="essay"
@@ -88,10 +88,10 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
         {filteredPatterns.map((pattern) => (
           <Card
             title={pattern.data.title}
-            excerpt={pattern.data.summary}
+            excerpt={pattern.data.excerpt || pattern.data.summary}
             date={formatDate(pattern.data.date, pattern.data.dateLabel)}
             category={pattern.data.patternId || 'Pattern'}
-            href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
+            href={`/essays/${entrySlug(pattern)}/`}
             linkText="View pattern"
             dataSeries={pattern.data.series || ''}
             dataCategory="pattern"

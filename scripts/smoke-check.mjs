@@ -18,13 +18,11 @@ const routes = [
   'essays/patterns/index.html',
   'essays/detection-drop-line-600/index.html',
   'essays/human-in-control/feed.xml',
-  'essays/whitebox-red-teaming/index.html',
   'books/index.html',
   'books/human-in-control/index.html',
   'artifacts/index.html',
   'artifacts/mris-template/index.html',
   'observations/index.html',
-  'observations/the-attack-that-left-no-fingerprints/index.html',
   'topics/red-teaming/index.html',
   'sitemap.xml',
   'feed.xml',
@@ -42,6 +40,16 @@ assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 
 assert(!existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Draft Six Dimensions route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-metadata', 'index.html')), 'Artifact metadata route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-content', 'index.html')), 'Artifact content route should not exist');
+assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-metadata', 'index.html')), 'Essay metadata route should not exist');
+assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-content', 'index.html')), 'Essay content route should not exist');
+assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-metadata', 'index.html')), 'Pattern metadata route should not exist');
+assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-content', 'index.html')), 'Pattern content route should not exist');
+assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html')), 'Draft Whitebox essay route should not exist');
+assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-metadata', 'index.html')), 'Whitebox metadata route should not exist');
+assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-content', 'index.html')), 'Whitebox content route should not exist');
+assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html')), 'Draft observation route should not exist');
+assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-metadata', 'index.html')), 'Observation metadata route should not exist');
+assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-content', 'index.html')), 'Observation content route should not exist');
 
 const searchHtml = readFileSync(join(dist, 'search/index.html'), 'utf8');
 assert(searchHtml.includes('Search'), 'Search page missing title');
@@ -112,7 +120,7 @@ assert(essaysIndex.includes('<label for="series-filter"'), 'Essays index should 
 assert(!essaysIndex.includes('Category:'), 'Essays index should not render the removed category filter row');
 assert(essaysIndex.includes('Human in Control'), 'Essays index should include series options');
 assert(essaysIndex.includes('Out of Bounds'), 'Essays index should include series options');
-assert(essaysIndex.includes('/essays/whitebox-red-teaming/'), 'Essays index should still render essay cards');
+assert(!essaysIndex.includes('/essays/whitebox-red-teaming/'), 'Essays index should not render draft essay cards');
 assert(essaysIndex.includes('/essays/detection-drop-line-600/'), 'Essays index should still render pattern cards');
 
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');

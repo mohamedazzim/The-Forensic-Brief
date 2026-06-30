@@ -62,7 +62,7 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
       {featuredIncidents.map((incident) => (
         <Card
           title={incident.data.title}
-          excerpt={incident.data.summary}
+          excerpt={incident.data.excerpt || incident.data.summary}
           date={formatDate(incident.data.incidentDate, incident.data.incidentDateLabel)}
           category="Incident Report"
           href={`/incidents/${entrySlug(incident)}/`}
@@ -81,10 +81,10 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
       {featuredEssays.map((essay) => (
         <Card
           title={essay.data.title}
-          excerpt={essay.data.summary}
+          excerpt={essay.data.excerpt || essay.data.summary}
           date={formatDate(essay.data.date, essay.data.dateLabel)}
           category={essay.data.series || 'Essay'}
-          href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
+          href={`/essays/${entrySlug(essay)}/`}
           linkText="Read essay"
         />
       ))}
@@ -123,7 +123,7 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
       {featuredArtifacts.map((artifact) => (
         <Card
           title={artifact.data.title}
-          excerpt={artifact.data.summary}
+          excerpt={artifact.data.excerpt || artifact.data.summary}
           date={formatDate(artifact.data.date, artifact.data.dateLabel)}
           category={artifact.data.artifactType}
           href={`/artifacts/${entrySlug(artifact)}/`}
@@ -142,10 +142,10 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
       {recentObservations.map((observation) => (
         <Card
           title={observation.data.title}
-          excerpt={observation.data.summary}
+          excerpt={observation.data.excerpt || observation.data.summary}
           date={formatDate(observation.data.date, observation.data.dateLabel)}
           category={observation.data.observationStatus}
-          href={`/observations/${observation.id.replace(/\.(md|mdx)$/, '')}/`}
+          href={`/observations/${entrySlug(observation)}/`}
           linkText="Read observation"
         />
       ))}

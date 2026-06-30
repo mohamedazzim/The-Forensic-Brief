@@ -4,7 +4,7 @@ import Card from '../../components/Card.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { sortNewestFirst } from '../../utils/contentEntries';
+import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 const observations = await getCollection('observations', ({ data }) => data.status === 'published');
 const sortedObservations = sortNewestFirst(observations);
@@ -39,10 +39,10 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
         {sortedObservations.map((observation) => (
           <Card
             title={observation.data.title}
-            excerpt={observation.data.summary}
+            excerpt={observation.data.excerpt || observation.data.summary}
             date={formatDate(observation.data.date, observation.data.dateLabel)}
             category={observation.data.observationStatus || 'Observation'}
-            href={`/observations/${observation.id.replace(/\.(md|mdx)$/, '')}/`}
+            href={`/observations/${entrySlug(observation)}/`}
             linkText="Read observation"
           />
         ))}

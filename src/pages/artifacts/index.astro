@@ -43,7 +43,7 @@ const sortedArtifacts = sortNewestFirst(artifacts);
             <h2 class="artifact-title">
               <a href={`/artifacts/${entrySlug(artifact)}/`}>{artifact.data.title}</a>
             </h2>
-            {artifact.data.summary && <p class="artifact-summary">{artifact.data.summary}</p>}
+            {(artifact.data.excerpt || artifact.data.summary) && <p class="artifact-summary">{artifact.data.excerpt || artifact.data.summary}</p>}
             <a href={`/artifacts/${entrySlug(artifact)}/`} class="artifact-link">
               View artifact ->
             </a>

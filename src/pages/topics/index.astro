@@ -4,10 +4,10 @@ import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 
 const allContent = [
-  ...(await getCollection('incidents')),
-  ...(await getCollection('essays')),
-  ...(await getCollection('observations')),
-  ...(await getCollection('artifacts')),
+  ...(await getCollection('incidents', ({ data }) => data.status === 'published')),
+  ...(await getCollection('essays', ({ data }) => data.status === 'published')),
+  ...(await getCollection('observations', ({ data }) => data.status === 'published')),
+  ...(await getCollection('artifacts', ({ data }) => data.status === 'published')),
 ];
 
 const tagCounts: Record<string, number> = {};

@@ -59,6 +59,8 @@ const srcFiles = walk(src, (f) => /\.(mdx?|astro|ts|js|mjs|json)$/.test(f));
 srcFiles.forEach(checkTextFile);
 validateMetadataPairs('incidents');
 validateMetadataPairs('artifacts');
+validateMetadataPairs('essays');
+validateMetadataPairs('observations');
 
 function readHtml(relativePath) {
   const filePath = join(dist, relativePath);
@@ -94,9 +96,7 @@ const requiredFiles = [
   'essays/index.html',
   'essays/hitl-is-not-oversight/index.html',
   'essays/detection-drop-line-600/index.html',
-  'essays/whitebox-red-teaming/index.html',
   'observations/index.html',
-  'observations/the-attack-that-left-no-fingerprints/index.html',
   'artifacts/index.html',
   'artifacts/mris-template/index.html',
   'books/index.html',
@@ -113,6 +113,16 @@ assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 
 assert(!existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Draft Six Dimensions route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-metadata', 'index.html')), 'Artifact metadata route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-content', 'index.html')), 'Artifact content route should not be generated');
+assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-metadata', 'index.html')), 'Essay metadata route should not be generated');
+assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-content', 'index.html')), 'Essay content route should not be generated');
+assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-metadata', 'index.html')), 'Pattern metadata route should not be generated');
+assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-content', 'index.html')), 'Pattern content route should not be generated');
+assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html')), 'Draft Whitebox essay route should not be generated');
+assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-metadata', 'index.html')), 'Whitebox metadata route should not be generated');
+assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-content', 'index.html')), 'Whitebox content route should not be generated');
+assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html')), 'Draft observation route should not be generated');
+assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-metadata', 'index.html')), 'Observation metadata route should not be generated');
+assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-content', 'index.html')), 'Observation content route should not be generated');
 
 assertJsonLd('index.html', ['"@type":"WebSite"', '"@type":"Organization"']);
 assertJsonLd(join('incidents', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
@@ -121,8 +131,6 @@ assertJsonLd(join('observations', 'index.html'), ['"@type":"CollectionPage"', '"
 assertJsonLd(join('artifacts', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('topics', 'index.html'), ['"@type":"CollectionPage"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('essays', 'hitl-is-not-oversight', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
-assertJsonLd(join('essays', 'whitebox-red-teaming', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
-assertJsonLd(join('observations', 'the-attack-that-left-no-fingerprints', 'index.html'), ['"@type":"Article"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('artifacts', 'mris-template', 'index.html'), ['"@type":"CreativeWork"', '"@type":"BreadcrumbList"']);
 assertJsonLd(join('books', 'human-in-control', 'index.html'), ['"@type":"Book"', '"@type":"BreadcrumbList"']);
 
@@ -137,6 +145,8 @@ assert(!html.includes('/incidents/air-canada-chatbot-refund/'), 'Generated HTML 
 assert(!html.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Generated HTML should not link to draft Samsung incident content');
 assert(!html.includes('/artifacts/pa-01-six-dimensions-maturity-scorecard.pdf'), 'Generated HTML should not reference local production artifact files');
 assert(!html.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Generated HTML should not link to draft Six Dimensions artifact content');
+assert(!html.includes('/essays/whitebox-red-teaming/'), 'Generated HTML should not link to draft Whitebox essay content');
+assert(!html.includes('/observations/the-attack-that-left-no-fingerprints/'), 'Generated HTML should not link to draft observation content');
 assert(!html.includes('-metadata/'), 'Generated HTML should not expose metadata routes');
 assert(!html.includes('-content/'), 'Generated HTML should not expose content routes');
 assert(!html.includes('r2_uploads/'), 'Generated HTML should not expose r2_uploads paths');
@@ -151,6 +161,7 @@ assert(essaysIndexHtml.includes('<label for="series-filter"'), 'Essays index sho
 assert(essaysIndexHtml.includes('Human in Control'), 'Essays index should include the Human in Control series option');
 assert(essaysIndexHtml.includes('Out of Bounds'), 'Essays index should include the Out of Bounds series option');
 assert(essaysIndexHtml.includes('Patterns'), 'Essays index should preserve the Patterns section heading');
+assert(!essaysIndexHtml.includes('/essays/whitebox-red-teaming/'), 'Essays index should not link to the draft Whitebox essay');
 assert(!essaysIndexHtml.includes('Category:'), 'Essays index should not render the removed category filter row');
 
 const incidentsIndexHtml = readHtml(join('incidents', 'index.html'));

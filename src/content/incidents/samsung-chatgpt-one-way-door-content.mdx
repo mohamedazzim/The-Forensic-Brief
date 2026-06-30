@@ -1,13 +1,10 @@
----
----
-
 ## Why this incident, and why this chapter
 
 *Provenance* opens its fourth chapter with Samsung, and for good reason. Every other kind of data loss assumes the data is still a **thing**, an object that persists somewhere and can, in principle, be found and destroyed. Stolen files can be traced and seized. Leaked documents can be injuncted. Breached databases can be rebuilt and their copies hunted down. Samsung's engineers understood, faster than most legal departments have, that this assumption had just quietly died. The code had not gone *somewhere*. It had gone *into* something. It was no longer an object in a place. It was, potentially, a faint adjustment in a vast web of numbers, present the way an ingredient is present in a finished cake.
 
 That is the **Influence dimension**, the axis along which data has consequences that survive its deletion. The Forensic Brief template exists to show that AI incidents are governance failures with multiple exit ramps, not single points of blame. Samsung is the cleanest case in the book where those two ideas meet, a preventable, multi-layer control failure whose downstream property, irreversibility, is exactly what makes the governance design matter. Analyse it properly and you are simultaneously reading Chapter Four and a procurement memo.
 
----
+<hr />
 
 ## Section 1 - Executive Brief (The Verdict)
 
@@ -19,7 +16,7 @@ That is the **Influence dimension**, the axis along which data has consequences 
 
 **Core Governance Failure.** Delegated disclosure across an irreversible boundary. In the book's language, the organisation walked its most valuable data through **the one-way door** and discovered, on the other side, that influence cannot be recalled. Prohibition-in-advance was the only tool left because everything after the paste was already too late.
 
----
+<hr />
 
 ## Section 2 - Layered Failure Timeline (Swiss-Cheese Analysis)
 
@@ -36,7 +33,7 @@ Three incidents occurred before the tool was pulled. That number is the indictme
 
 Three layers, three slices, every hole aligned. The Swiss cheese did exactly what unmanaged Swiss cheese does.
 
----
+<hr />
 
 ## Section 3 - Technical Autopsy (The Missing Pattern)
 
@@ -50,7 +47,7 @@ Three layers, three slices, every hole aligned. The Swiss cheese did exactly wha
 
 **Correct Governance Logic (conceptual, not code).** Classify actions by reversibility and make irreversibility a first-class property of the architecture. Default-deny external model endpoints from IP-bearing networks. Route any egress of classified material through a gateway that inspects, blocks, or quarantines. Crucially, *satisfy the underlying need rather than only forbidding it*. Stand up a sanctioned internal or enterprise endpoint with contractual no-training guarantees, so the engineer who needs a bug fixed has a door that is **not** one-way. Governance that only says *no* invites the shadow workarounds that produced this incident in the first place.
 
----
+<hr />
 
 ## Section 4 - Assumptions and Signals That Failed
 
@@ -64,7 +61,7 @@ Three layers, three slices, every hole aligned. The Swiss cheese did exactly wha
 
 This is the silent layer where the incident actually originated, not in the paste, but in the unexamined assumption weeks earlier that the tool was safe to switch on.
 
----
+<hr />
 
 ## Section 5 - Governance and Liability Exposure
 
@@ -76,7 +73,7 @@ This is the silent layer where the incident actually originated, not in the past
 
 **How this reads.** Not a defensible one-off error. The pattern, broad enablement with no egress control, no classification, and no halt-on-first-signal, reads as a **governance omission shading toward systemic**, the absence of any architecture for AI egress, discovered only because the harm announced itself three times in three weeks.
 
----
+<hr />
 
 ## Section 6 - Counterfactual Governance (The Preventable Path)
 
@@ -88,7 +85,7 @@ Credibility here comes from restraint: the fix is *not* "ban all AI." It is two 
 
 The first pattern is the better investment because, in the Influence dimension, *reduce-harm* is a weak consolation. The only fully effective control is the one applied **before** the paste. That is the whole argument of the chapter, expressed as an architecture decision rather than a philosophical one. And it is why Samsung, lacking the door, was left with the wall.
 
----
+<hr />
 
 ## Section 7 - Stakeholder Takeaways
 
@@ -100,13 +97,13 @@ The first pattern is the better investment because, in the Influence dimension, 
 
 **Executive - what risk should have been challenged earlier.** The trade itself. Enabling a consumer-grade *learning* tool on IP-bearing systems to capture a reversible productivity gain while accepting an irreversible downside. Stated that plainly in a risk-acceptance meeting, the trade fails on sight. The job was to make someone state it plainly *before* April, not after.
 
----
+<hr />
 
 ## The thread back to *Provenance*
 
 Samsung is the chapter's thesis enacted in three weeks. Confronted with a new species of loss, the most capable company on the planet found it possessed exactly one tool, the word *no* applied in advance, because everything after the paste was already too late. The remedy of last resort became the remedy of only resort, for the same reason regulators reaching for **algorithmic disgorgement**, destroy the model not just the data, concede the dimension's core truth. Influence cannot be located, cannot be extracted, cannot be unlearned with assurance. A governance programme that learns Samsung's lesson stops treating AI egress as an IT setting and starts treating it as a boundary with a calendar of no return. The door only opens one way. Govern it before, or not at all.
 
----
+<hr />
 
 ### Suggested tags (LinkedIn)
 
@@ -114,6 +111,6 @@ Samsung is the chapter's thesis enacted in three weeks. Confronted with a new sp
 
 *Primary three for the post header:* **#AIGovernance #ShadowAI #EnterpriseAI**
 
----
+<hr />
 
 *This Forensic Brief accompanies* Provenance: How the Six Dimensions of Data Will Rewrite Privacy, Power, and Accountability *by Dr. Anandkumar Prakasam. Incident facts are drawn from contemporaneous reporting (Bloomberg, TechCrunch, May 2023) and verified June 2026.*

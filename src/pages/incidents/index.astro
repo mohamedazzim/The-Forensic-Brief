@@ -39,7 +39,7 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
         {sortedIncidents.map((incident) => (
           <Card
             title={incident.data.title}
-            excerpt={incident.data.summary}
+            excerpt={incident.data.excerpt || incident.data.summary}
             date={formatDate(incident.data.incidentDate, incident.data.incidentDateLabel)}
             category={`${incident.data.severity?.toUpperCase() || 'INCIDENT'}${incident.data.domain ? ` - ${incident.data.domain}` : ''}`}
             href={`/incidents/${entrySlug(incident)}/`}

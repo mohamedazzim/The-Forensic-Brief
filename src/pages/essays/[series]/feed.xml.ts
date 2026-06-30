@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
+import { entrySlug } from '../../../utils/contentEntries';
 
 const seriesNames = ['human-in-control', 'out-of-bounds', 'accountable-autonomy', 'six-dimensions', 'the-burden'] as const;
 
@@ -22,7 +23,7 @@ export async function GET(context: APIContext) {
       title: item.data.title,
       pubDate: item.data.date!,
       description: item.data.summary || '',
-      link: `/essays/${item.id.replace(/\.(md|mdx)$/, '')}/`,
+      link: `/essays/${entrySlug(item)}/`,
     }));
 
   return rss({

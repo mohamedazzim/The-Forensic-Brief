@@ -3,6 +3,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Card from '../../../components/Card.astro';
 import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { entrySlug } from '../../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -54,10 +55,10 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
         {sortedItems.map((essay) => (
           <Card
             title={essay.data.title}
-            excerpt={essay.data.summary}
+            excerpt={essay.data.excerpt || essay.data.summary}
             date={formatDate(essay.data.date, essay.data.dateLabel)}
             category={essay.data.category === 'pattern' ? 'Pattern' : 'Essay'}
-            href={`/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`}
+            href={`/essays/${entrySlug(essay)}/`}
             linkText="Read more"
           />
         ))}

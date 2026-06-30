@@ -5,8 +5,10 @@ const sharedPublished = {
   title: z.string(),
   date: z.date(),
   dateLabel: z.string().optional(),
+  displayDate: z.string().optional(),
   updated: z.date().optional(),
   summary: z.string().max(200),
+  excerpt: z.string().optional(),
   author: z.string().default('Dr. Anandkumar Prakasam'),
   tags: z.array(z.string()).default([]),
   status: z.literal('published'),
@@ -19,8 +21,10 @@ const sharedDraft = {
   title: z.string(),
   date: z.date().optional(),
   dateLabel: z.string().optional(),
+  displayDate: z.string().optional(),
   updated: z.date().optional(),
   summary: z.string().max(200).optional(),
+  excerpt: z.string().optional(),
   author: z.string().default('Dr. Anandkumar Prakasam'),
   tags: z.array(z.string()).default([]),
   status: z.literal('draft'),
@@ -85,11 +89,14 @@ const incidents = defineCollection({
 });
 
 const essays = defineCollection({
-  type: 'content',
-  glob: '**/*.{md,mdx}',
+  loader: glob({
+    base: './src/content/essays',
+    pattern: ['**/*-metadata.md', '**/*-metadata.mdx'],
+  }),
   schema: z.union([
     z.object({
       ...sharedPublished,
+      contentFile: z.string(),
       category: z.enum(['essay', 'pattern']).default('essay'),
       series: z.enum([
         'human-in-control',
@@ -120,6 +127,7 @@ const essays = defineCollection({
     }),
     z.object({
       ...sharedDraft,
+      contentFile: z.string().optional(),
       category: z.enum(['essay', 'pattern']).default('essay'),
       series: z.enum([
         'human-in-control',
@@ -146,15 +154,19 @@ const essays = defineCollection({
 });
 
 const observations = defineCollection({
-  type: 'content',
-  glob: '**/*.{md,mdx}',
+  loader: glob({
+    base: './src/content/observations',
+    pattern: ['**/*-metadata.md', '**/*-metadata.mdx'],
+  }),
   schema: z.union([
     z.object({
       ...sharedPublished,
+      contentFile: z.string(),
       observationStatus: z.enum(['preliminary', 'ongoing', 'resolved']),
     }),
     z.object({
       ...sharedDraft,
+      contentFile: z.string().optional(),
       observationStatus: z.enum(['preliminary', 'ongoing', 'resolved']).optional(),
     }),
   ]),

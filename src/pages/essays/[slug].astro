@@ -11,7 +11,7 @@ import { entrySlug } from '../../utils/contentEntries';
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
   return essays.map((essay) => ({
-    params: { slug: essay.id.replace(/\.(md|mdx)$/, '') },
+    params: { slug: entrySlug(essay) },
     props: { essay },
   }));
 }
@@ -25,10 +25,17 @@ const artifacts = await getCollection('artifacts', ({ data }) => data.status ===
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 
 const { essay } = Astro.props;
-const { Content } = await essay.render();
+const essayBodyModules = import.meta.glob('../../content/essays/*-content.mdx');
+const essayBodyPath = essay.data.contentFile
+  ? `../../content/essays/${essay.data.contentFile}`
+  : '';
+const essayBodyModule = essayBodyPath && essayBodyModules[essayBodyPath]
+  ? await essayBodyModules[essayBodyPath]()
+  : null;
+const Content = essayBodyModule?.default;
 
 const isPattern = essay.data.category === 'pattern';
-const essayUrl = `/essays/${essay.id.replace(/\.(md|mdx)$/, '')}/`;
+const essayUrl = `/essays/${entrySlug(essay)}/`;
 const essayDateDisplay = essay.data.dateLabel || (essay.data.date ? essay.data.date.toISOString().split('T')[0] : '');
 
 const seriesItems = essay.data.series
@@ -141,16 +148,16 @@ const relatedContentItems = [
     )}
 
     <div class="article-content">
-      <Content />
+      {Content && <Content />}
     </div>
 
     <SeriesNav
       prev={prevEssay ? {
-        slug: prevEssay.id.replace(/\.(md|mdx)$/, ''),
+        slug: entrySlug(prevEssay),
         title: prevEssay.data.title,
       } : undefined}
       next={nextEssay ? {
-        slug: nextEssay.id.replace(/\.(md|mdx)$/, ''),
+        slug: entrySlug(nextEssay),
         title: nextEssay.data.title,
       } : undefined}
       book={relatedBook ? {

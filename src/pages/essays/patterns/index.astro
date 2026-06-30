@@ -3,6 +3,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Card from '../../../components/Card.astro';
 import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
+import { entrySlug } from '../../../utils/contentEntries';
 import { sortNewestFirst } from '../../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'pattern');
@@ -40,10 +41,10 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
         {sortedEssays.map((pattern) => (
           <Card
             title={pattern.data.title}
-            excerpt={pattern.data.summary}
+            excerpt={pattern.data.excerpt || pattern.data.summary}
             date={formatDate(pattern.data.date, pattern.data.dateLabel)}
             category={pattern.data.patternId || 'Pattern'}
-            href={`/essays/${pattern.id.replace(/\.(md|mdx)$/, '')}/`}
+            href={`/essays/${entrySlug(pattern)}/`}
             linkText="View pattern"
           />
         ))}

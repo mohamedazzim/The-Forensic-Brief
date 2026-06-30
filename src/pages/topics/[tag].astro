@@ -87,7 +87,7 @@ function getHref(item: any) {
         {sortedItems.map((item) => (
           <Card
             title={item.data.title}
-            excerpt={item.data.summary}
+            excerpt={item.data.excerpt || item.data.summary}
             date={formatDate(item.data.date, item.data.dateLabel)}
             category={getCollectionType(item)}
             href={getHref(item)}

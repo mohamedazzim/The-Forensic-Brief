@@ -156,7 +156,7 @@ const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.in
       title="Related Content"
       items={[
         ...incident.data.relatedEssays.map((slug) => {
-          const essay = essays.find((e) => e.id.replace(/\.(md|mdx)$/, '') === slug);
+          const essay = essays.find((e) => entrySlug(e) === slug);
           return essay ? {
             title: essay.data.title,
             href: `/essays/${slug}/`,
@@ -164,7 +164,7 @@ const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.in
           } : null;
         }),
         ...incident.data.relatedPatterns.map((slug) => {
-          const essay = essays.find((e) => e.id.replace(/\.(md|mdx)$/, '') === slug);
+          const essay = essays.find((e) => entrySlug(e) === slug);
           return essay ? {
             title: essay.data.title,
             href: `/essays/${slug}/`,

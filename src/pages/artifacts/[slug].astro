@@ -138,7 +138,7 @@ const downloadAvailability = await Promise.all(
         <h2>Related Essays</h2>
         <ul>
           {artifact.data.relatedEssays.map((slug) => {
-            const essay = essays.find((e) => e.id.replace(/\.(md|mdx)$/, '') === slug);
+            const essay = essays.find((e) => entrySlug(e) === slug);
             return essay ? (
               <li><a href={`/essays/${slug}/`}>{essay.data.title}</a></li>
             ) : null;
