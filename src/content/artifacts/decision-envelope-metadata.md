@@ -18,7 +18,7 @@ downloads:
   - format: "Markdown"
     url: "https://files.theforensicbrief.com/artifacts/decision-envelope-v1.md"
     sizeKB: 1.7
-status: draft
+status: published
 featured: true
 contentFile: "decision-envelope-content.mdx"
 ---
