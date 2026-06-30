@@ -8,7 +8,27 @@ import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 const sortedIncidents = sortNewestFirst(incidents);
-const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
+const formatDate = (incident: (typeof incidents)[number]) =>
+  incident.data.displayDate
+  || incident.data.incidentDateLabel
+  || incident.data.dateLabel
+  || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '')
+  || incident.data.date.toISOString().split('T')[0];
+const formatCategory = (incident: (typeof incidents)[number]) => {
+  if (incident.data.severity && incident.data.domain) {
+    return `${incident.data.severity.toUpperCase()} - ${incident.data.domain}`;
+  }
+
+  if (incident.data.severity) {
+    return incident.data.severity.toUpperCase();
+  }
+
+  if (incident.data.domain) {
+    return `Incident - ${incident.data.domain}`;
+  }
+
+  return 'Incident';
+};
 ---
 
 <BaseLayout title="Incidents">
@@ -40,8 +60,9 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
           <Card
             title={incident.data.title}
             excerpt={incident.data.excerpt || incident.data.summary}
-            date={formatDate(incident.data.incidentDate, incident.data.incidentDateLabel)}
-            category={`${incident.data.severity?.toUpperCase() || 'INCIDENT'}${incident.data.domain ? ` - ${incident.data.domain}` : ''}`}
+            date={formatDate(incident)}
+            dateTime={(incident.data.incidentDate ?? incident.data.date).toISOString()}
+            category={formatCategory(incident)}
             href={`/incidents/${entrySlug(incident)}/`}
             linkText="Read report"
           />

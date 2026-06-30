@@ -12,6 +12,7 @@ const routes = [
   'index.html',
   'search/index.html',
   'incidents/index.html',
+  'incidents/samsung-chatgpt-one-way-door/index.html',
   'incidents/feed.xml',
   'essays/index.html',
   'essays/feed.xml',
@@ -33,7 +34,7 @@ const routes = [
 routes.forEach((route) => assert(existsSync(join(dist, route)), `Missing route: ${route}`));
 
 assert(!existsSync(join(dist, 'incidents', 'air-canada-chatbot-refund', 'index.html')), 'Unsupported Air Canada route should not exist');
-assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html')), 'Draft Samsung incident route should not exist');
+assert(existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html')), 'Published Samsung incident route should exist');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-metadata', 'index.html')), 'Incident metadata route should not exist');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-content', 'index.html')), 'Incident content route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope route should not exist');
@@ -92,13 +93,21 @@ const booksIndex = readFileSync(join(dist, 'books/index.html'), 'utf8');
 assert(booksIndex.includes('href="/books/human-in-control/"'), 'Books index should link to the Human in Control detail page');
 
 const incidentsIndex = readFileSync(join(dist, 'incidents/index.html'), 'utf8');
-assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Incidents index should not link to draft Samsung incident route');
+assert(incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Incidents index should link to the published Samsung incident route');
 assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door-metadata/'), 'Incidents index should not expose metadata routes');
 assert(!incidentsIndex.includes('/incidents/samsung-chatgpt-one-way-door-content/'), 'Incidents index should not expose content routes');
+assert(incidentsIndex.includes('April 2023 (company-wide ban, early May 2023)'), 'Incidents index should render the Samsung display date');
+assert(incidentsIndex.includes('Incident'), 'Incidents index should render a safe generic incident label');
 assert(!incidentsIndex.includes('Severity:'), 'Incidents index should not render the removed severity filter row');
 assert(!incidentsIndex.includes('Domain:'), 'Incidents index should not render the removed domain filter row');
 assert(!incidentsIndex.includes('Vendor:'), 'Incidents index should not render the removed vendor filter row');
 assert(incidentsIndex.includes('Incidents'), 'Incidents index should still render the page title');
+
+const samsungIncident = readFileSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html'), 'utf8');
+assert(samsungIncident.includes('Samsung, ChatGPT'), 'Samsung detail should render the source-backed systems list');
+assert(samsungIncident.includes('Why this incident, and why this chapter'), 'Samsung detail should render the paired content body');
+assert(!samsungIncident.includes('undefined'), 'Samsung detail should not render undefined values');
+assert(!samsungIncident.includes('null'), 'Samsung detail should not render null values');
 
 const artifactsIndex = readFileSync(join(dist, 'artifacts/index.html'), 'utf8');
 assert(artifactsIndex.includes('/artifacts/mris-template/'), 'Artifacts index should link to the clean MRIS route');

@@ -12,7 +12,7 @@ export async function GET(context: APIContext) {
     .map((item) => ({
       title: item.data.title,
       pubDate: item.data.date ?? item.data.updated!,
-      description: item.data.summary || '',
+      description: item.data.summary || item.data.excerpt || '',
       link: `/incidents/${entrySlug(item)}/`,
     }));
 

@@ -3,6 +3,7 @@ interface Props {
   title: string;
   excerpt?: string;
   date?: string;
+  dateTime?: string;
   category: string;
   href: string;
   linkText?: string;
@@ -15,7 +16,7 @@ interface Props {
   dataTopics?: string;
 }
 
-const { title, excerpt, date, category, href, linkText = 'Read report', dataSeries, dataCategory, dataSeverity, dataDomain, dataVendor, dataType, dataTopics } = Astro.props;
+const { title, excerpt, date, dateTime, category, href, linkText = 'Read report', dataSeries, dataCategory, dataSeverity, dataDomain, dataVendor, dataType, dataTopics } = Astro.props;
 ---
 
 <article class="article-card" data-series={dataSeries} data-category={dataCategory} data-severity={dataSeverity} data-domain={dataDomain} data-vendor={dataVendor} data-type={dataType} data-topics={dataTopics}>
@@ -25,7 +26,7 @@ const { title, excerpt, date, category, href, linkText = 'Read report', dataSeri
   </h3>
   {excerpt && <p class="card-excerpt">{excerpt}</p>}
   <div class="card-meta">
-    {date ? <time datetime={date}>{date}</time> : <span></span>}
+    {date ? <time datetime={dateTime || date}>{date}</time> : <span></span>}
     <a href={href} class="card-read-more">{linkText} -></a>
   </div>
 </article>

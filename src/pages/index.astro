@@ -18,6 +18,12 @@ if (hasContentFiles('books')) {
 }
 
 const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
+const formatIncidentDate = (incident: (typeof incidents)[number]) =>
+  incident.data.displayDate
+  || incident.data.incidentDateLabel
+  || incident.data.dateLabel
+  || formatDate(incident.data.incidentDate)
+  || formatDate(incident.data.date);
 
 const featuredIncidents = sortNewestFirst(incidents).slice(0, 3);
 const featuredEssays = sortNewestFirst(essays).slice(0, 3);
@@ -63,7 +69,8 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
         <Card
           title={incident.data.title}
           excerpt={incident.data.excerpt || incident.data.summary}
-          date={formatDate(incident.data.incidentDate, incident.data.incidentDateLabel)}
+          date={formatIncidentDate(incident)}
+          dateTime={(incident.data.incidentDate ?? incident.data.date).toISOString()}
           category="Incident Report"
           href={`/incidents/${entrySlug(incident)}/`}
           linkText="Read report"

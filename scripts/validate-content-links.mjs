@@ -93,6 +93,7 @@ const requiredFiles = [
   'robots.txt',
   'search/index.html',
   'incidents/index.html',
+  'incidents/samsung-chatgpt-one-way-door/index.html',
   'essays/index.html',
   'essays/hitl-is-not-oversight/index.html',
   'essays/detection-drop-line-600/index.html',
@@ -106,7 +107,7 @@ const requiredFiles = [
 requiredFiles.forEach((path) => assert(existsSync(join(dist, path)), `Missing generated file: ${path}`));
 
 assert(!existsSync(join(dist, 'incidents', 'air-canada-chatbot-refund', 'index.html')), 'Unsupported Air Canada incident route should not be generated');
-assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html')), 'Draft Samsung incident route should not be generated');
+assert(existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index.html')), 'Published Samsung incident route should be generated');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-metadata', 'index.html')), 'Incident metadata route should not be generated');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-content', 'index.html')), 'Incident content route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope should not be generated');
@@ -142,7 +143,7 @@ assert(!html.includes('Subscribe on Substack'), 'Generated HTML should not inclu
 assert(!html.includes('Newsletter signup is not configured yet'), 'Generated HTML should not include disabled newsletter filler');
 assert(!html.includes('PDF preview coming soon'), 'Generated HTML should not include removed PDF preview placeholder');
 assert(!html.includes('/incidents/air-canada-chatbot-refund/'), 'Generated HTML should not link to unsupported incident content');
-assert(!html.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Generated HTML should not link to draft Samsung incident content');
+assert(html.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Generated HTML should link to the published Samsung incident');
 assert(!html.includes('/artifacts/pa-01-six-dimensions-maturity-scorecard.pdf'), 'Generated HTML should not reference local production artifact files');
 assert(!html.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Generated HTML should not link to draft Six Dimensions artifact content');
 assert(!html.includes('/essays/whitebox-red-teaming/'), 'Generated HTML should not link to draft Whitebox essay content');
@@ -166,9 +167,23 @@ assert(!essaysIndexHtml.includes('Category:'), 'Essays index should not render t
 
 const incidentsIndexHtml = readHtml(join('incidents', 'index.html'));
 assert(incidentsIndexHtml.includes('Incidents'), 'Incidents index should still render');
+assert(incidentsIndexHtml.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Incidents index should link to the published Samsung incident');
+assert(incidentsIndexHtml.includes('The One-Way Door: How Samsung Lost Its Source Code to a Machine That Cannot Forget'), 'Incidents index should render the Samsung incident title');
+assert(incidentsIndexHtml.includes('April 2023 (company-wide ban, early May 2023)'), 'Incidents index should render the Samsung display date');
+assert(incidentsIndexHtml.includes('Incident'), 'Incidents index should render a safe generic incident category when structured forensic labels are absent');
+assert(!incidentsIndexHtml.includes('undefined'), 'Incidents index should not render undefined labels');
+assert(!incidentsIndexHtml.includes('null'), 'Incidents index should not render null labels');
 assert(!incidentsIndexHtml.includes('Severity:'), 'Incidents index should not render the removed severity filter row');
 assert(!incidentsIndexHtml.includes('Domain:'), 'Incidents index should not render the removed domain filter row');
 assert(!incidentsIndexHtml.includes('Vendor:'), 'Incidents index should not render the removed vendor filter row');
+
+const samsungIncidentHtml = readHtml(join('incidents', 'samsung-chatgpt-one-way-door', 'index.html'));
+assert(samsungIncidentHtml.includes('April 2023 (company-wide ban, early May 2023)'), 'Samsung detail page should render the source-backed display date');
+assert(samsungIncidentHtml.includes('Samsung, ChatGPT'), 'Samsung detail page should render the source-backed systems list');
+assert(samsungIncidentHtml.includes('Within roughly twenty days of letting its semiconductor engineers use ChatGPT'), 'Samsung detail page should render the source-backed excerpt');
+assert(samsungIncidentHtml.includes('Why this incident, and why this chapter'), 'Samsung detail page should render the paired content body');
+assert(!samsungIncidentHtml.includes('undefined'), 'Samsung detail page should not render undefined labels');
+assert(!samsungIncidentHtml.includes('null'), 'Samsung detail page should not render null labels');
 
 const artifactsIndexHtml = readHtml(join('artifacts', 'index.html'));
 assert(artifactsIndexHtml.includes('Artifacts'), 'Artifacts index should still render');

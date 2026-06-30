@@ -15,7 +15,7 @@ export async function GET(context: APIContext) {
       return {
         title: item.data.title,
         pubDate: item.data.date ?? item.data.updated!,
-        description: item.data.summary || '',
+        description: item.data.summary || item.data.excerpt || '',
         link: `/${collection}/${entrySlug(item)}/`,
       };
     });

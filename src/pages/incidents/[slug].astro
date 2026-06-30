@@ -26,16 +26,21 @@ const incidentBodyModule = incidentBodyPath && incidentBodyModules[incidentBodyP
   : null;
 const Content = incidentBodyModule?.default;
 const incidentUrl = `/incidents/${entrySlug(incident)}/`;
-const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '');
+const incidentDateDisplay = incident.data.displayDate
+  || incident.data.incidentDateLabel
+  || incident.data.dateLabel
+  || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '')
+  || incident.data.date.toISOString().split('T')[0];
+const incidentDek = incident.data.summary || incident.data.excerpt;
 ---
 
-<BaseLayout title={incident.data.title} description={incident.data.summary}>
+<BaseLayout title={incident.data.title} description={incidentDek}>
   <StructuredData
     type="article"
     data={{
       title: incident.data.title,
-      summary: incident.data.summary,
-      date: incident.data.incidentDate,
+      summary: incidentDek,
+      date: incident.data.incidentDate ?? incident.data.date,
       updated: incident.data.updated,
       author: incident.data.author,
       url: incidentUrl,
@@ -57,10 +62,10 @@ const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.in
     <header class="article-header">
       <span class="eyebrow">Incident Report</span>
       <h1 class="article-title">{incident.data.title}</h1>
-      {incident.data.summary && <p class="article-dek">{incident.data.summary}</p>}
+      {incidentDek && <p class="article-dek">{incidentDek}</p>}
       <div class="article-meta">
         {incidentDateDisplay && (
-          <time datetime={incident.data.incidentDate ? incident.data.incidentDate.toISOString() : incidentDateDisplay}>
+          <time datetime={(incident.data.incidentDate ?? incident.data.date).toISOString()}>
             {incidentDateDisplay}
           </time>
         )}
@@ -82,10 +87,10 @@ const incidentDateDisplay = incident.data.incidentDateLabel || (incident.data.in
     </header>
 
     <div class="incident-structure">
-      {incident.data.summary && (
+      {incidentDek && (
         <section class="incident-section">
           <h2>Summary</h2>
-          <p>{incident.data.summary}</p>
+          <p>{incidentDek}</p>
         </section>
       )}
 
