@@ -173,20 +173,19 @@ pre code {
 
 .content-body table {
   display: block;
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 46rem;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   margin: 1.75rem 0;
   border: 1px solid var(--border-light);
   background: color-mix(in srgb, var(--bg-card) 96%, var(--text-primary) 4%);
   font-size: 0.95rem;
   line-height: 1.5;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .content-body thead {
@@ -195,25 +194,53 @@ pre code {
 
 .content-body th,
 .content-body td {
-  padding: 0.8rem 0.9rem;
+  padding: 0.7rem 0.8rem;
   text-align: left;
   vertical-align: top;
   border-right: 1px solid var(--border-light);
   border-bottom: 1px solid var(--border-light);
   overflow-wrap: break-word;
   word-break: normal;
+  hyphens: manual;
 }
 
 .content-body th {
   font-weight: 700;
   font-family: 'Inter', sans-serif;
-  vertical-align: bottom;
+  vertical-align: top;
 }
 
 .content-body th:first-child,
 .content-body td:first-child {
   width: 3rem;
+  padding-left: 0.65rem;
+  padding-right: 0.65rem;
   white-space: nowrap;
+}
+
+.content-body th:nth-child(2),
+.content-body td:nth-child(2) {
+  width: 22%;
+}
+
+.content-body th:nth-child(3),
+.content-body td:nth-child(3) {
+  width: 31%;
+}
+
+.content-body th:nth-child(4),
+.content-body td:nth-child(4) {
+  width: 6.5rem;
+}
+
+.content-body th:nth-child(5),
+.content-body td:nth-child(5) {
+  width: 7.5rem;
+}
+
+.content-body th:nth-child(6),
+.content-body td:nth-child(6) {
+  width: 24%;
 }
 
 .content-body tr > :last-child {
@@ -240,11 +267,12 @@ pre code {
   .content-body table {
     margin: 1.5rem 0;
     font-size: 0.9rem;
+    min-width: 42rem;
   }
 
   .content-body th,
   .content-body td {
-    padding: 0.65rem 0.75rem;
+    padding: 0.65rem 0.7rem;
   }
 }
 
