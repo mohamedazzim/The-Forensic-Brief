@@ -45,20 +45,16 @@ async function isReachable(url?: string) {
   }
 }
 
-const [coverAvailable, backCoverAvailable, pdfAvailable] = await Promise.all([
-  isReachable(book.data.cover),
-  isReachable(book.data.backCover),
-  isReachable(book.data.pdfUrl),
-]);
+const pdfAvailable = await isReachable(book.data.pdfUrl);
 const coverCards = [
-  book.data.cover && coverAvailable
+  book.data.cover
     ? {
         src: book.data.cover,
         alt: `Front cover of ${book.data.title}`,
         label: 'Front cover',
       }
     : null,
-  book.data.backCover && backCoverAvailable
+  book.data.backCover
     ? {
         src: book.data.backCover,
         alt: `Back cover of ${book.data.title}`,
@@ -76,7 +72,7 @@ const coverCards = [
       summary: book.data.summary || undefined,
       author: book.data.author,
       url: bookUrl,
-      cover: coverAvailable ? book.data.cover : undefined,
+      cover: book.data.cover || undefined,
       isbn: book.data.isbn,
       pages: book.data.pages,
     }}

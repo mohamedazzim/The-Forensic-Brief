@@ -30,6 +30,13 @@ function frontmatterValue(frontmatter, key) {
   return match ? match[1].trim() : '';
 }
 
+function readFrontmatter(relativePath) {
+  const raw = readFileSync(join(root, relativePath), 'utf8');
+  const frontmatterMatch = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  assert(frontmatterMatch, `${relativePath} is missing frontmatter`);
+  return frontmatterMatch[1];
+}
+
 function validateMetadataPairs(collectionDir) {
   const dir = join(src, 'content', collectionDir);
   const metadataFiles = walk(dir, (file) => file.endsWith('-metadata.md') || file.endsWith('-metadata.mdx'));
@@ -83,6 +90,11 @@ async function remoteAvailable(url) {
     return false;
   }
 }
+
+const sixDimensionsFrontmatter = readFrontmatter('src/content/artifacts/six-dimensions-maturity-scorecard-metadata.md');
+const sixDimensionsDownloadUrlMatch = sixDimensionsFrontmatter.match(/^\s+url:\s*["']?([^"'\r\n]+)["']?/m);
+const sixDimensionsDownloadUrl = sixDimensionsDownloadUrlMatch ? sixDimensionsDownloadUrlMatch[1].trim() : '';
+const sixDimensionsHasDownload = Boolean(sixDimensionsDownloadUrl);
 
 const requiredFiles = [
   'index.html',
@@ -209,7 +221,19 @@ assert(!observationHtml.includes('null'), 'Observation detail page should not re
 
 const sixDimensionsHtml = readHtml(join('artifacts', 'six-dimensions-maturity-scorecard', 'index.html'));
 assert(sixDimensionsHtml.includes('The Six Dimensions - Maturity Scorecard'), 'Six Dimensions detail page should render the source-backed title');
-assert(sixDimensionsHtml.includes('https://files.theforensicbrief.com/artifacts/six-dimensions-maturity-scorecard-v1.pdf'), 'Six Dimensions detail page should expose the R2-backed PDF download link');
+if (sixDimensionsHasDownload) {
+  assert(
+    sixDimensionsHtml.includes(sixDimensionsDownloadUrl),
+    'Six Dimensions detail page should expose the configured R2-backed PDF download link'
+  );
+  const available = await remoteAvailable(sixDimensionsDownloadUrl);
+  assert(available, `Six Dimensions detail page exposes an unreachable asset: ${sixDimensionsDownloadUrl}`);
+} else {
+  assert(
+    sixDimensionsHtml.includes('Downloads unavailable') || sixDimensionsHtml.includes('PDF unavailable'),
+    'Six Dimensions detail page should render a safe unavailable download state when no download URL is configured'
+  );
+}
 assert(sixDimensionsHtml.includes('Why this exists (necessity)'), 'Six Dimensions detail page should render the paired content body');
 assert(!sixDimensionsHtml.includes('undefined'), 'Six Dimensions detail page should not render undefined values');
 assert(!sixDimensionsHtml.includes('null'), 'Six Dimensions detail page should not render null values');
