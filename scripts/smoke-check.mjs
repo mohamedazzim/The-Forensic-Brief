@@ -142,7 +142,7 @@ const observationPage = readFileSync(join(dist, 'observations', 'the-attack-that
 assert(observationPage.includes('The Precedence Lattice'), 'Observation detail should render the paired content body');
 
 const sixDimensionsPage = readFileSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html'), 'utf8');
-assert(sixDimensionsPage.includes('Downloads unavailable'), 'Six Dimensions detail should render the safe unavailable download state');
+assert(sixDimensionsPage.includes('https://files.theforensicbrief.com/artifacts/six-dimensions-maturity-scorecard-v1.pdf'), 'Six Dimensions detail should render the active R2-backed PDF download link');
 
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
 assert(bookPage.includes('human-in-control-front-cover.jpg'), 'Book detail page should expose the front cover image');

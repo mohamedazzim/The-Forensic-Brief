@@ -209,7 +209,7 @@ assert(!observationHtml.includes('null'), 'Observation detail page should not re
 
 const sixDimensionsHtml = readHtml(join('artifacts', 'six-dimensions-maturity-scorecard', 'index.html'));
 assert(sixDimensionsHtml.includes('The Six Dimensions - Maturity Scorecard'), 'Six Dimensions detail page should render the source-backed title');
-assert(sixDimensionsHtml.includes('Downloads unavailable'), 'Six Dimensions detail page should render a safe unavailable download state until R2 upload is active');
+assert(sixDimensionsHtml.includes('https://files.theforensicbrief.com/artifacts/six-dimensions-maturity-scorecard-v1.pdf'), 'Six Dimensions detail page should expose the R2-backed PDF download link');
 assert(sixDimensionsHtml.includes('Why this exists (necessity)'), 'Six Dimensions detail page should render the paired content body');
 assert(!sixDimensionsHtml.includes('undefined'), 'Six Dimensions detail page should not render undefined values');
 assert(!sixDimensionsHtml.includes('null'), 'Six Dimensions detail page should not render null values');
