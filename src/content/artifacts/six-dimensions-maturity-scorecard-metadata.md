@@ -7,5 +7,9 @@ summary: "The book's central claim is that data lives in six dimensions, but mos
 author: "Dr. Anandkumar Prakasam"
 status: published
 relatedBook: "Provenance: How the Six Dimensions of Data Will Rewrite Privacy, Power, and Accountability"
+downloads:
+  - format: "PDF"
+    url: "https://files.theforensicbrief.com/artifacts/six-dimensions-maturity-scorecard-v1.pdf"
+    sizeKB: 94.8
 contentFile: "six-dimensions-maturity-scorecard-content.mdx"
 ---
