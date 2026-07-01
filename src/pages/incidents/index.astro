@@ -4,7 +4,7 @@ import Card from '../../components/Card.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
+import { entrySlug, formatEntryDate, sortNewestFirst } from '../../utils/contentEntries';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 const sortedIncidents = sortNewestFirst(incidents);
@@ -13,7 +13,7 @@ const formatDate = (incident: (typeof incidents)[number]) =>
   || incident.data.incidentDateLabel
   || incident.data.dateLabel
   || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '')
-  || incident.data.date.toISOString().split('T')[0];
+  || formatEntryDate(incident.data);
 const formatCategory = (incident: (typeof incidents)[number]) => {
   if (incident.data.severity && incident.data.domain) {
     return `${incident.data.severity.toUpperCase()} - ${incident.data.domain}`;
@@ -61,7 +61,7 @@ const formatCategory = (incident: (typeof incidents)[number]) => {
             title={incident.data.title}
             excerpt={incident.data.excerpt || incident.data.summary}
             date={formatDate(incident)}
-            dateTime={(incident.data.incidentDate ?? incident.data.date).toISOString()}
+            dateTime={(incident.data.incidentDate ?? incident.data.date ?? incident.data.sortDate)?.toISOString()}
             category={formatCategory(incident)}
             href={`/incidents/${entrySlug(incident)}/`}
             linkText="Read report"

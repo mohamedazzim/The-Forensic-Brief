@@ -97,9 +97,12 @@ const requiredFiles = [
   'essays/index.html',
   'essays/hitl-is-not-oversight/index.html',
   'essays/detection-drop-line-600/index.html',
+  'essays/whitebox-red-teaming/index.html',
   'observations/index.html',
+  'observations/the-attack-that-left-no-fingerprints/index.html',
   'artifacts/index.html',
   'artifacts/mris-template/index.html',
+  'artifacts/six-dimensions-maturity-scorecard/index.html',
   'books/index.html',
   'books/human-in-control/index.html',
 ];
@@ -111,17 +114,17 @@ assert(existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-metadata', 'index.html')), 'Incident metadata route should not be generated');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-content', 'index.html')), 'Incident content route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope should not be generated');
-assert(!existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Draft Six Dimensions route should not be generated');
+assert(existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Published Six Dimensions route should be generated');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-metadata', 'index.html')), 'Artifact metadata route should not be generated');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-content', 'index.html')), 'Artifact content route should not be generated');
 assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-metadata', 'index.html')), 'Essay metadata route should not be generated');
 assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-content', 'index.html')), 'Essay content route should not be generated');
 assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-metadata', 'index.html')), 'Pattern metadata route should not be generated');
 assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-content', 'index.html')), 'Pattern content route should not be generated');
-assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html')), 'Draft Whitebox essay route should not be generated');
+assert(existsSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html')), 'Published Whitebox essay route should be generated');
 assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-metadata', 'index.html')), 'Whitebox metadata route should not be generated');
 assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-content', 'index.html')), 'Whitebox content route should not be generated');
-assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html')), 'Draft observation route should not be generated');
+assert(existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html')), 'Published observation route should be generated');
 assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-metadata', 'index.html')), 'Observation metadata route should not be generated');
 assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-content', 'index.html')), 'Observation content route should not be generated');
 
@@ -145,12 +148,13 @@ assert(!html.includes('PDF preview coming soon'), 'Generated HTML should not inc
 assert(!html.includes('/incidents/air-canada-chatbot-refund/'), 'Generated HTML should not link to unsupported incident content');
 assert(html.includes('/incidents/samsung-chatgpt-one-way-door/'), 'Generated HTML should link to the published Samsung incident');
 assert(!html.includes('/artifacts/pa-01-six-dimensions-maturity-scorecard.pdf'), 'Generated HTML should not reference local production artifact files');
-assert(!html.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Generated HTML should not link to draft Six Dimensions artifact content');
-assert(!html.includes('/essays/whitebox-red-teaming/'), 'Generated HTML should not link to draft Whitebox essay content');
-assert(!html.includes('/observations/the-attack-that-left-no-fingerprints/'), 'Generated HTML should not link to draft observation content');
+assert(html.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Generated HTML should link to the published Six Dimensions artifact');
+assert(html.includes('/essays/whitebox-red-teaming/'), 'Generated HTML should link to the published Whitebox essay');
+assert(html.includes('/observations/the-attack-that-left-no-fingerprints/'), 'Generated HTML should link to the published observation');
 assert(!html.includes('-metadata/'), 'Generated HTML should not expose metadata routes');
 assert(!html.includes('-content/'), 'Generated HTML should not expose content routes');
 assert(!html.includes('r2_uploads/'), 'Generated HTML should not expose r2_uploads paths');
+assert(!html.includes('topic-slug'), 'Generated HTML should not expose placeholder topic slugs');
 assert(!html.includes('Table of Contents'), 'Generated HTML should not expose the removed book table of contents block');
 assert(!html.includes('Placeholder: approved descriptive copy for this book has not been supplied yet.'), 'Generated HTML should not expose placeholder book copy');
 assert(!html.includes('Placeholder book record using the approved front and back cover images while the manuscript package is still being prepared.'), 'Generated HTML should not expose placeholder book summary copy');
@@ -162,7 +166,7 @@ assert(essaysIndexHtml.includes('<label for="series-filter"'), 'Essays index sho
 assert(essaysIndexHtml.includes('Human in Control'), 'Essays index should include the Human in Control series option');
 assert(essaysIndexHtml.includes('Out of Bounds'), 'Essays index should include the Out of Bounds series option');
 assert(essaysIndexHtml.includes('Patterns'), 'Essays index should preserve the Patterns section heading');
-assert(!essaysIndexHtml.includes('/essays/whitebox-red-teaming/'), 'Essays index should not link to the draft Whitebox essay');
+assert(essaysIndexHtml.includes('/essays/whitebox-red-teaming/'), 'Essays index should link to the published Whitebox essay');
 assert(!essaysIndexHtml.includes('Category:'), 'Essays index should not render the removed category filter row');
 
 const incidentsIndexHtml = readHtml(join('incidents', 'index.html'));
@@ -187,9 +191,28 @@ assert(!samsungIncidentHtml.includes('null'), 'Samsung detail page should not re
 
 const artifactsIndexHtml = readHtml(join('artifacts', 'index.html'));
 assert(artifactsIndexHtml.includes('Artifacts'), 'Artifacts index should still render');
+assert(artifactsIndexHtml.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Artifacts index should link to the published Six Dimensions route');
 assert(!artifactsIndexHtml.includes('Type:'), 'Artifacts index should not render the removed type filter row');
 assert(!artifactsIndexHtml.includes('Topic:'), 'Artifacts index should not render the removed topic filter row');
 assert(!artifactsIndexHtml.includes('Format:'), 'Artifacts index should not render the removed format filter row');
+
+const whiteboxEssayHtml = readHtml(join('essays', 'whitebox-red-teaming', 'index.html'));
+assert(whiteboxEssayHtml.includes('From Guessing to Proving: The Case for Whitebox Red Teaming'), 'Whitebox essay detail page should render the source-backed title');
+assert(whiteboxEssayHtml.includes('The default: testing in the dark'), 'Whitebox essay detail page should render the paired content body');
+assert(!whiteboxEssayHtml.includes('undefined'), 'Whitebox essay detail page should not render undefined values');
+assert(!whiteboxEssayHtml.includes('null'), 'Whitebox essay detail page should not render null values');
+
+const observationHtml = readHtml(join('observations', 'the-attack-that-left-no-fingerprints', 'index.html'));
+assert(observationHtml.includes('The Precedence Lattice'), 'Observation detail page should render the paired content body');
+assert(!observationHtml.includes('undefined'), 'Observation detail page should not render undefined values');
+assert(!observationHtml.includes('null'), 'Observation detail page should not render null values');
+
+const sixDimensionsHtml = readHtml(join('artifacts', 'six-dimensions-maturity-scorecard', 'index.html'));
+assert(sixDimensionsHtml.includes('The Six Dimensions - Maturity Scorecard'), 'Six Dimensions detail page should render the source-backed title');
+assert(sixDimensionsHtml.includes('Downloads unavailable'), 'Six Dimensions detail page should render a safe unavailable download state until R2 upload is active');
+assert(sixDimensionsHtml.includes('Why this exists (necessity)'), 'Six Dimensions detail page should render the paired content body');
+assert(!sixDimensionsHtml.includes('undefined'), 'Six Dimensions detail page should not render undefined values');
+assert(!sixDimensionsHtml.includes('null'), 'Six Dimensions detail page should not render null values');
 
 const bookPageHtml = readHtml(join('books', 'human-in-control', 'index.html'));
 assert(!bookPageHtml.includes('Table of Contents'), 'Book detail page should not render a Table of Contents section');

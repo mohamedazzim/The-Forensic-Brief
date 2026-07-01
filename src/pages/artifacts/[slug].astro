@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../../utils/hasContentFiles';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, formatEntryDate, resolveSortDate } from '../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 let books = [];
@@ -28,9 +28,10 @@ const artifactBodyModule = artifactBodyPath && artifactBodyModules[artifactBodyP
   ? await artifactBodyModules[artifactBodyPath]()
   : null;
 const Content = artifactBodyModule?.default;
-const artifactDateDisplay = artifact.data.dateLabel || (artifact.data.date ? artifact.data.date.toISOString().split('T')[0] : '');
+const artifactDateValue = resolveSortDate(artifact.data);
+const artifactDateDisplay = formatEntryDate(artifact.data);
 const relatedBook = artifact.data.relatedBook
-  ? books.find((b) => entrySlug(b) === artifact.data.relatedBook)
+  ? books.find((b) => entrySlug(b) === artifact.data.relatedBook || b.data.title === artifact.data.relatedBook)
   : null;
 const artifactUrl = `/artifacts/${entrySlug(artifact)}/`;
 
@@ -73,6 +74,7 @@ const downloadAvailability = await Promise.all(
       description: artifact.data.summary,
       url: artifactUrl,
       license: artifact.data.license,
+      author: artifact.data.author,
     }}
   />
   <StructuredData
@@ -88,8 +90,8 @@ const downloadAvailability = await Promise.all(
   <article class="artifact-page">
     <header class="artifact-header">
       <div class="artifact-meta-top">
-        <span class="eyebrow">{artifact.data.artifactType}</span>
-        <span class="artifact-version">Version {artifact.data.version}</span>
+        <span class="eyebrow">{artifact.data.artifactLabel || artifact.data.artifactType || 'Artifact'}</span>
+        {artifact.data.version && <span class="artifact-version">Version {artifact.data.version}</span>}
       </div>
       <h1 class="artifact-title">{artifact.data.title}</h1>
       {artifact.data.summary && <p class="artifact-summary">{artifact.data.summary}</p>}
@@ -150,7 +152,7 @@ const downloadAvailability = await Promise.all(
     {relatedBook && (
       <section class="related-section">
         <h2>Related Book</h2>
-        <p><a href={`/books/${artifact.data.relatedBook}/`}>
+        <p><a href={`/books/${entrySlug(relatedBook)}/`}>
           {relatedBook.data.title}
         </a></p>
       </section>

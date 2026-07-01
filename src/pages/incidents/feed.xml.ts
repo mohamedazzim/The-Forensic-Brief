@@ -7,11 +7,11 @@ export async function GET(context: APIContext) {
   const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 
   const items = sortNewestFirst(
-    incidents.filter((item) => item.data.date || item.data.updated)
+    incidents.filter((item) => item.data.date || item.data.sortDate || item.data.updated)
   )
     .map((item) => ({
       title: item.data.title,
-      pubDate: item.data.date ?? item.data.updated!,
+      pubDate: item.data.date ?? item.data.sortDate ?? item.data.updated!,
       description: item.data.summary || item.data.excerpt || '',
       link: `/incidents/${entrySlug(item)}/`,
     }));

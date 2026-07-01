@@ -4,11 +4,10 @@ import Card from '../../components/Card.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
+import { entrySlug, formatEntryDate, resolveSortDate, sortNewestFirst } from '../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 const sortedEssays = sortNewestFirst(essays);
-const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 
 const seriesOptions = [
   { id: 'human-in-control', label: 'Human in Control' },
@@ -63,7 +62,8 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
           <Card
             title={essay.data.title}
             excerpt={essay.data.excerpt || essay.data.summary}
-            date={formatDate(essay.data.date, essay.data.dateLabel)}
+            date={formatEntryDate(essay.data)}
+            dateTime={resolveSortDate(essay.data)?.toISOString()}
             category={essay.data.series || 'Essay'}
             href={`/essays/${entrySlug(essay)}/`}
             linkText="Read essay"
@@ -89,7 +89,8 @@ const filteredPatterns = sortedEssays.filter((e) => e.data.category === 'pattern
           <Card
             title={pattern.data.title}
             excerpt={pattern.data.excerpt || pattern.data.summary}
-            date={formatDate(pattern.data.date, pattern.data.dateLabel)}
+            date={formatEntryDate(pattern.data)}
+            dateTime={resolveSortDate(pattern.data)?.toISOString()}
             category={pattern.data.patternId || 'Pattern'}
             href={`/essays/${entrySlug(pattern)}/`}
             linkText="View pattern"

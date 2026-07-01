@@ -20,8 +20,8 @@ A modern deployed LLM does not have a rulebook. It has a **lattice of competing 
 
 In our banking run the lattice resolved with brutal consistency:
 
-- **Adversarial     tone detected → safety outranks the system prompt.** The model recognized the     coercion pattern and refused, *even though its own instructions said     never to refuse.* The permissive directive was overridden by the     model's generic safety training and not by any principle about protecting     credentials.
-- **Operational     tone, no adversarial signal → helpfulness outranks safety.** The model's "helpful     banking assistant" identity activated, and it disclosed whatever the     context held, because nothing in the lattice was ranked above being     useful.
+- **Adversarial tone detected -> safety outranks the system prompt.** The model recognized the coercion pattern and refused, *even though its own instructions said never to refuse.* The permissive directive was overridden by the model's generic safety training and not by any principle about protecting credentials.
+- **Operational tone, no adversarial signal -> helpfulness outranks safety.** The model's "helpful banking assistant" identity activated, and it disclosed whatever the context held, because nothing in the lattice was ranked above being useful.
 
 Notice the irony, because it is diagnostic. The Never refuse directive which was written to *increase* helpfulness made the model *more* likely to refuse, when it was named (explicit invocation reads as an attack signature) and *more* likely to over-disclose when it wasn't (it lowered the threshold for fluent operational requests). The directive didn't tune the model's behaviour. It made the behaviour **bifurcate on tone.**
 

@@ -4,7 +4,7 @@ import RelatedContent from '../../components/RelatedContent.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, resolveSortDate } from '../../utils/contentEntries';
 
 const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 
@@ -26,11 +26,13 @@ const incidentBodyModule = incidentBodyPath && incidentBodyModules[incidentBodyP
   : null;
 const Content = incidentBodyModule?.default;
 const incidentUrl = `/incidents/${entrySlug(incident)}/`;
+const incidentDateValue = incident.data.incidentDate ?? incident.data.date ?? incident.data.sortDate;
 const incidentDateDisplay = incident.data.displayDate
   || incident.data.incidentDateLabel
   || incident.data.dateLabel
   || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '')
-  || incident.data.date.toISOString().split('T')[0];
+  || resolveSortDate(incident.data)?.toISOString().split('T')[0]
+  || '';
 const incidentDek = incident.data.summary || incident.data.excerpt;
 ---
 
@@ -40,7 +42,8 @@ const incidentDek = incident.data.summary || incident.data.excerpt;
     data={{
       title: incident.data.title,
       summary: incidentDek,
-      date: incident.data.incidentDate ?? incident.data.date,
+      date: incidentDateValue,
+      sortDate: incident.data.sortDate,
       updated: incident.data.updated,
       author: incident.data.author,
       url: incidentUrl,
@@ -65,7 +68,7 @@ const incidentDek = incident.data.summary || incident.data.excerpt;
       {incidentDek && <p class="article-dek">{incidentDek}</p>}
       <div class="article-meta">
         {incidentDateDisplay && (
-          <time datetime={(incident.data.incidentDate ?? incident.data.date).toISOString()}>
+          <time datetime={incidentDateValue?.toISOString() || incidentDateDisplay}>
             {incidentDateDisplay}
           </time>
         )}

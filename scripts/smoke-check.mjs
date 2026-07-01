@@ -18,12 +18,15 @@ const routes = [
   'essays/feed.xml',
   'essays/patterns/index.html',
   'essays/detection-drop-line-600/index.html',
+  'essays/whitebox-red-teaming/index.html',
   'essays/human-in-control/feed.xml',
   'books/index.html',
   'books/human-in-control/index.html',
   'artifacts/index.html',
   'artifacts/mris-template/index.html',
+  'artifacts/six-dimensions-maturity-scorecard/index.html',
   'observations/index.html',
+  'observations/the-attack-that-left-no-fingerprints/index.html',
   'topics/red-teaming/index.html',
   'sitemap.xml',
   'feed.xml',
@@ -38,17 +41,17 @@ assert(existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door', 'index
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-metadata', 'index.html')), 'Incident metadata route should not exist');
 assert(!existsSync(join(dist, 'incidents', 'samsung-chatgpt-one-way-door-content', 'index.html')), 'Incident content route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'decision-envelope', 'index.html')), 'Draft Decision Envelope route should not exist');
-assert(!existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Draft Six Dimensions route should not exist');
+assert(existsSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html')), 'Published Six Dimensions route should exist');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-metadata', 'index.html')), 'Artifact metadata route should not exist');
 assert(!existsSync(join(dist, 'artifacts', 'mris-template-content', 'index.html')), 'Artifact content route should not exist');
 assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-metadata', 'index.html')), 'Essay metadata route should not exist');
 assert(!existsSync(join(dist, 'essays', 'hitl-is-not-oversight-content', 'index.html')), 'Essay content route should not exist');
 assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-metadata', 'index.html')), 'Pattern metadata route should not exist');
 assert(!existsSync(join(dist, 'essays', 'detection-drop-line-600-content', 'index.html')), 'Pattern content route should not exist');
-assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html')), 'Draft Whitebox essay route should not exist');
+assert(existsSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html')), 'Published Whitebox essay route should exist');
 assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-metadata', 'index.html')), 'Whitebox metadata route should not exist');
 assert(!existsSync(join(dist, 'essays', 'whitebox-red-teaming-content', 'index.html')), 'Whitebox content route should not exist');
-assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html')), 'Draft observation route should not exist');
+assert(existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html')), 'Published observation route should exist');
 assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-metadata', 'index.html')), 'Observation metadata route should not exist');
 assert(!existsSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints-content', 'index.html')), 'Observation content route should not exist');
 
@@ -111,7 +114,7 @@ assert(!samsungIncident.includes('null'), 'Samsung detail should not render null
 
 const artifactsIndex = readFileSync(join(dist, 'artifacts/index.html'), 'utf8');
 assert(artifactsIndex.includes('/artifacts/mris-template/'), 'Artifacts index should link to the clean MRIS route');
-assert(!artifactsIndex.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Artifacts index should not link to draft Six Dimensions route');
+assert(artifactsIndex.includes('/artifacts/six-dimensions-maturity-scorecard/'), 'Artifacts index should link to the published Six Dimensions route');
 assert(!artifactsIndex.includes('/artifacts/mris-template-metadata/'), 'Artifacts index should not expose metadata routes');
 assert(!artifactsIndex.includes('/artifacts/mris-template-content/'), 'Artifacts index should not expose content routes');
 assert(!artifactsIndex.includes('Type:'), 'Artifacts index should not render the removed type filter row');
@@ -129,8 +132,17 @@ assert(essaysIndex.includes('<label for="series-filter"'), 'Essays index should 
 assert(!essaysIndex.includes('Category:'), 'Essays index should not render the removed category filter row');
 assert(essaysIndex.includes('Human in Control'), 'Essays index should include series options');
 assert(essaysIndex.includes('Out of Bounds'), 'Essays index should include series options');
-assert(!essaysIndex.includes('/essays/whitebox-red-teaming/'), 'Essays index should not render draft essay cards');
+assert(essaysIndex.includes('/essays/whitebox-red-teaming/'), 'Essays index should render the published Whitebox essay card');
 assert(essaysIndex.includes('/essays/detection-drop-line-600/'), 'Essays index should still render pattern cards');
+
+const whiteboxEssay = readFileSync(join(dist, 'essays', 'whitebox-red-teaming', 'index.html'), 'utf8');
+assert(whiteboxEssay.includes('The default: testing in the dark'), 'Whitebox essay detail should render the paired content body');
+
+const observationPage = readFileSync(join(dist, 'observations', 'the-attack-that-left-no-fingerprints', 'index.html'), 'utf8');
+assert(observationPage.includes('The Precedence Lattice'), 'Observation detail should render the paired content body');
+
+const sixDimensionsPage = readFileSync(join(dist, 'artifacts', 'six-dimensions-maturity-scorecard', 'index.html'), 'utf8');
+assert(sixDimensionsPage.includes('Downloads unavailable'), 'Six Dimensions detail should render the safe unavailable download state');
 
 const bookPage = readFileSync(join(dist, 'books/human-in-control/index.html'), 'utf8');
 assert(bookPage.includes('human-in-control-front-cover.jpg'), 'Book detail page should expose the front cover image');

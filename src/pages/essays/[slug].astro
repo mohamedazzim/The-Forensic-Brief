@@ -6,7 +6,7 @@ import StructuredData from '../../components/StructuredData.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../../utils/hasContentFiles';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, formatEntryDate, resolveSortDate } from '../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -36,7 +36,8 @@ const Content = essayBodyModule?.default;
 
 const isPattern = essay.data.category === 'pattern';
 const essayUrl = `/essays/${entrySlug(essay)}/`;
-const essayDateDisplay = essay.data.dateLabel || (essay.data.date ? essay.data.date.toISOString().split('T')[0] : '');
+const essayDateValue = resolveSortDate(essay.data);
+const essayDateDisplay = formatEntryDate(essay.data);
 
 const seriesItems = essay.data.series
   ? essays
@@ -89,6 +90,7 @@ const relatedContentItems = [
       title: essay.data.title,
       summary: essay.data.summary,
       date: essay.data.date,
+      sortDate: essay.data.sortDate,
       updated: essay.data.updated,
       author: essay.data.author,
       url: essayUrl,
@@ -113,7 +115,7 @@ const relatedContentItems = [
       {essay.data.summary && <p class="article-dek">{essay.data.summary}</p>}
       <div class="article-meta">
         {essayDateDisplay && (
-          <time datetime={essay.data.date ? essay.data.date.toISOString() : essayDateDisplay}>
+          <time datetime={essayDateValue?.toISOString() || essayDateDisplay}>
             {essayDateDisplay}
           </time>
         )}

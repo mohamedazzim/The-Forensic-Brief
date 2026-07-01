@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import NewsletterCTA from '../../components/NewsletterCTA.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug } from '../../utils/contentEntries';
+import { entrySlug, formatEntryDate, resolveSortDate } from '../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const observations = await getCollection('observations', ({ data }) => data.status === 'published');
@@ -22,7 +22,8 @@ const observationBodyModule = observationBodyPath && observationBodyModules[obse
   ? await observationBodyModules[observationBodyPath]()
   : null;
 const Content = observationBodyModule?.default;
-const observationDateDisplay = observation.data.dateLabel || (observation.data.date ? observation.data.date.toISOString().split('T')[0] : '');
+const observationDateValue = resolveSortDate(observation.data);
+const observationDateDisplay = formatEntryDate(observation.data);
 
 const statusColors: Record<string, string> = {
   preliminary: 'var(--text-light)',
@@ -38,6 +39,7 @@ const statusColors: Record<string, string> = {
       title: observation.data.title,
       summary: observation.data.summary,
       date: observation.data.date,
+      sortDate: observation.data.sortDate,
       updated: observation.data.updated,
       author: observation.data.author,
       url: `/observations/${entrySlug(observation)}/`,
@@ -61,7 +63,7 @@ const statusColors: Record<string, string> = {
       {observation.data.summary && <p class="article-dek">{observation.data.summary}</p>}
       <div class="article-meta">
         {observationDateDisplay && (
-          <time datetime={observation.data.date ? observation.data.date.toISOString() : observationDateDisplay}>
+          <time datetime={observationDateValue?.toISOString() || observationDateDisplay}>
             {observationDateDisplay}
           </time>
         )}

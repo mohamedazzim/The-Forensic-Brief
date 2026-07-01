@@ -22,11 +22,11 @@ export async function GET(context: APIContext) {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay' && data.series === series);
 
   const items = essays
-    .filter((item) => item.data.date)
+    .filter((item) => item.data.date || item.data.sortDate || item.data.updated)
     .sort((a, b) => (a.data.seriesNo ?? 0) - (b.data.seriesNo ?? 0))
     .map((item) => ({
       title: item.data.title,
-      pubDate: item.data.date!,
+      pubDate: item.data.date ?? item.data.sortDate ?? item.data.updated!,
       description: item.data.summary || '',
       link: `/essays/${entrySlug(item)}/`,
     }));

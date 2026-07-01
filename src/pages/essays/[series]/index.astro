@@ -3,7 +3,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Card from '../../../components/Card.astro';
 import StructuredData from '../../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug } from '../../../utils/contentEntries';
+import { entrySlug, formatEntryDate, resolveSortDate } from '../../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
@@ -24,7 +24,6 @@ export async function getStaticPaths() {
 
 const { series, items } = Astro.props;
 const sortedItems = items.sort((a, b) => (a.data.seriesNo ?? 0) - (b.data.seriesNo ?? 0));
-const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 ---
 
 <BaseLayout title={`Series: ${series}`} description={`Essays in the ${series} series.`}>
@@ -60,7 +59,8 @@ const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOS
           <Card
             title={essay.data.title}
             excerpt={essay.data.excerpt || essay.data.summary}
-            date={formatDate(essay.data.date, essay.data.dateLabel)}
+            date={formatEntryDate(essay.data)}
+            dateTime={resolveSortDate(essay.data)?.toISOString()}
             category={essay.data.category === 'pattern' ? 'Pattern' : 'Essay'}
             href={`/essays/${entrySlug(essay)}/`}
             linkText="Read more"

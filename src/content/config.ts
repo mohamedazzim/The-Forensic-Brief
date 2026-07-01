@@ -3,11 +3,13 @@ import { glob } from 'astro/loaders';
 
 const sharedPublished = {
   title: z.string(),
-  date: z.date(),
+  slug: z.string(),
+  date: z.date().optional(),
+  sortDate: z.date().optional(),
+  datePrecision: z.enum(['day', 'month', 'year']).optional(),
   dateLabel: z.string().optional(),
   displayDate: z.string().optional(),
   updated: z.date().optional(),
-  summary: z.string().max(200),
   excerpt: z.string().optional(),
   author: z.string().default('Dr. Anandkumar Prakasam'),
   tags: z.array(z.string()).default([]),
@@ -19,11 +21,14 @@ const sharedPublished = {
 
 const sharedDraft = {
   title: z.string(),
+  slug: z.string(),
   date: z.date().optional(),
+  sortDate: z.date().optional(),
+  datePrecision: z.enum(['day', 'month', 'year']).optional(),
   dateLabel: z.string().optional(),
   displayDate: z.string().optional(),
   updated: z.date().optional(),
-  summary: z.string().max(200).optional(),
+  summary: z.string().optional(),
   excerpt: z.string().optional(),
   author: z.string().default('Dr. Anandkumar Prakasam'),
   tags: z.array(z.string()).default([]),
@@ -40,20 +45,10 @@ const incidents = defineCollection({
   }),
   schema: z.union([
     z.object({
-      title: z.string(),
-      slug: z.string(),
-      date: z.date(),
-      dateLabel: z.string().optional(),
+      ...sharedPublished,
       displayDate: z.string(),
-      updated: z.date().optional(),
       summary: z.string().max(200).optional(),
       excerpt: z.string(),
-      author: z.string().default('Dr. Anandkumar Prakasam'),
-      tags: z.array(z.string()).default([]),
-      status: z.literal('published'),
-      featured: z.boolean().default(false),
-      heroImage: z.string().optional(),
-      ogImage: z.string().optional(),
       contentFile: z.string(),
       incidentDate: z.date().optional(),
       incidentDateLabel: z.string().optional(),
@@ -63,10 +58,10 @@ const incidents = defineCollection({
       corroboration: z.string().optional(),
       sources: z.array(z.object({
         label: z.string(),
-        url: z.string(),
+        url: z.string().optional(),
       })).default([]),
       timeline: z.array(z.object({
-        date: z.date(),
+        date: z.date().optional(),
         label: z.string().optional(),
         event: z.string(),
       })).default([]),
@@ -109,8 +104,9 @@ const essays = defineCollection({
   schema: z.union([
     z.object({
       ...sharedPublished,
+      summary: z.string(),
       contentFile: z.string(),
-      category: z.enum(['essay', 'pattern']).default('essay'),
+      category: z.enum(['essay', 'pattern']),
       series: z.enum([
         'human-in-control',
         'out-of-bounds',
@@ -174,13 +170,17 @@ const observations = defineCollection({
   schema: z.union([
     z.object({
       ...sharedPublished,
+      summary: z.string(),
+      displayDate: z.string(),
       contentFile: z.string(),
-      observationStatus: z.enum(['preliminary', 'ongoing', 'resolved']),
+      observationStatus: z.enum(['preliminary', 'ongoing', 'resolved']).optional(),
+      series: z.string().optional(),
     }),
     z.object({
       ...sharedDraft,
       contentFile: z.string().optional(),
       observationStatus: z.enum(['preliminary', 'ongoing', 'resolved']).optional(),
+      series: z.string().optional(),
     }),
   ]),
 });
@@ -193,9 +193,12 @@ const artifacts = defineCollection({
   schema: z.union([
     z.object({
       ...sharedPublished,
+      summary: z.string(),
       contentFile: z.string(),
-      artifactType: z.enum(['template', 'checklist', 'table', 'framework', 'worksheet', 'audit']),
-      version: z.string(),
+      artifactId: z.string().optional(),
+      artifactLabel: z.string().optional(),
+      artifactType: z.string().optional(),
+      version: z.string().optional(),
       relatedEssays: z.array(z.string()).default([]),
       relatedBook: z.string().optional(),
       inlinePreview: z.boolean().default(false),
@@ -204,12 +207,14 @@ const artifacts = defineCollection({
         format: z.enum(['PDF', 'DOCX', 'XLSX', 'Markdown']),
         url: z.string(),
         sizeKB: z.number(),
-      })).min(1),
+      })).default([]),
     }),
     z.object({
       ...sharedDraft,
       contentFile: z.string().optional(),
-      artifactType: z.enum(['template', 'checklist', 'table', 'framework', 'worksheet', 'audit']).optional(),
+      artifactId: z.string().optional(),
+      artifactLabel: z.string().optional(),
+      artifactType: z.string().optional(),
       version: z.string().optional(),
       relatedEssays: z.array(z.string()).default([]),
       relatedBook: z.string().optional(),
@@ -230,6 +235,7 @@ const books = defineCollection({
   schema: z.union([
     z.object({
       ...sharedPublished,
+      slug: z.string().optional(),
       cover: z.string(),
       coverAvailable: z.boolean().optional(),
       backCover: z.string().optional(),
@@ -246,6 +252,7 @@ const books = defineCollection({
     }),
     z.object({
       ...sharedDraft,
+      slug: z.string().optional(),
       cover: z.string().optional(),
       coverAvailable: z.boolean().optional(),
       backCover: z.string().optional(),

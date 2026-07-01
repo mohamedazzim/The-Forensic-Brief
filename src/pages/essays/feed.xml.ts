@@ -8,11 +8,11 @@ export async function GET(context: APIContext) {
 
   const items = sortNewestFirst(
     essays
-      .filter((item) => item.data.date || item.data.updated)
+      .filter((item) => item.data.date || item.data.sortDate || item.data.updated)
   )
     .map((item) => ({
       title: item.data.title,
-      pubDate: item.data.date ?? item.data.updated!,
+      pubDate: item.data.date ?? item.data.sortDate ?? item.data.updated!,
       description: item.data.summary || '',
       link: `/essays/${entrySlug(item)}/`,
     }));

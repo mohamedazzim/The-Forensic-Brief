@@ -8,13 +8,13 @@ export async function GET(context: APIContext) {
   const essays = await getCollection('essays', ({ data }) => data.status === 'published');
 
   const items = sortNewestFirst(
-    [...incidents, ...essays].filter((item) => item.data.date || item.data.updated)
+    [...incidents, ...essays].filter((item) => item.data.date || item.data.sortDate || item.data.updated)
   )
     .map((item) => {
       const collection = item.collection as 'incidents' | 'essays';
       return {
         title: item.data.title,
-        pubDate: item.data.date ?? item.data.updated!,
+        pubDate: item.data.date ?? item.data.sortDate ?? item.data.updated!,
         description: item.data.summary || item.data.excerpt || '',
         link: `/${collection}/${entrySlug(item)}/`,
       };

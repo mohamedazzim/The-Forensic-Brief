@@ -7,15 +7,25 @@ interface Props {
 const { type, data } = Astro.props;
 
 let structuredData: Record<string, any> = {};
+const toIsoDate = (value?: Date | string) => {
+  if (!value) return undefined;
+  if (value instanceof Date) return value.toISOString();
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.valueOf()) ? undefined : parsed.toISOString();
+};
 
 if (type === 'article') {
+  const publishedDate = toIsoDate(data.date || data.sortDate);
+  const modifiedDate = toIsoDate(data.updated) || publishedDate;
+
   structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: data.title,
     description: data.summary,
-    datePublished: data.date?.toISOString(),
-    dateModified: data.updated?.toISOString() || data.date?.toISOString(),
+    datePublished: publishedDate,
+    dateModified: modifiedDate,
     author: {
       '@type': 'Person',
       name: data.author || 'Dr. Anandkumar Prakasam',
@@ -30,6 +40,9 @@ if (type === 'article') {
       '@id': `https://theforensicbrief.com${data.url}`,
     },
   };
+
+  if (!publishedDate) delete structuredData.datePublished;
+  if (!modifiedDate) delete structuredData.dateModified;
   
   if (data.image) {
     structuredData.image = data.image;

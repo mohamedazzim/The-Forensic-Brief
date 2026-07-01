@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/Card.astro';
 import StructuredData from '../../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
-import { entrySlug, sortNewestFirst } from '../../utils/contentEntries';
+import { entrySlug, formatEntryDate, resolveSortDate, sortNewestFirst } from '../../utils/contentEntries';
 
 export async function getStaticPaths() {
   const allContent = [
@@ -33,7 +33,6 @@ export async function getStaticPaths() {
 
 const { tag, items } = Astro.props;
 const sortedItems = sortNewestFirst(items);
-const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
 
 function getCollectionType(item: any) {
   if (item.collection === 'incidents') return 'Incident';
@@ -89,7 +88,8 @@ function getHref(item: any) {
           <Card
             title={item.data.title}
             excerpt={item.data.excerpt || item.data.summary}
-            date={formatDate(item.data.date, item.data.dateLabel)}
+            date={formatEntryDate(item.data)}
+            dateTime={resolveSortDate(item.data)?.toISOString()}
             category={getCollectionType(item)}
             href={getHref(item)}
             linkText="Read more"

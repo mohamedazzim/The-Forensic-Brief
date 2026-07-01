@@ -6,7 +6,7 @@ import NewsletterCTA from '../components/NewsletterCTA.astro';
 import StructuredData from '../components/StructuredData.astro';
 import { getCollection } from 'astro:content';
 import { hasContentFiles } from '../utils/hasContentFiles';
-import { entrySlug, sortNewestFirst } from '../utils/contentEntries';
+import { entrySlug, formatEntryDate, resolveSortDate, sortNewestFirst } from '../utils/contentEntries';
 
 const incidents = await getCollection('incidents', ({ data }) => data.status === 'published');
 const essays = await getCollection('essays', ({ data }) => data.status === 'published' && data.category === 'essay');
@@ -17,13 +17,14 @@ if (hasContentFiles('books')) {
   books = await getCollection('books', ({ data }) => data.status === 'published');
 }
 
-const formatDate = (date?: Date, label?: string) => label || (date ? date.toISOString().split('T')[0] : '');
+const formatDate = (data?: { displayDate?: string; dateLabel?: string; date?: Date | string; sortDate?: Date | string; updated?: Date | string }) =>
+  formatEntryDate(data);
 const formatIncidentDate = (incident: (typeof incidents)[number]) =>
   incident.data.displayDate
   || incident.data.incidentDateLabel
   || incident.data.dateLabel
-  || formatDate(incident.data.incidentDate)
-  || formatDate(incident.data.date);
+  || (incident.data.incidentDate ? incident.data.incidentDate.toISOString().split('T')[0] : '')
+  || formatEntryDate(incident.data);
 
 const featuredIncidents = sortNewestFirst(incidents).slice(0, 3);
 const featuredEssays = sortNewestFirst(essays).slice(0, 3);
@@ -70,7 +71,7 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
           title={incident.data.title}
           excerpt={incident.data.excerpt || incident.data.summary}
           date={formatIncidentDate(incident)}
-          dateTime={(incident.data.incidentDate ?? incident.data.date).toISOString()}
+          dateTime={(incident.data.incidentDate ?? incident.data.date ?? incident.data.sortDate)?.toISOString()}
           category="Incident Report"
           href={`/incidents/${entrySlug(incident)}/`}
           linkText="Read report"
@@ -89,7 +90,8 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
         <Card
           title={essay.data.title}
           excerpt={essay.data.excerpt || essay.data.summary}
-          date={formatDate(essay.data.date, essay.data.dateLabel)}
+          date={formatDate(essay.data)}
+          dateTime={resolveSortDate(essay.data)?.toISOString()}
           category={essay.data.series || 'Essay'}
           href={`/essays/${entrySlug(essay)}/`}
           linkText="Read essay"
@@ -131,8 +133,9 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
         <Card
           title={artifact.data.title}
           excerpt={artifact.data.excerpt || artifact.data.summary}
-          date={formatDate(artifact.data.date, artifact.data.dateLabel)}
-          category={artifact.data.artifactType}
+          date={formatDate(artifact.data)}
+          dateTime={resolveSortDate(artifact.data)?.toISOString()}
+          category={artifact.data.artifactType || artifact.data.artifactLabel || 'Artifact'}
           href={`/artifacts/${entrySlug(artifact)}/`}
           linkText="Open artifact"
         />
@@ -150,8 +153,9 @@ const featuredBooks = sortNewestFirst(books).slice(0, 3);
         <Card
           title={observation.data.title}
           excerpt={observation.data.excerpt || observation.data.summary}
-          date={formatDate(observation.data.date, observation.data.dateLabel)}
-          category={observation.data.observationStatus}
+          date={formatDate(observation.data)}
+          dateTime={resolveSortDate(observation.data)?.toISOString()}
+          category={observation.data.observationStatus || 'Observation'}
           href={`/observations/${entrySlug(observation)}/`}
           linkText="Read observation"
         />

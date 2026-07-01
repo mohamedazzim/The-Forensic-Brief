@@ -17,6 +17,11 @@ export async function GET(context: APIContext) {
     Promise.resolve(books),
   ]);
 
+  const topicSet = new Set<string>();
+  collections.slice(0, 4).flat().forEach((item) => {
+    item.data.tags?.forEach((tag: string) => topicSet.add(tag));
+  });
+
   const urls = [
     '/',
     '/search/',
@@ -29,9 +34,8 @@ export async function GET(context: APIContext) {
     '/about/',
     '/methodology/',
     '/disclaimer/',
-    '/topics/human-oversight/',
-    '/topics/eu-ai-act/',
-    '/topics/automation-bias/',
+    '/topics/',
+    ...[...topicSet].sort((a, b) => a.localeCompare(b)).map((tag) => `/topics/${tag}/`),
     ...collections.flatMap((items, index) => items.map((item) => {
       const names = ['incidents', 'essays', 'observations', 'artifacts', 'books'] as const;
       return `/${names[index]}/${entrySlug(item)}/`;
